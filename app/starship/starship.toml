@@ -70,13 +70,17 @@ disabled = true
 
 [python]
 python_binary = "python3"
+symbol = "python "
 
 # Don't show the module when '~/.Rprofile' is detected.
 [rlang]
 detect_extensions = ["R", "Rd", "Rmd", "Rproj"]
 detect_files = [""]
 detect_folders = [".Rproj.user"]
-symbol = "R"
+symbol = "R "
+
+[ruby]
+symbol = "ruby "
 
 # Assuming Zsh is default shell.
 [shell]

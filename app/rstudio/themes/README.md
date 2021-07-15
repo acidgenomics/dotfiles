@@ -2,6 +2,8 @@
 
 Currently supported themes:
 
+- Dracula
+  https://github.com/dracula/Dracula-RStudio
 - Nord
   https://github.com/edavidaja/nord-rstudio
 - Oceanic Eighties

@@ -76,7 +76,5 @@
     "rainbow_parentheses": true,
     "auto_detect_indentation": false,
     "check_for_updates": false,
-    "insert_native_pipe_operator": true,
-    "show_margin": false,
-    "show_terminal_tab": false
+    "insert_native_pipe_operator": true
 }

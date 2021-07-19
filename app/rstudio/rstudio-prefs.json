@@ -76,5 +76,10 @@
     "rainbow_parentheses": true,
     "auto_detect_indentation": false,
     "check_for_updates": false,
-    "insert_native_pipe_operator": true
+    "insert_native_pipe_operator": true,
+    "show_diagnostics_r": false,
+    "auto_discover_package_dependencies": false,
+    "show_diagnostics_cpp": false,
+    "diagnostics_on_save": false,
+    "background_diagnostics": false
 }

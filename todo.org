@@ -1,0 +1,27 @@
+#+TITLE: Dotfiles
+#+STARTUP: content
+* Development
+** TODO Need to rethink how to handle overwrites of existing user dotfiles.
+    We should consider overwriting only if it's a broken symlink.
+* Themes
+** TODO Need to migrate dracula, nord, and solarized themes back into main repo.
+* Vim
+** TODO Configure to put swp and bak files in ~/.vim instead of polluting
+        current working directory.
+** TODO Consider reorganizing doom and spacemacs into top level at app?
+** TODO Consider taking a look at spacevim again for configuration.
+        https://spacevim.org
+** TODO Work on reconfiguring jedi-vim support for Python autocompletion.
+** TODO Consider adding support for emmet-vim in a future update.
+** TODO Consider improving R IDE support.
+        R IDE guides:
+            https://www.freecodecamp.org/news/
+                turning-vim-into-an-r-ide-cd9602e8c217/
+        For completion:
+            https://github.com/ncm2/ncm2
+            https://github.com/gaalcaras/ncm-R
+            https://github.com/rizzatti/dash.vim (Mac only)
+        For linting:
+            https://github.com/dense-analysis/ale
+        Language server:
+            https://github.com/REditorSupport/languageserver

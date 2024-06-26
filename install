@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+set -o errexit  # -e
+set -o errtrace  # -E
+set -o nounset  # -u
+set -o pipefail
+
+KOOPA_PREFIX="${KOOPA_PREFIX:-/opt/koopa}"
+PATH="${KOOPA_PREFIX}/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH
+
+# shellcheck source=/dev/null
+source "$(koopa header bash)"
+
+main() {
+    # """
+    # Install dotfiles.
+    # @note Updated 2024-01-12.
+    # """
+    local app dict
+    [[ -d "${HOME:-}" ]] || return 1
+    declare -A app
+    app['chezmoi']="$(koopa_locate_chezmoi)"
+    koopa_assert_is_executable "${app[@]}"
+    declare -A dict=(
+        ['name']='dotfiles'
+        ['prefix']="$( \
+            cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && \
+            pwd -P \
+        )"
+        ['xdg_config_home']="$(koopa_xdg_config_home)"
+    )
+    koopa_add_config_link "${dict['prefix']}" "${dict['name']}"
+    koopa_rm \
+        "${HOME}/.R/Makevars" \
+        "${HOME}/.config/libreoffice" \
+        "${HOME}/.doom.d" \
+        "${HOME}/.gitattributes" \
+        "${HOME}/.gitconfig" \
+        "${HOME}/.gitconfig-os" \
+        "${HOME}/.gitconfig-private" \
+        "${HOME}/.gitignore" \
+        "${HOME}/.kshrc" \
+        "${HOME}/.mcfly" \
+        "${HOME}/.oh-my-zsh" \
+        "${HOME}/.prettierrc" \
+        "${HOME}/.shrc" \
+        "${HOME}/.tmux" \
+        "${HOME}/.tmux.conf"
+    if [[ -d "${HOME}/.ssh" ]]
+    then
+        koopa_chmod '0700' "${HOME}/.ssh"
+    fi
+    (
+        "${app['chezmoi']}" \
+            --force \
+            --no-pager \
+            --source="${dict['prefix']}" \
+            --verbose \
+            apply
+    )
+    (
+        koopa_cd "${HOME:?}"
+        if [[ ! -L '.zprofile' ]]
+        then
+            koopa_ln --verbose \
+                "${dict['xdg_config_home']}/zsh/.zprofile" \
+                '.zprofile'
+        fi
+        if [[ ! -L '.zshrc' ]]
+        then
+            koopa_ln --verbose \
+                "${dict['xdg_config_home']}/zsh/.zshrc" \
+                '.zshrc'
+        fi
+    )
+    if koopa_is_macos
+    then
+        (
+            koopa_mkdir "${HOME}/Library/Application Support/Code/User"
+            koopa_cd "${HOME}/Library/Application Support/Code/User"
+            if [[ ! -L 'keybindings.json' ]]
+            then
+                koopa_ln --verbose \
+                    "${dict['xdg_config_home']}/Code/User/keybindings.json" \
+                    'keybindings.json'
+            fi
+            if [[ ! -L 'settings.json' ]]
+            then
+                koopa_ln --verbose \
+                    "${dict['xdg_config_home']}/Code/User/settings.json" \
+                    'settings.json'
+            fi
+        )
+        (
+            if [[ -L "${HOME}/Library/Application Support/nushell" ]]
+            then
+                koopa_rm "${HOME}/Library/Application Support/nushell"
+            fi
+            koopa_mkdir "${HOME}/Library/Application Support/nushell"
+            koopa_cd "${HOME}/Library/Application Support/nushell"
+            if [[ ! -L 'config.nu' ]]
+            then
+                koopa_ln --verbose \
+                    "${dict['xdg_config_home']}/nushell/config.nu" \
+                    'config.nu'
+            fi
+            if [[ ! -L 'env.nu' ]]
+            then
+                koopa_ln --verbose \
+                    "${dict['xdg_config_home']}/nushell/env.nu" \
+                    'env.nu'
+            fi
+        )
+    fi
+    return 0
+}
+
+main "$@"

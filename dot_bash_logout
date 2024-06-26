@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+__dotfiles_bash_logout() {
+    [[ -f "${HOME}/.logout" ]] || return 0
+    # shellcheck source=/dev/null
+    source "${HOME}/.logout"
+    return 0
+}
+
+__dotfiles_bash_logout

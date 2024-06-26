@@ -1,0 +1,12 @@
+# """
+# Subversion server configuration.
+# @note Updated 2022-04-19.
+#
+# @seealso
+# - https://stackoverflow.com/questions/6115170/
+# """
+
+# > [global]
+# > ssl-trust-default-ca = yes
+
+# > [groups]

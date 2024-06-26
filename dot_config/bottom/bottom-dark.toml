@@ -1,0 +1,16 @@
+# """
+# Bottom configuration.
+# @note Updated 2022-12-08.
+#
+# @seealso
+# - https://clementtsang.github.io/bottom/nightly/configuration/
+#     config-file/default-config/
+# - https://github.com/ClementTsang/bottom/blob/master/docs/
+#     content/troubleshooting.md
+# - https://github.com/ClementTsang/bottom/tree/master/sample_configs
+# - https://github.com/ClementTsang/bottom/blob/master/sample_configs/
+#     default_config.toml
+# """
+
+[flags]
+color = "default"

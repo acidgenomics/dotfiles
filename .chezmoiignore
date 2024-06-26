@@ -1,0 +1,10 @@
+LICENSE
+README.md
+develop
+etc/
+install
+todo.org
+uninstall
+{{ if ne .chezmoi.os "darwin" }}
+.terminfo/
+{{- end }}

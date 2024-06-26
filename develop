@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+main() {
+    [[ "$#" -eq 0 ]] || return 1
+    git switch main
+    git remote set-url origin 'git@github.com:acidgenomics/dotfiles.git'
+    git pull
+    return 0
+}
+
+main "$@"

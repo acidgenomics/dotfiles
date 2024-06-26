@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+__dotfiles_bashrc() {
+    [[ "$-" == *i* ]] || return 0
+    [[ -f "${HOME}/.profile" ]] || return 0
+    # shellcheck source=/dev/null
+    source "${HOME}/.profile"
+    return 0
+}
+
+__dotfiles_bashrc

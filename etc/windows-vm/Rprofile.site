@@ -1,0 +1,20 @@
+options(
+    "defaultPackages" = c(
+        getOption("defaultPackages"),
+        "AcidDevTools"
+    ),
+    "deparse.max.lines" = 3L,
+    "error" = quote(rlang::entrace()),
+    "repos" = c(
+        "CRAN" = "https://cloud.r-project.org",
+        "AcidGenomics" = "https://r.acidgenomics.com"
+    ),
+    "rlang_backtrace_on_error" = "full",
+    "rstudio.errors.suppressed" = FALSE,
+    "showErrorCalls" = TRUE,
+    "showWarnCalls" = TRUE,
+    "testthat.progress.max_fails" = 1L,
+    "testthat.progress.verbose_skips" = TRUE,
+    "warn" = 1L,
+    "warning.length" = 8170L
+)

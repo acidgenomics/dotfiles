@@ -1,6 +1,6 @@
 # """
 # Global git configuration.
-# Updated 2024-06-25.
+# Updated 2024-06-27.
 #
 # @section Conditional configuration:
 #
@@ -379,12 +379,18 @@
     path = ~/.config/delta/theme.gitconfig
     path = ~/.config/git/config-private
 
+# Conditional configuration of personal repos.
 [includeIf "hasconfig:remote.*.url:ssh://git-personal:*/**"]
     path = ~/.config/git/config-personal
 [includeIf "gitdir:~/git/personal/"]
     path = ~/.config/git/config-personal
+[includeIf "gitdir:~/personal/"]
+    path = ~/.config/git/config-personal
 
+# Conditional configuration of work repos.
 [includeIf "hasconfig:remote.*.url:ssh://git-work:*/**"]
     path = ~/.config/git/config-work
 [includeIf "gitdir:~/git/work/"]
+    path = ~/.config/git/config-work
+[includeIf "gitdir:~/work/"]
     path = ~/.config/git/config-work

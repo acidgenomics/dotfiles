@@ -1,26 +1,4 @@
-# """
-# curl configuration.
-# Updated 2021-05-06.
-#
-# See also:
-# - https://curl.haxx.se/docs/manpage.html
-# - https://github.com/alrra/dotfiles/blob/main/src/shell/curlrc
-# """
-
-# Wait 60 seconds before timing out.
-connect-timeout = 60
-
-# Follow HTTP redirects.
+connect-timeout=60
 location
-
-# Display progress as a simple progress bar.
-# > progress-bar
-
-# When following a redirect, automatically set the previous URL as referer.
-referer = ";auto"
-
-# Show error messages.
+referer=";auto"
 show-error
-
-# Send a fake UA string for the HTTP servers that sniff it.
-# > user-agent = "Mozilla/5.0 Gecko"

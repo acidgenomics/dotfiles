@@ -16,17 +16,9 @@
     "editor.pasteAs.enabled": false,
     "git.path": "/opt/koopa/bin/git",
     "python.condaPath": "/opt/koopa/bin/conda",
-{{- if eq .chezmoi.os "darwin" }}
-    "python.defaultInterpreterPath": "/usr/local/bin/python3",
-{{- else }}
     "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/venv/positron/bin/python3",
-{{- end }}
     "python.experiments.enabled": false,
-{{- if eq .chezmoi.os "darwin" }}
-    "python.pythonPath": "/usr/local/bin/python3",
-{{- else }}
     "python.pythonPath": "{{ .chezmoi.homeDir }}/venv/positron/bin/python3",
-{{- end }}
     "quarto.path": "/opt/koopa/bin/quarto",
     "update.mode": "none",
     "update.showReleaseNotes": false

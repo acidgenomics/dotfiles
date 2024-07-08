@@ -1,11 +1,10 @@
-# """
-# Rust cargo configuration.
-# @note Updated 2022-08-30.
-#
-# @seealso
-# - https://doc.rust-lang.org/cargo/reference/config.html
-# """
+[http]
+check-revoke = true
+debug = true
 
 [net]
 git-fetch-with-cli = true
 retry = 5
+
+[term]
+verbose = true

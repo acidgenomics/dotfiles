@@ -272,9 +272,9 @@
     zeroPaddedFilemode = warn
 
 [gpg]
-{{ if eq .chezmoi.os "darwin" }}
+{{- if eq .chezmoi.os "darwin" }}
     program = /usr/local/MacGPG2/bin/gpg
-{{ end }}
+{{- end }}
 
 [help]
     # If a command is mistyped, make Git automatically run the command it thinks

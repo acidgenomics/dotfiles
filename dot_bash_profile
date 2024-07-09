@@ -33,13 +33,17 @@ __dotfiles_bash_profile() {
     # Map key bindings to default editor.
     # Bash currently uses Emacs by default.
     case "${EDITOR:-}" in
-        'emacs' | *'/emacs')
+        'emacs' | \
+        *'/emacs')
             set -o emacs
             set +o vi
             ;;
-        'nvim' | *'/nvim' | \
-        'vi' | *'/vi' | \
-        'vim' | *'/vim')
+        'nvim' | \
+        'vi' | \
+        'vim' | \
+        *'/nvim' | \
+        *'/vi' | \
+        *'/vim')
             set +o emacs
             set -o vi
             ;;

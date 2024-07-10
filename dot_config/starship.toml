@@ -10,10 +10,10 @@ disabled = true
 
 [battery]
 disabled = false
-format = '[$percentage]($style) '
+format = '[\[$symbol$percentage\]]($style) '
 
 [[battery.display]]
-threshold = 25
+threshold = 20
 
 [buf]
 disabled = true
@@ -287,7 +287,7 @@ version_format = '$raw'
 disabled = true
 
 [shell]
-bash_indicator = '\\$'
+bash_indicator = "\\$"
 cmd_indicator = 'cmd'
 disabled = false
 elvish_indicator = 'elvish'

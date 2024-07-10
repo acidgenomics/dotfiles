@@ -10,7 +10,7 @@ disabled = true
 
 [battery]
 disabled = false
-format = "[$percentage]($style) "
+format = '[$percentage]($style) '
 
 [[battery.display]]
 threshold = 25
@@ -23,21 +23,23 @@ disabled = true
 
 [c]
 disabled = false
-format = "[$symbol($version(-$name) )]($style)"
-style = "yellow"
-symbol = "C "
+format = '[<$symbol( $version(-$name))>]($style) '
+style = 'yellow'
+symbol = 'C'
+version_format = '$raw'
 
 [character]
 disabled = false
-error_symbol = "[✗](red)"
-format = "$symbol "
-success_symbol = "[❯](purple)"
+error_symbol = '[✗](red)'
+format = '$symbol '
+success_symbol = '[❯](purple)'
 
 [cmake]
 disabled = false
-format = "[$symbol($version )]($style)"
-style = "yellow"
-symbol = "cmake "
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'cmake'
+version_format = '$raw'
 
 [cmd_duration]
 disabled = true
@@ -47,9 +49,9 @@ disabled = true
 
 [conda]
 disabled = false
-format = "[$symbol$environment]($style) "
-style = "yellow"
-symbol = "conda "
+format = '[<$symbol: $environment>]($style) '
+style = 'yellow'
+symbol = 'conda'
 
 [container]
 disabled = true
@@ -68,13 +70,13 @@ disabled = true
 
 [directory]
 disabled = false
-format = "[$path]($style)[$read_only]($read_only_style) "
-read_only = ""
-read_only_style = "yellow"
-style = "blue"
+format = '[$path]($style)[$read_only]($read_only_style) '
+read_only = ''
+read_only_style = 'yellow'
+style = 'blue'
 truncate_to_repo = false
 truncation_length = 0
-truncation_symbol = ""
+truncation_symbol = ''
 
 [docker_context]
 disabled = true
@@ -109,16 +111,16 @@ disabled = true
 [git_branch]
 always_show_remote = false
 disabled = false
-format = "[$branch]($style) "
+format = '[$branch]($style) '
 only_attached  = false
-style = "green"
+style = 'green'
 
 [git_commit]
 commit_hash_length = 7
 disabled = false
-format = "[$hash]($style) "
+format = '[$hash]($style) '
 only_detached = false
-style = "green"
+style = 'green'
 tag_disabled = true
 
 [git_metrics]
@@ -127,12 +129,12 @@ disabled = true
 [git_state]
 disabled = false
 format = '\([$state( $progress_current/$progress_total)]($style)\) '
-style = "bold yellow"
+style = 'bold yellow'
 
 [git_status]
 disabled = false
 format = '([\[$all_status$ahead_behind\]]($style) )'
-style = "bold red"
+style = 'bold red'
 
 [golang]
 disabled = true
@@ -145,9 +147,10 @@ disabled = true
 
 [haskell]
 disabled = false
-format = "[$symbol($version )]($style)"
-style = "yellow"
-symbol = "haskell "
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'haskell'
+version_format = '$raw'
 
 [haxe]
 disabled = true
@@ -162,8 +165,8 @@ disabled = true
 disabled = false
 format = "[$hostname]($style)\n"
 ssh_only = false
-style = "cyan"
-trim_at = ""
+style = 'cyan'
+trim_at = ''
 
 [java]
 disabled = true
@@ -173,9 +176,10 @@ disabled = true
 
 [julia]
 disabled = false
-format = "[$symbol($version )]($style)"
-style = "yellow"
-symbol = "julia "
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'julia'
+version_format = '$raw'
 
 [kotlin]
 disabled = true
@@ -221,9 +225,10 @@ disabled = true
 
 [package]
 disabled = false
-format = "[$symbol$version]($style) "
-style = "yellow"
-symbol = "📦 "
+format = '[$symbol $version]($style) '
+style = 'yellow'
+symbol = '📦'
+version_format = '$raw'
 
 [perl]
 disabled = true
@@ -242,10 +247,11 @@ disabled = true
 
 [python]
 disabled = false
-format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
-python_binary = "python3"
-style = "green"
-symbol = "python "
+format = '[<$symbol( $version)(: $virtualenv)>]($style) '
+python_binary = 'python3'
+style = 'yellow'
+symbol = 'python'
+version_format = '$raw'
 
 [raku]
 disabled = true
@@ -254,44 +260,47 @@ disabled = true
 disabled = true
 
 [rlang]
-detect_extensions = ["R", "Rd", "Rmd", "Rproj"]
-detect_files = [""]
-detect_folders = [".Rproj.user"]
+detect_extensions = ['R', 'Rd', 'Rmd', 'Rproj']
+detect_files = ['']
+detect_folders = ['.Rproj.user']
 disabled = false
-format = "[$symbol($version )]($style)"
-style = "yellow"
-symbol = "R "
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'R'
+version_format = '$raw'
 
 [ruby]
 disabled = false
-format = "[$symbol($version )]($style)"
-style = "yellow"
-symbol = "ruby "
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'ruby'
+version_format = '$raw'
 
 [rust]
 disabled = false
-format = "[$symbol($version )]($style)"
-style = "yellow"
-symbol = "rust "
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'rust'
+version_format = '$raw'
 
 [scala]
 disabled = true
 
 [shell]
-bash_indicator = "\\$"
-cmd_indicator = "cmd"
+bash_indicator = '\\$'
+cmd_indicator = 'cmd'
 disabled = false
-elvish_indicator = "elvish"
-fish_indicator = "🐠"
-format = "[$indicator]($style) "
-ion_indicator = "ion"
-nu_indicator = "nu"
-powershell_indicator = "powershell"
-style = "purple"
-tcsh_indicator = "tcsh"
-unknown_indicator = "?"
-xonsh_indicator = "xonsh"
-zsh_indicator = "%"
+elvish_indicator = 'elvish'
+fish_indicator = '🐠'
+format = '[$indicator]($style) '
+ion_indicator = 'ion'
+nu_indicator = 'nu'
+powershell_indicator = 'powershell'
+style = 'purple'
+tcsh_indicator = 'tcsh'
+unknown_indicator = '?'
+xonsh_indicator = 'xonsh'
+zsh_indicator = '%'
 
 [shlvl]
 disabled = true
@@ -319,10 +328,10 @@ disabled = true
 
 [username]
 disabled = false
-format = "[$user]($style)[@](cyan)"
+format = '[$user]($style)[@](cyan)'
 show_always = true
-style_root = "bold cyan"
-style_user = "cyan"
+style_root = 'bold cyan'
+style_user = 'cyan'
 
 [vagrant]
 disabled = true

@@ -1,18 +1,3 @@
-# """
-# starship prompt configuration
-#
-# @note Updated 2023-09-12.
-#
-# @details
-# Allowed colors: black, blue, cyan, green, purple, red, white, yellow.
-# Note that "magenta" maps to "purple" here.
-# Colors are documented in the advanced configuration section.
-#
-# @seealso
-# - https://starship.rs/config/
-# - https://starship.rs/advanced-config/
-# """
-
 add_newline = true
 command_timeout = 2000
 scan_timeout = 30
@@ -38,16 +23,19 @@ disabled = true
 
 [c]
 disabled = false
+format = "[$symbol($version(-$name) )]($style)"
 style = "yellow"
-symbol = "c "
+symbol = "C "
 
 [character]
 disabled = false
-error_symbol = "[✗](bold red)"
+error_symbol = "[✗](red)"
+format = "$symbol "
 success_symbol = "[❯](purple)"
 
 [cmake]
 disabled = false
+format = "[$symbol($version )]($style)"
 style = "yellow"
 symbol = "cmake "
 
@@ -59,6 +47,7 @@ disabled = true
 
 [conda]
 disabled = false
+format = "[$symbol$environment]($style) "
 style = "yellow"
 symbol = "conda "
 
@@ -79,11 +68,12 @@ disabled = true
 
 [directory]
 disabled = false
+format = "[$path]($style)[$read_only]($read_only_style) "
 read_only = ""
 read_only_style = "yellow"
 style = "blue"
 truncate_to_repo = false
-truncation_length = 0  # no truncation
+truncation_length = 0
 truncation_symbol = ""
 
 [docker_context]
@@ -136,10 +126,12 @@ disabled = true
 
 [git_state]
 disabled = false
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
 style = "bold yellow"
 
 [git_status]
 disabled = false
+format = '([\[$all_status$ahead_behind\]]($style) )'
 style = "bold red"
 
 [golang]
@@ -153,6 +145,7 @@ disabled = true
 
 [haskell]
 disabled = false
+format = "[$symbol($version )]($style)"
 style = "yellow"
 symbol = "haskell "
 
@@ -170,7 +163,7 @@ disabled = false
 format = "[$hostname]($style)\n"
 ssh_only = false
 style = "cyan"
-trim_at = "."
+trim_at = ""
 
 [java]
 disabled = true
@@ -180,6 +173,7 @@ disabled = true
 
 [julia]
 disabled = false
+format = "[$symbol($version )]($style)"
 style = "yellow"
 symbol = "julia "
 
@@ -227,7 +221,9 @@ disabled = true
 
 [package]
 disabled = false
+format = "[$symbol$version]($style) "
 style = "yellow"
+symbol = "📦 "
 
 [perl]
 disabled = true
@@ -246,9 +242,10 @@ disabled = true
 
 [python]
 disabled = false
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 python_binary = "python3"
-symbol = "python "
 style = "green"
+symbol = "python "
 
 [raku]
 disabled = true
@@ -257,34 +254,44 @@ disabled = true
 disabled = true
 
 [rlang]
-# Don't show the module when '~/.Rprofile' is detected.
 detect_extensions = ["R", "Rd", "Rmd", "Rproj"]
 detect_files = [""]
 detect_folders = [".Rproj.user"]
 disabled = false
+format = "[$symbol($version )]($style)"
 style = "yellow"
 symbol = "R "
 
 [ruby]
 disabled = false
-symbol = "ruby "
+format = "[$symbol($version )]($style)"
 style = "yellow"
+symbol = "ruby "
 
 [rust]
 disabled = false
-symbol = "rust "
+format = "[$symbol($version )]($style)"
 style = "yellow"
+symbol = "rust "
 
 [scala]
 disabled = true
 
 [shell]
-# Assuming Zsh is default shell.
-bash_indicator = "\\$ "
+bash_indicator = "\\$"
+cmd_indicator = "cmd"
 disabled = false
-format = "$indicator"
-style = "white bold"
-zsh_indicator = ""
+elvish_indicator = "elvish"
+fish_indicator = "🐠"
+format = "[$indicator]($style) "
+ion_indicator = "ion"
+nu_indicator = "nu"
+powershell_indicator = "powershell"
+style = "purple"
+tcsh_indicator = "tcsh"
+unknown_indicator = "?"
+xonsh_indicator = "xonsh"
+zsh_indicator = "%"
 
 [shlvl]
 disabled = true

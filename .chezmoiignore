@@ -1,4 +1,7 @@
 LICENSE
+{{- if ne .chezmoi.os "darwin" }}
+Library/
+{{- end }}
 README.md
 develop
 etc/

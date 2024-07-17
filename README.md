@@ -42,6 +42,7 @@ koopa configure user dotfiles
 - [thcipriani](https://github.com/thcipriani/dotfiles)
 - [addyosmani](https://github.com/addyosmani/dotfiles)
 - [cevhyruz](https://github.com/cevhyruz/dotfiles)
+- [dsifford](https://github.com/dsifford/dotfiles)
 
 ### Color themes
 

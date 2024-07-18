@@ -1,11 +1,3 @@
-# """
-# Git ignore global rules.
-# @note Updated 2024-01-12.
-#
-# @seealso
-# - https://github.com/github/gitignore/
-# """
-
 !Build/
 **/*.rs.bk
 *-Ex.R
@@ -21,7 +13,9 @@
 *.cover
 *.cram
 *.cram.crai
+*.crt
 *.db
+*.der
 *.dpkg-old
 *.egg
 *.egg-info/

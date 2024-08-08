@@ -1,4 +1,4 @@
-# Homebrew Bundle Brewfile.
+# Homebrew Bundle Brewfile
 
 Updated 2024-08-08.
 

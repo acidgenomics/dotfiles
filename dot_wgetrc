@@ -1,4 +1,5 @@
 adjust_extension=on
+check_certificate=on
 follow_ftp=on
 no_parent=on
 retry_connrefused=on
@@ -6,5 +7,5 @@ robots=off
 server_response=on
 timeout=60
 timestamping=on
-trust_server_names=on
 tries=3
+trust_server_names=on

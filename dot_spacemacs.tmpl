@@ -85,7 +85,6 @@ This function should only modify configuration layer settings."
      emacs-lisp
      emoji
      (ess :variables
-          ;; > inferior-R-program-name "/opt/koopa/bin/R"
           ess-ask-for-ess-directory nil
           ess-default-style 'DEFAULT
           ess-eval-visibly-p nil
@@ -98,6 +97,9 @@ This function should only modify configuration layer settings."
           ess-r-backend 'lsp
           ess-roxy-str "#'"
           ess-use-flymake t
+{{- if findExecutable "R" (list "/usr/local/bin" "/usr/bin" "/bin") }}
+          inferior-R-program-name "{{ findExecutable "R" (list "/usr/local/bin" "/usr/bin" "/bin") }}"
+{{- end }}
           inferior-R-args "--no-restore --no-save")
      evil-commentary
      git
@@ -119,7 +121,7 @@ This function should only modify configuration layer settings."
             ;; > shell-default-height 30
             shell-default-position 'right
             shell-default-shell 'ansi-term
-            shell-default-term-shell "/opt/koopa/bin/bash"
+            shell-default-term-shell "{{ lookPath "bash" }}"
             shell-default-width 80)
      syntax-checking
      tmux

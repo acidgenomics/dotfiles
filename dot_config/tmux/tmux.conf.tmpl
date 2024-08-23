@@ -1,6 +1,6 @@
 # """
 # Tmux configuration.
-# Updated 2024-06-12.
+# Updated 2024-08-23.
 #
 # Restart the server when changing settings:
 # > tmux kill-server
@@ -29,8 +29,8 @@ bind r source-file ~/.config/tmux/tmux.conf
 
 {{- if eq .chezmoi.os "darwin" }}
 set -g default-command /bin/zsh
-{{- else }}
-set -g default-command /opt/koopa/bin/zsh
+{{- else if lookPath "zsh" }}
+set -g default-command {{ lookPath "zsh" }}
 {{- end }}
 
 # Server options

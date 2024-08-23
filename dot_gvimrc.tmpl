@@ -1,6 +1,6 @@
 """
 " GUI Vim configuration.
-" Updated 2024-06-13.
+" Updated 2024-08-23.
 "
 " Intended primarily for MacVim.
 "
@@ -24,6 +24,6 @@ set guifont=JetBrains\ Mono\ Regular:h16
 
 {{- if eq .chezmoi.os "darwin" }}
 set shell=/bin/zsh
-{{- else }}
-set shell=/opt/koopa/bin/zsh
+{{- else if lookPath "zsh" }}
+set shell={{ lookPath "zsh" }}
 {{- end }}

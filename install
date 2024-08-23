@@ -15,7 +15,7 @@ source "$(koopa header bash)"
 main() {
     # """
     # Install dotfiles.
-    # @note Updated 2024-07-05.
+    # @note Updated 2024-08-23.
     # """
     local app dict
     [[ -d "${HOME:-}" ]] || return 1
@@ -24,10 +24,7 @@ main() {
     koopa_assert_is_executable "${app[@]}"
     declare -A dict=(
         ['name']='dotfiles'
-        ['prefix']="$( \
-            cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && \
-            pwd -P \
-        )"
+        ['prefix']="$(koopa_script_parent_dir)"
         ['xdg_config_home']="$(koopa_xdg_config_home)"
     )
     koopa_add_config_link "${dict['prefix']}" "${dict['name']}"

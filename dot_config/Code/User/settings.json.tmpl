@@ -210,6 +210,15 @@
         "activityBarBadge.background": "#0000",
         "activityBarBadge.foreground": "#0000"
     },
+{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+    "workbench.colorTheme": "Atom One Light",
+{{- else }}
+{{- if any (eq .chezmoi.hostname "acidalia-planitia") (eq .chezmoi.hostname "windsor") }}
+    "workbench.colorTheme": "Dracula Pro",
+{{- else }}
+    "workbench.colorTheme": "Dracula",
+{{- end }}
+{{- end }}
     "workbench.editorAssociations": {
         "*.ipynb": "jupyter-notebook"
     },
@@ -218,14 +227,12 @@
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.languageDetection": false,
     "workbench.panel.defaultLocation": "right",
-    "workbench.startupEditor": "newUntitledFile",
-    "workbench.tree.renderIndentGuides": "always",
-  {{- if any (eq .chezmoi.hostname "acidalia-planitia") (eq .chezmoi.hostname "windsor") }}
-    "workbench.colorTheme": "Dracula Pro",
+{{- if any (eq .chezmoi.hostname "acidalia-planitia") (eq .chezmoi.hostname "windsor") }}
     "workbench.preferredDarkColorTheme": "Dracula Pro",
-  {{- else }}
-    "workbench.colorTheme": "Dracula",
+{{- else }}
     "workbench.preferredDarkColorTheme": "Dracula",
-  {{- end }}
+{{- end }}
     "workbench.preferredLightColorTheme": "Atom One Light"
+    "workbench.startupEditor": "newUntitledFile",
+    "workbench.tree.renderIndentGuides": "always"
 }

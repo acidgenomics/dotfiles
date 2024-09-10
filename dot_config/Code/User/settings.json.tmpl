@@ -68,7 +68,7 @@
     "gitlens.telemetry.enabled": false,
     "gitlens.virtualRepositories.enabled": false,
     "hadolint.cliOptions": [],
-    "hadolint.hadolintPath": "{{ env "KOOPA_PREFIX" }}/bin/hadolint",
+    "hadolint.hadolintPath": "{{ lookPath "hadolint" }}",
     "html.format.wrapLineLength": 0,
     "http.proxyStrictSSL": true,
     "isort.args": [
@@ -80,7 +80,7 @@
         "{{ env "KOOPA_PREFIX" }}/opt/isort/libexec/bin/python3"
     ],
     "isort.path": [
-        "{{ env "KOOPA_PREFIX" }}/bin/isort"
+        "{{ lookPath "isort" }}"
     ],
     "isort.serverEnabled": false,
     "javascript.suggest.enabled": false,
@@ -111,8 +111,8 @@
     "python.REPL.enableREPLSmartSend": false,
     "python.analysis.autoImportCompletions": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
-    "python.defaultInterpreterPath": "{{ env "KOOPA_PREFIX" }}/bin/python3",
+    "python.condaPath": "{{ lookPath "conda" }}",
+    "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
     "python.diagnostics.sourceMapsEnabled": true,
     "python.experiments.enabled": false,
     "python.terminal.activateEnvironment": false,
@@ -131,8 +131,8 @@
     "r.rmarkdown.chunkBackgroundColor": "",
     "r.rpath.linux": "/usr/bin/R",
     "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
-    "r.rterm.linux": "{{ env "KOOPA_PREFIX" }}/bin/radian",
-    "r.rterm.mac": "{{ env "KOOPA_PREFIX" }}/bin/radian",
+    "r.rterm.linux": "{{ lookPath "radian" }}",
+    "r.rterm.mac": "{{ lookPath "radian" }}",
     "r.rterm.option": [
         "--no-save",
         "--no-restore",
@@ -149,7 +149,7 @@
     "remote.downloadExtensionsLocally": false,
     "remote.tunnels.alwaysUpdateCLI": true,
     "ruff.path": [
-        "{{ env "KOOPA_PREFIX" }}/bin/ruff"
+        "{{ lookPath "ruff" }}"
     ],
     "security.workspace.trust.enabled": false,
     "security.workspace.trust.untrustedFiles": "open",
@@ -165,8 +165,8 @@
     "terminal.integrated.cursorBlinking": false,
     "terminal.integrated.cursorStyle": "block",
     "terminal.integrated.defaultLocation": "editor",
-    "terminal.integrated.defaultProfile.linux": "zsh",
-    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.defaultProfile.osx": "bash",
     "terminal.integrated.env.osx": {
         "PYTHONPATH": "${workspaceFolder}",
         "R_HOME": "/Library/Frameworks/R.framework/Resources"
@@ -180,7 +180,7 @@
                 "-il"
             ],
             "icon": "terminal-bash",
-            "path": "{{ env "KOOPA_PREFIX" }}/bin/bash"
+            "path": "{{ lookPath "bash" }}"
         },
         "zsh": {
             "args": [
@@ -193,7 +193,7 @@
 {{- if eq .chezmoi.os "darwin" }}
             "path": "/bin/zsh"
 {{- else }}
-            "path": "{{ env "KOOPA_PREFIX" }}/bin/zsh"
+            "path": "{{ lookPath "zsh" }}"
 {{- end }}
         }
     },

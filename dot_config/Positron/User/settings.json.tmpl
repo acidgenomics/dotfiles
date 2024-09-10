@@ -1,6 +1,6 @@
 {
     "black-formatter.path": [
-        "{{ env "KOOPA_PREFIX" }}/bin/black"
+        "{{ lookPath "black" }}"
     ],
     "black-formatter.interpreter": [
         "{{ env "KOOPA_PREFIX" }}/opt/black/libexec/bin/python3"
@@ -14,12 +14,12 @@
     "editor.fontFamily": "JetBrains Mono', monospace",
     "editor.fontSize": 16,
     "editor.pasteAs.enabled": false,
-    "git.path": "{{ env "KOOPA_PREFIX" }}/bin/git",
-    "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
-    "python.defaultInterpreterPath": "{{ env "KOOPA_PREFIX" }}/bin/python3",
+    "git.path": "{{ lookPath "git" }}",
+    "python.condaPath": "{{ lookPath "conda" }}",
+    "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
     "python.experiments.enabled": false,
-    "python.pythonPath": "{{ env "KOOPA_PREFIX" }}/bin/python3",
-    "quarto.path": "{{ env "KOOPA_PREFIX" }}/bin/quarto",
+    "python.pythonPath": "{{ lookPath "python3" }}",
+    "quarto.path": "{{ lookPath "quarto" }}",
     "update.mode": "none",
     "update.showReleaseNotes": false
 }

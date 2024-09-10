@@ -29,8 +29,8 @@ bind r source-file ~/.config/tmux/tmux.conf
 
 {{- if eq .chezmoi.os "darwin" }}
 set -g default-command /bin/zsh
-{{- else if lookPath "zsh" }}
-set -g default-command {{ lookPath "zsh" }}
+{{- else }}
+set -g default-command {{ lookPath "bash" }}
 {{- end }}
 
 # Server options

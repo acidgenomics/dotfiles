@@ -22,8 +22,4 @@ set guifont=JetBrains\ Mono\ Regular:h16
 " Customize the line height.
 " > set linespace=8
 
-{{- if eq .chezmoi.os "darwin" }}
-set shell=/bin/zsh
-{{- else if lookPath "zsh" }}
-set shell={{ lookPath "zsh" }}
-{{- end }}
+set shell={{ lookPath "bash" }}

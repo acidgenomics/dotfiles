@@ -12,11 +12,7 @@
     "code_completion_other": "manual",
     "color_preview": false,
     "continue_comments_on_newline": true,
-{{- if eq .chezmoi.os "darwin" }}
-    "custom_shell_command": "/bin/zsh",
-{{- else }}
-    "custom_shell_command": "{{ env "KOOPA_PREFIX" }}/bin/zsh",
-{{- end }}
+    "custom_shell_command": "{{ lookPath "bash" }}",
     "default_encoding": "UTF-8",
     "diagnostics_on_save": false,
     "doc_outline_show": "sections_and_chunks",
@@ -70,7 +66,7 @@
     },
     "pdf_previewer": "none",
     "posix_terminal_shell": "custom",
-    "python_path": "{{ env "KOOPA_PREFIX" }}/bin/python3",
+    "python_path": "{{ lookPath "python3" }},
     "python_project_environment_automatic_activate": false,
     "python_type": "system",
     "python_version": "3.12.4",

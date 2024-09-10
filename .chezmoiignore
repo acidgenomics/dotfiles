@@ -2,6 +2,9 @@
 */*.md
 */*/*.md
 */*/*/*.md
+{{- if ne .chezmoi.os "linux" }}
+.local/share/code-server
+{{- end }}
 LICENSE
 {{- if ne .chezmoi.os "darwin" }}
 Library/

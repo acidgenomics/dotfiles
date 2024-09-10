@@ -15,7 +15,7 @@ unfocused_hollow = false
 {{- if eq .chezmoi.os "darwin" }}
 SHELL = "/bin/zsh"
 {{- else }}
-SHELL = "/opt/koopa/bin/zsh"
+SHELL = "{{ env "KOOPA_PREFIX" }}/bin/zsh"
 {{- end }}
 TERM = "xterm-256color"
 
@@ -67,14 +67,14 @@ args = ["--interactive", "--login"]
 {{- if eq .chezmoi.os "darwin" }}
 program = "/bin/zsh"
 {{- else }}
-program = "/opt/koopa/bin/zsh"
+program = "{{ env "KOOPA_PREFIX" }}/bin/zsh"
 {{- end }}
 
 # Launch bound to a tmux session. Note that this doesn't currently handle
 # dark/light mode switching correctly.
 # > [shell]
 # > args = ["new"]
-# > program = "/opt/koopa/bin/tmux"
+# > program = "{{ env "KOOPA_PREFIX" }}/bin/tmux"
 
 [window]
 decorations = "full"

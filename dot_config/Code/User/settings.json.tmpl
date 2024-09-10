@@ -68,7 +68,7 @@
     "gitlens.telemetry.enabled": false,
     "gitlens.virtualRepositories.enabled": false,
     "hadolint.cliOptions": [],
-    "hadolint.hadolintPath": "/opt/koopa/bin/hadolint",
+    "hadolint.hadolintPath": "{{ env "KOOPA_PREFIX" }}/bin/hadolint",
     "html.format.wrapLineLength": 0,
     "http.proxyStrictSSL": true,
     "isort.args": [
@@ -77,16 +77,16 @@
     ],
     "isort.check": true,
     "isort.interpreter": [
-        "/opt/koopa/opt/isort/libexec/bin/python3"
+        "{{ env "KOOPA_PREFIX" }}/opt/isort/libexec/bin/python3"
     ],
     "isort.path": [
-        "/opt/koopa/bin/isort"
+        "{{ env "KOOPA_PREFIX" }}/bin/isort"
     ],
     "isort.serverEnabled": false,
     "javascript.suggest.enabled": false,
     "jupyter.kernels.trusted": [
-        "/opt/koopa/opt/anaconda/share/jupyter/kernels/python3/kernel.json",
-        "/opt/koopa/opt/jupyterlab/libexec/share/jupyter/kernels/python3/kernel.json"
+        "{{ env "KOOPA_PREFIX" }}/opt/anaconda/share/jupyter/kernels/python3/kernel.json",
+        "{{ env "KOOPA_PREFIX" }}/opt/jupyterlab/libexec/share/jupyter/kernels/python3/kernel.json"
     ],
     "liveshare.accessibility.soundsEnabled": false,
     "liveshare.accessibility.voiceEnabled": false,
@@ -111,8 +111,8 @@
     "python.REPL.enableREPLSmartSend": false,
     "python.analysis.autoImportCompletions": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.condaPath": "/opt/koopa/bin/conda",
-    "python.defaultInterpreterPath": "/opt/koopa/bin/python3",
+    "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
+    "python.defaultInterpreterPath": "{{ env "KOOPA_PREFIX" }}/bin/python3",
     "python.diagnostics.sourceMapsEnabled": true,
     "python.experiments.enabled": false,
     "python.terminal.activateEnvironment": false,
@@ -131,8 +131,8 @@
     "r.rmarkdown.chunkBackgroundColor": "",
     "r.rpath.linux": "/usr/bin/R",
     "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
-    "r.rterm.linux": "/opt/koopa/bin/radian",
-    "r.rterm.mac": "/opt/koopa/bin/radian",
+    "r.rterm.linux": "{{ env "KOOPA_PREFIX" }}/bin/radian",
+    "r.rterm.mac": "{{ env "KOOPA_PREFIX" }}/bin/radian",
     "r.rterm.option": [
         "--no-save",
         "--no-restore",
@@ -149,7 +149,7 @@
     "remote.downloadExtensionsLocally": false,
     "remote.tunnels.alwaysUpdateCLI": true,
     "ruff.path": [
-        "/opt/koopa/bin/ruff"
+        "{{ env "KOOPA_PREFIX" }}/bin/ruff"
     ],
     "security.workspace.trust.enabled": false,
     "security.workspace.trust.untrustedFiles": "open",
@@ -180,7 +180,7 @@
                 "-il"
             ],
             "icon": "terminal-bash",
-            "path": "/opt/koopa/bin/bash"
+            "path": "{{ env "KOOPA_PREFIX" }}/bin/bash"
         },
         "zsh": {
             "args": [
@@ -190,7 +190,7 @@
                 "ZDOTDIR": "${env:HOME}/.config/zsh"
             },
             "icon": "terminal-bash",
-            "path": "/opt/koopa/bin/zsh"
+            "path": "{{ env "KOOPA_PREFIX" }}/bin/zsh"
         }
     },
     "typescript.suggest.enabled": false,

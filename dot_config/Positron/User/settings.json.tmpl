@@ -1,9 +1,9 @@
 {
     "black-formatter.path": [
-        "/opt/koopa/bin/black"
+        "{{ env "KOOPA_PREFIX" }}/bin/black"
     ],
     "black-formatter.interpreter": [
-        "/opt/koopa/opt/black/libexec/bin/python3"
+        "{{ env "KOOPA_PREFIX" }}/opt/black/libexec/bin/python3"
     ],
     "editor.autoClosingBrackets": "never",
     "editor.autoClosingComments": "never",
@@ -14,12 +14,12 @@
     "editor.fontFamily": "JetBrains Mono', monospace",
     "editor.fontSize": 16,
     "editor.pasteAs.enabled": false,
-    "git.path": "/opt/koopa/bin/git",
-    "python.condaPath": "/opt/koopa/bin/conda",
-    "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/venv/positron/bin/python3",
+    "git.path": "{{ env "KOOPA_PREFIX" }}/bin/git",
+    "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
+    "python.defaultInterpreterPath": "{{ env "KOOPA_PREFIX" }}/bin/python3",
     "python.experiments.enabled": false,
-    "python.pythonPath": "{{ .chezmoi.homeDir }}/venv/positron/bin/python3",
-    "quarto.path": "/opt/koopa/bin/quarto",
+    "python.pythonPath": "{{ env "KOOPA_PREFIX" }}/bin/python3",
+    "quarto.path": "{{ env "KOOPA_PREFIX" }}/bin/quarto",
     "update.mode": "none",
     "update.showReleaseNotes": false
 }

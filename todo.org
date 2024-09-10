@@ -1,6 +1,7 @@
 #+TITLE: Dotfiles
 #+STARTUP: content
 * Development
+** TODO Set Dracula Pro theme in Code based on whether the theme exists on disk, not the machine.
 ** TODO RStudio terminal file colors are too bright in light mode. Too much yellow.
 ** TODO Need to rethink how to handle overwrites of existing user dotfiles.
     We should consider overwriting only if it's a broken symlink.

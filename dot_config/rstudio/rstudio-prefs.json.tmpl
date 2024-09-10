@@ -15,7 +15,7 @@
 {{- if eq .chezmoi.os "darwin" }}
     "custom_shell_command": "/bin/zsh",
 {{- else }}
-    "custom_shell_command": "/opt/koopa/bin/zsh",
+    "custom_shell_command": "{{ env "KOOPA_PREFIX" }}/bin/zsh",
 {{- end }}
     "default_encoding": "UTF-8",
     "diagnostics_on_save": false,
@@ -70,9 +70,10 @@
     },
     "pdf_previewer": "none",
     "posix_terminal_shell": "custom",
-    "python_path": "/opt/koopa/opt/anaconda/bin/python3",
-    "python_type": "conda",
-    "python_version": "3.11.7",
+    "python_path": "{{ env "KOOPA_PREFIX" }}/opt/python3.12/bin/python3.12",
+    "python_project_environment_automatic_activate": false,
+    "python_type": "system",
+    "python_version": "3.12.4",
     "rainbow_parentheses": true,
     "real_time_spellchecking": false,
     "reduced_motion": true,

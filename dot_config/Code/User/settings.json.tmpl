@@ -190,7 +190,11 @@
                 "ZDOTDIR": "${env:HOME}/.config/zsh"
             },
             "icon": "terminal-bash",
+{{- if eq .chezmoi.os "darwin" }}
+            "path": "/bin/zsh"
+{{- else }}
             "path": "{{ env "KOOPA_PREFIX" }}/bin/zsh"
+{{- end }}
         }
     },
     "typescript.suggest.enabled": false,

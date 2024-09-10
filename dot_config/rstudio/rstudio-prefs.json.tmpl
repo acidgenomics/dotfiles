@@ -16,7 +16,11 @@
     "default_encoding": "UTF-8",
     "diagnostics_on_save": false,
     "doc_outline_show": "sections_and_chunks",
+{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+    "editor_theme": "Xcode",
+{{- else }}
     "editor_theme": "Dracula",
+{{- end }}
     "enable_snippets": false,
     "focus_console_after_exec": true,
     "font_size_points": 13,

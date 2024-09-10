@@ -353,7 +353,7 @@
 
 # Exclude these directories from dubious ownership warnings.
 [safe]
-    directory = /opt/koopa
+    directory = {{ env "KOOPA_PREFIX" }}
 
 [status]
     # Show summary for all git submodules, which can be slow.

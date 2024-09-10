@@ -12,7 +12,6 @@
 
 ;; ESS / R configuration.
 (setq
- ;; > inferior-R-program-name "/opt/koopa/bin/R"
  ess-ask-for-ess-directory nil
  ess-default-style 'DEFAULT
  ess-eval-visibly-p nil
@@ -23,6 +22,9 @@
  ess-language "R"
  ess-nuke-trailing-whitespace-p t
  ess-roxy-str "#'"
+{{- if findExecutable "R" (list "/usr/local/bin" "/usr/bin" "/bin") }}
+ inferior-R-program-name "{{ findExecutable "R" (list "/usr/local/bin" "/usr/bin" "/bin") }}"
+{{- end }}
  inferior-R-args "--no-restore --no-save")
 
 ;; Start Doom maximized.

@@ -828,10 +828,8 @@ autocmd FileType json setlocal
 let g:fzf_dir = join([g:koopa_prefix, 'opt', 'fzf'], '/')
 if isdirectory(g:fzf_dir)
     " The 'set rtp+=' approach only works for a hard-coded path, and does not
-    " support variables, unfortunately.
-    " > set rtp += '/opt/koopa/opt/fzf'
-    " For variables, we have to use 'let &rtp' instead. The comma is necessary
-    " here to deliniate the directory in the path string.
+    " support variables. For variables, we have to use 'let &rtp' instead. The
+    " comma is necessary here to deliniate the directory in the path string.
     let &rtp.=','.g:fzf_dir
     " Ensure we can use ':fzf' and ':Fzf' aliases in addition to ':FZF'.
     cnoreabbrev fzf FZF

@@ -1,6 +1,7 @@
 #+TITLE: Dotfiles
 #+STARTUP: content
 * Development
+** TODO RStudio terminal file colors are too bright in light mode. Too much yellow.
 ** TODO Need to rethink how to handle overwrites of existing user dotfiles.
     We should consider overwriting only if it's a broken symlink.
 * Themes

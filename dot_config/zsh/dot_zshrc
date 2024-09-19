@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
 
+# FIXME Rework this to define in koopa instead.
+# FIXME Early return for super old zsh.
+
 __dotfiles_zshrc() {
     [[ -o 'interactive' ]] || return 0
     [[ -f "${HOME}/.profile" ]] || return 0
@@ -38,7 +41,7 @@ __dotfiles_zshrc() {
         'vi' # messes up mcfly.
     )
     case "${ZSH_VERSION:?}" in
-        5.0 | 5.0.*)
+        '5.0' | '5.0.'*)
             ;;
         *)
             unsetopt_array+=('pipefail')

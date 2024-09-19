@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# FIXME Early return for super old bash versions.
+
 __dotfiles_bash_profile() {
     [[ "$-" == *i* ]] || return 0
     [[ -f "${HOME}/.profile" ]] || return 0

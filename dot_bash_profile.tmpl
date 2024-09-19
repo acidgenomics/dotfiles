@@ -18,9 +18,11 @@ __dotfiles_bash_profile() {
             ;;
     esac
     [[ "$-" == *i* ]] || return 0
-    [[ -f "${HOME}/.profile" ]] || return 0
-    # shellcheck source=/dev/null
-    source "${HOME}/.profile"
+    if [[ -f "${HOME}/.profile" ]]
+    then
+        # shellcheck source=/dev/null
+        source "${HOME}/.profile"
+    fi
     return 0
 }
 

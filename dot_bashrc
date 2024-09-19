@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-# FIXME Early return for super old bash versions.
-
 __dotfiles_bashrc() {
+    case "${BASH_VERSION:-}" in
+        '1.'* | '2.'* | '3.'*)
+            return 0
+            ;;
+    esac
     [[ "$-" == *i* ]] || return 0
     [[ -f "${HOME}/.profile" ]] || return 0
     # shellcheck source=/dev/null

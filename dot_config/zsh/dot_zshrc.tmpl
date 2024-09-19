@@ -1,5 +1,16 @@
 #!/usr/bin/env zsh
 
+# """
+# Z shell (Zsh) configuration.
+# Refer to '~/.profile' file for POSIX shell configuration details.
+#
+# Source file:
+# {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
+#
+# Git repo:
+# https://github.com/acidgenomics/dotfiles/
+# """
+
 __dotfiles_zshrc() {
     case "${ZSH_VERSION:-}" in
         '1.'* | \
@@ -52,15 +63,9 @@ __dotfiles_zshrc() {
         'errexit'
         'flowcontrol'
         'nounset'
+        'pipefail'
         'vi' # messes up mcfly.
     )
-    case "${ZSH_VERSION:?}" in
-        '5.0' | '5.0.'*)
-            ;;
-        *)
-            unsetopt_array+=('pipefail')
-            ;;
-    esac
     unsetopt "${unsetopt_array[@]}"
     # Fix the 'DELETE' key. Can use '\e[3~' instead of '^[[3~' here.
     bindkey '^[[3~' delete-char

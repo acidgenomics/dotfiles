@@ -30,8 +30,10 @@ __dotfiles_zshrc() {
             ;;
     esac
     [[ -o 'interactive' ]] || return 0
-    [[ -f "${HOME}/.profile" ]] || return 0
-    source "${HOME}/.profile"
+    if [[ -f "${HOME}/.profile" ]]
+    then
+        source "${HOME}/.profile"
+    fi
     # zsh-autosuggestions
     # --------------------------------------------------------------------------
     # Set the suggestion text color.

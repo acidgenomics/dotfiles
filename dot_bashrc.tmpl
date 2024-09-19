@@ -28,7 +28,7 @@ __dotfiles_bashrc() {
         local rc_file
         for rc_file in "${HOME}/.bashrc.d/"*
         do
-            if [ -f "$rc_file" ]
+            if [[ -f "$rc_file" ]]
             then
                 # shellcheck source=/dev/null
                 source "$rc_file"

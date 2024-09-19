@@ -32,46 +32,6 @@ __dotfiles_zshrc() {
     [[ -o 'interactive' ]] || return 0
     [[ -f "${HOME}/.profile" ]] || return 0
     source "${HOME}/.profile"
-    local -a setopt_array unsetopt_array
-    setopt_array+=(
-        'alwaystoend'
-        'autocd'
-        'autopushd'
-        'combiningchars'
-        'completealiases'
-        'completeinword'
-        'extendedglob'
-        'extendedhistory'
-        'histexpiredupsfirst'
-        'histignoredups'
-        'histignorespace'
-        'histverify'
-        'incappendhistory'
-        'interactivecomments'
-        'longlistjobs'
-        'markdirs'
-        'pushdignoredups'
-        'pushdminus'
-        'sharehistory'
-    )
-    setopt "${setopt_array[@]}"
-    unsetopt_array+=(
-        'banghist'
-        'beep'
-        'chasedots'
-        'chaselinks'
-        'errexit'
-        'flowcontrol'
-        'nounset'
-        'pipefail'
-        'vi' # messes up mcfly.
-    )
-    unsetopt "${unsetopt_array[@]}"
-    # Fix the 'DELETE' key. Can use '\e[3~' instead of '^[[3~' here.
-    bindkey '^[[3~' delete-char
-    # Make 'HOME' and 'END' keys work intuitively.
-    bindkey '^[[H' beginning-of-line
-    bindkey '^[[F' end-of-line
     # zsh-autosuggestions
     # --------------------------------------------------------------------------
     # Set the suggestion text color.

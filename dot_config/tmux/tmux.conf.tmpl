@@ -1,6 +1,6 @@
 # """
 # Tmux configuration.
-# Updated 2024-09-19.
+# Updated 2024-09-24.
 #
 # Restart the server when changing settings:
 # > tmux kill-server
@@ -41,7 +41,9 @@ set -g default-shell "{{ lookPath "bash" }}"
 # > set-option -sg focus-events off
 
 # Set the delay so that it doesn't interfere with programs like vim.
-set-option -sg escape-time 0
+# Setting this to 0 messes with VS Code integrated terminal.
+# https://github.com/microsoft/vscode/issues/207545
+set-option -sg escape-time 100
 
 # Session options
 # ==============================================================================

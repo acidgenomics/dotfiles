@@ -1,6 +1,6 @@
 # """
 # Include dotfiles from elsewhere.
-# @note Updated 2022-08-25.
+# @note Updated 2024-09-24.
 #
 # @seealso
 # - https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
@@ -13,6 +13,6 @@
     stripComponents = 1
 [".local/share/zsh/plugins/zsh-syntax-highlighting"]
     type = "archive"
-    url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/refs/tags/0.7.1.tar.gz"
+    url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/refs/tags/0.8.0.tar.gz"
     exact = true
     stripComponents = 1

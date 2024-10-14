@@ -1,6 +1,9 @@
 [http]
 debug = true
 
+[net]
+git-fetch-with-cli = true
+
 [term]
 hyperlinks = false
 verbose = true

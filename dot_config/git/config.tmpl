@@ -1,6 +1,6 @@
 # """
 # Global git configuration.
-# Updated 2024-06-27.
+# Updated 2024-10-17.
 #
 # @section Conditional configuration:
 #
@@ -26,6 +26,9 @@
 # - https://github.com/alrra/dotfiles/blob/main/src/git/gitconfig
 # - https://github.com/roryk/dotfiles/blob/master/gitconfig
 # - https://github.com/vsbuffalo/dotfiles/blob/master/.gitconfig
+#
+# Source file:
+# {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
 # """
 
 [advice]
@@ -227,6 +230,11 @@
     helper = cache --timeout=10000000
     # Can disable Git Credential Manager for Windows prompts with:
     # > modalPrompt = false
+    # Enabling 'usehttppath' allows for usage of multiple PAT on a single
+    # machine, which can be useful for updating work and personal repos
+    # side-by-side. However, this will trigger PAT prompt for each repo, which
+    # can be annoying, so disabled by default.
+    usehttppath = false
 
 [delta]
     # Dynamic dark/light color theme handling is managed by the

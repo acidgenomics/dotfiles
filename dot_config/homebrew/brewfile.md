@@ -1,9 +1,10 @@
 # Homebrew Bundle Brewfile
 
-Updated 2024-08-08.
+Updated 2024-10-28.
 
 ## Casks to consider
 
+- audacity
 - abbyy-finereader-pdf
 - adobe-acrobat-pro
 - adobe-creative-cloud
@@ -18,9 +19,11 @@ Updated 2024-08-08.
 - bettertouchtool
 - bluejeans
 - boop
+- carbon-copy-cloner
 - coconutbattery
 - coda
 - cog
+- datagrip
 - egnyte
 - eloston-chromium
 - fiji
@@ -33,18 +36,26 @@ Updated 2024-08-08.
 - gitkraken
 - google-cloud-sdk
 - handbrake
+- hazel
+- iterm2
 - julia
+- keka
 - kitty
+- little-snitch
 - macvim
+- microsoft-openjdk
 - museeks
 - name-mangler
 - neovide
 - netnewswire
 - nordvpn
 - onyx
+- oracle-jdk
 - osxfuse
+- pacifist
 - pastebot
 - plex-media-server
+- positron
 - powershell
 - quarto
 - r
@@ -57,6 +68,8 @@ Updated 2024-08-08.
 - sqlworkbenchj
 - strawberry
 - sublime-text
+- superduper
+- temurin
 - textmate
 - the-unarchiver
 - thonny
@@ -67,6 +80,7 @@ Updated 2024-08-08.
 - vscodium
 - webex
 - wine-stable
+- xld
 
 ## Cask reinstallation
 

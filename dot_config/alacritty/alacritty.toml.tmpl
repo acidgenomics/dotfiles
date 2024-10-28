@@ -63,7 +63,9 @@ multiplier = 3
 save_to_clipboard = true
 semantic_escape_chars = ",│`|:\"' ()[]{}<>"
 
-[shell]
+[terminal]
+
+[terminal.shell]
 args = ["--interactive", "--login"]
 {{- if eq .chezmoi.os "darwin" }}
 program = "/bin/zsh"
@@ -73,7 +75,7 @@ program = "{{ lookPath "bash" }}"
 
 # Launch bound to a tmux session. Note that this doesn't currently handle
 # dark/light mode switching correctly.
-# > [shell]
+# > [terminal.shell]
 # > args = ["new"]
 # > program = "{{ lookPath "tmux" }}"
 

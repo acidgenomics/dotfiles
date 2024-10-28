@@ -1,6 +1,3 @@
-import = ["~/.config/alacritty/colors-{{ env "KOOPA_COLOR_MODE" }}.toml"]
-live_config_reload = true
-
 [bell]
 duration = 0
 
@@ -41,6 +38,10 @@ style = "Regular"
 [font.offset]
 x = 0
 y = 0
+
+[general]
+import = ["~/.config/alacritty/colors-{{ env "KOOPA_COLOR_MODE" }}.toml"]
+live_config_reload = true
 
 [[hints.enabled]]
 command = "xdg-open"

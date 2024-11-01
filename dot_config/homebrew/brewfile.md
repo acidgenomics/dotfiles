@@ -20,6 +20,8 @@ Updated 2024-10-28.
 - bluejeans
 - boop
 - carbon-copy-cloner
+- chatgpt
+- claude
 - coconutbattery
 - coda
 - cog

@@ -164,7 +164,7 @@ disabled = true
 [hostname]
 disabled = false
 format = "[$hostname]($style)\n"
-ssh_only = false
+ssh_only = true
 style = 'cyan'
 trim_at = ''
 
@@ -329,7 +329,7 @@ disabled = true
 [username]
 disabled = false
 format = '[$user]($style)[@](cyan)'
-show_always = true
+show_always = false
 style_root = 'bold cyan'
 style_user = 'cyan'
 

@@ -1,0 +1,11 @@
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+cacert={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- end }}
+connect-timeout=60
+# > insecure
+location
+{{- if env "HTTP_PROXY" }}
+proxy={{ env "HTTP_PROXY" }}
+{{- end }}
+referer=";auto"
+show-error

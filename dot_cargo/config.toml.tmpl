@@ -1,0 +1,15 @@
+[http]
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+cainfo = "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem"
+{{- end }}
+debug = true
+{{- if env "HTTP_PROXY" }}
+proxy = "{{ env "HTTP_PROXY" }}"
+{{- end }}
+
+[net]
+git-fetch-with-cli = true
+
+[term]
+hyperlinks = false
+verbose = true

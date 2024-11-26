@@ -8,8 +8,11 @@ SSL_CERT_FILE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
 {{- end }}
 
 {{- if env "HTTP_PROXY" }}
-HTTPS_PROXY={{ env "HTTP_PROXY" }}
 HTTP_PROXY={{ env "HTTP_PROXY" }}
 http_proxy={{ env "HTTP_PROXY" }}
-https_proxy={{ env "HTTP_PROXY" }}
+{{- end }}
+
+{{- if env "HTTPS_PROXY" }}
+HTTPS_PROXY={{ env "HTTPS_PROXY" }}
+https_proxy={{ env "HTTPS_PROXY" }}
 {{- end }}

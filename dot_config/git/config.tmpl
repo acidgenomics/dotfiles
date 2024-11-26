@@ -297,7 +297,14 @@
     # > autocorrect = 20
 
 [http]
-    sslVerify = false
+{{- if env "HTTP_PROXY" }}
+    proxy = {{ env "HTTP_PROXY" }}
+{{- end }}
+
+[https]
+{{- if env "HTTPS_PROXY" }}
+    proxy = {{ env "HTTPS_PROXY" }}
+{{- end }}
 
 [init]
     defaultBranch = main

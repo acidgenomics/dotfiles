@@ -101,10 +101,10 @@
     }; f"
     # Checkout main branch.
     main = checkout -B main origin/main
+    no-cache-credential = config --local credential.helper ""
     p = push
     pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
     r = rebase
-    reset-pat = config --local credential.helper ""
     # Remove the tag with the specified tag name if exists and tag the latest
     # commit with that name.
     retag = "!f() { \

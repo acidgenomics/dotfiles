@@ -1,6 +1,6 @@
 # """
 # Global git configuration.
-# Updated 2024-10-17.
+# Updated 2024-11-26.
 #
 # @section Conditional configuration:
 #
@@ -104,6 +104,7 @@
     p = push
     pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
     r = rebase
+    reset-pat = config --local credential.helper ""
     # Remove the tag with the specified tag name if exists and tag the latest
     # commit with that name.
     retag = "!f() { \

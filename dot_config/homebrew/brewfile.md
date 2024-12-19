@@ -1,10 +1,9 @@
 # Homebrew Bundle Brewfile
 
-Updated 2024-10-28.
+Updated 2024-12-19.
 
 ## Casks to consider
 
-- audacity
 - abbyy-finereader-pdf
 - adobe-acrobat-pro
 - adobe-creative-cloud
@@ -12,9 +11,11 @@ Updated 2024-10-28.
 - aerial
 - airfoil
 - anaconda
+- audacity
 - audio-hijack
 - audirvana
 - authy
+- balenaetcher
 - bartender
 - bettertouchtool
 - bluejeans
@@ -71,6 +72,7 @@ Updated 2024-10-28.
 - strawberry
 - sublime-text
 - superduper
+- swinsian
 - temurin
 - textmate
 - the-unarchiver

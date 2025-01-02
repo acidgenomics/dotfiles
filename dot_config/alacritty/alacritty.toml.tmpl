@@ -9,7 +9,9 @@ style = "Block"
 unfocused_hollow = false
 
 [env]
-{{- if eq .chezmoi.os "darwin" }}
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "bash") }}
+SHELL = "{{ env "KOOPA_PREFIX" }}/bin/bash"
+{{- else if eq .chezmoi.os "darwin" }}
 SHELL = "/bin/zsh"
 {{- else }}
 SHELL = "{{ lookPath "bash" }}"
@@ -66,10 +68,14 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>"
 [terminal]
 
 [terminal.shell]
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "bash") }}
+args = ["-i", "-l"]
+program = "{{ env "KOOPA_PREFIX" }}/bin/bash"
+{{- else if eq .chezmoi.os "darwin" }}
 args = ["--interactive", "--login"]
-{{- if eq .chezmoi.os "darwin" }}
 program = "/bin/zsh"
 {{- else }}
+args = ["-i", "-l"]
 program = "{{ lookPath "bash" }}"
 {{- end }}
 

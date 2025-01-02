@@ -68,14 +68,12 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>"
 [terminal]
 
 [terminal.shell]
+args = ["-il"]
 {{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "bash") }}
-args = ["-i", "-l"]
 program = "{{ env "KOOPA_PREFIX" }}/bin/bash"
 {{- else if eq .chezmoi.os "darwin" }}
-args = ["--interactive", "--login"]
 program = "/bin/zsh"
 {{- else }}
-args = ["-i", "-l"]
 program = "{{ lookPath "bash" }}"
 {{- end }}
 

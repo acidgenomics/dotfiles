@@ -1,7 +1,7 @@
 # """
 # Kitty configuration
 #
-# @note Updated 2023-11-22.
+# @note Updated 2025-01-03.
 #
 # @seealso
 # - https://sw.kovidgoyal.net/kitty/conf/
@@ -12,8 +12,13 @@
 #     linux-toggle-dark-mode.html#kittys-built-in-solution-easy
 # """
 
+# Shell
+# ==============================================================================
+
+shell {{ lookPath "bash" }}
+
 # Fonts
-# ========================================================================= {{{1
+# ==============================================================================
 
 font_family JetBrainsMono NF
 font_size 16.0
@@ -23,7 +28,7 @@ italic_font auto
 bold_italic_font auto
 
 # Cursor customization
-# ========================================================================= {{{1
+# ==============================================================================
 
 # Cursor configuration.
 cursor_shape block
@@ -31,19 +36,19 @@ cursor_blink_interval 0
 shell_integration no-cursor
 
 # Window layout
-# ========================================================================= {{{1
+# ==============================================================================
 
 initial_window_height 30c
 initial_window_width 90c
 remember_window_size no
 
 # Color scheme
-# ========================================================================= {{{1
+# ==============================================================================
 
 include current-theme.conf
 
 # Advanced
-# ========================================================================= {{{1
+# ==============================================================================
 
 # Disable automatic update checks.
 update_check_interval 0

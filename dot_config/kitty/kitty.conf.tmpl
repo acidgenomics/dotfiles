@@ -12,43 +12,19 @@
 #     linux-toggle-dark-mode.html#kittys-built-in-solution-easy
 # """
 
-# Shell
-# ==============================================================================
-
-shell {{ lookPath "bash" }}
-
-# Fonts
-# ==============================================================================
-
+bold_font auto
+bold_italic_font auto
+cursor_blink_interval 0
+cursor_shape block
 font_family JetBrainsMono NF
 font_size 16.0
-
-bold_font auto
-italic_font auto
-bold_italic_font auto
-
-# Cursor customization
-# ==============================================================================
-
-# Cursor configuration.
-cursor_shape block
-cursor_blink_interval 0
-shell_integration no-cursor
-
-# Window layout
-# ==============================================================================
-
 initial_window_height 30c
 initial_window_width 90c
+italic_font auto
+macos_show_window_title_in none
 remember_window_size no
-
-# Color scheme
-# ==============================================================================
+shell {{ lookPath "bash" }}
+shell_integration no-cursor
+update_check_interval 0
 
 include current-theme.conf
-
-# Advanced
-# ==============================================================================
-
-# Disable automatic update checks.
-update_check_interval 0

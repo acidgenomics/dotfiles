@@ -66,6 +66,7 @@ main() {
     )
     if koopa_is_macos
     then
+        # Visual Studio Code.
         (
             koopa_mkdir "${HOME}/Library/Application Support/Code/User"
             koopa_cd "${HOME}/Library/Application Support/Code/User"
@@ -82,6 +83,18 @@ main() {
                     'settings.json'
             fi
         )
+        # McFly.
+        (
+            koopa_mkdir "${HOME}/Library/Application Support/McFly"
+            koopa_cd "${HOME}/Library/Application Support/McFly"
+            if [[ ! -L 'config.toml' ]]
+            then
+                koopa_ln --verbose \
+                    "${dict['xdg_config_home']}/mcfly/config.toml" \
+                    'config.toml'
+            fi
+        )
+        # Positron.
         (
             koopa_mkdir "${HOME}/Library/Application Support/Positron/User"
             koopa_cd "${HOME}/Library/Application Support/Positron/User"
@@ -92,6 +105,7 @@ main() {
                     'settings.json'
             fi
         )
+        # nushell.
         (
             if [[ -L "${HOME}/Library/Application Support/nushell" ]]
             then

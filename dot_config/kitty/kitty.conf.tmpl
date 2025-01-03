@@ -12,6 +12,8 @@
 #     linux-toggle-dark-mode.html#kittys-built-in-solution-easy
 # """
 
+include current-theme.conf
+
 bold_font auto
 bold_italic_font auto
 cursor_blink_interval 0
@@ -26,5 +28,3 @@ remember_window_size no
 shell {{ lookPath "bash" }}
 shell_integration no-cursor
 update_check_interval 0
-
-include current-theme.conf

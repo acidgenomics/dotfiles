@@ -1,0 +1,34 @@
+# """
+# McFly configuration
+#
+# @note Updated 2025-01-03.
+#
+# @seealso
+# - https://github.com/cantino/mcfly/pull/405/files
+# """
+
+[colors]
+
+[colors.menubar]
+bg = "black"
+fg = "white"
+
+[colors.darkmode]
+prompt = "white"
+timing = "blue"
+results_fg = "white"
+results_bg = "black"
+results_hl = "blue"
+results_selection_fg = "black"
+results_selection_bg = "white"
+results_selection_hl = "red"
+
+[colors.lightmode]
+prompt = "white"
+timing = "blue"
+results_fg = "white"
+results_bg = "black"
+results_hl = "blue"
+results_selection_fg = "black"
+results_selection_bg = "white"
+results_selection_hl = "red"

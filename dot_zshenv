@@ -2,7 +2,10 @@
 
 # """
 # ZSH environment configuration.
-# @note Updated 2023-03-27.
+# @note Updated 2025-01-03.
+#
+# @seealso
+# - https://unix.stackexchange.com/questions/72559/
 # """
 
 # This is the current default configuration.
@@ -12,3 +15,6 @@
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME:?}/.config}"
 export ZDOTDIR="${ZDOTDIR:-${XDG_CONFIG_HOME}/zsh}"
 
+# Avoid parsing system /etc files. When GLOBAL_RCS is unset, /etc/zprofile,
+# /etc/zshrc, /etc/zlogin and /etc/zlogout will not be sourced.
+unsetopt GLOBAL_RCS

@@ -71,6 +71,7 @@
     "hadolint.hadolintPath": "{{ lookPath "hadolint" }}",
     "html.format.wrapLineLength": 0,
     "http.proxyStrictSSL": true,
+{{- if stat (joinPath (env "KOOPA_PREFIX") "opt" "isort") }}
     "isort.args": [
         "--profile",
         "black"
@@ -80,9 +81,10 @@
         "{{ env "KOOPA_PREFIX" }}/opt/isort/libexec/bin/python3"
     ],
     "isort.path": [
-        "{{ lookPath "isort" }}"
+        "{{ env "KOOPA_PREFIX" }}/bin/isort"
     ],
     "isort.serverEnabled": false,
+{{- end }}
     "javascript.suggest.enabled": false,
     "jupyter.kernels.trusted": [
         "{{ env "KOOPA_PREFIX" }}/opt/anaconda/share/jupyter/kernels/python3/kernel.json",
@@ -214,7 +216,7 @@
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
     "workbench.colorTheme": "Atom One Light",
 {{- else }}
-{{- if any (eq .chezmoi.hostname "acidalia-planitia") (eq .chezmoi.hostname "windsor") }}
+{{- if stat (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-1.1.0") }}
     "workbench.colorTheme": "Dracula Pro",
 {{- else }}
     "workbench.colorTheme": "Dracula",
@@ -228,7 +230,7 @@
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.languageDetection": false,
     "workbench.panel.defaultLocation": "right",
-{{- if any (eq .chezmoi.hostname "acidalia-planitia") (eq .chezmoi.hostname "windsor") }}
+{{- if stat (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-1.1.0") }}
     "workbench.preferredDarkColorTheme": "Dracula Pro",
 {{- else }}
     "workbench.preferredDarkColorTheme": "Dracula",

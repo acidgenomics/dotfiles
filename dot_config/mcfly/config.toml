@@ -1,16 +1,58 @@
 # """
 # McFly configuration
 #
-# @note Updated 2025-01-03.
+# @note Updated 2025-01-04.
 #
+# The following colors are supported, according to README:
+#
+# | Light       | Dark           |
+# | :---------- | :------------- |
+# | `dark_grey` | `black`        |
+# | `red`       | `dark_red`     |
+# | `green`     | `dark_green`   |
+# | `yellow`    | `dark_yellow`  |
+# | `blue`      | `dark_blue`    |
+# | `magenta`   | `dark_magenta` |
+# | `cyan`      | `dark_cyan`    |
+# | `white`     | `grey`         |
+#
+#
+# Current config defaults:
+#
+# > colors: Colors {
+# >     menubar_bg: Color::Blue,
+# >     menubar_fg: Color::White,
+# >     darkmode_colors: DarkModeColors {
+# >         prompt: Color::White,
+# >         timing: Color::Blue,
+# >         results_fg: Color::White,
+# >         results_bg: Color::Black,
+# >         results_hl: Color::Blue,
+# >         results_selection_fg: Color::Black,
+# >         results_selection_bg: Color::White,
+# >         results_selection_hl: Color::DarkGreen,
+# >     },
+# >     lightmode_colors: LightModeColors {
+# >         prompt: Color::Black,
+# >         timing: Color::DarkBlue,
+# >         results_fg: Color::Black,
+# >         results_bg: Color::White,
+# >         results_hl: Color::Blue,
+# >         results_selection_fg: Color::White,
+# >         results_selection_bg: Color::DarkGrey,
+# >         results_selection_hl: Color::Grey,
+# >     },
+# > },
+
 # @seealso
+# - https://github.com/cantino/mcfly/pull/343/files
 # - https://github.com/cantino/mcfly/pull/405/files
 # """
 
 [colors]
 
 [colors.menubar]
-bg = "black"
+bg = "blue"
 fg = "white"
 
 [colors.darkmode]
@@ -21,14 +63,14 @@ results_bg = "black"
 results_hl = "blue"
 results_selection_fg = "black"
 results_selection_bg = "white"
-results_selection_hl = "red"
+results_selection_hl = "dark_green"
 
 [colors.lightmode]
-prompt = "white"
-timing = "blue"
-results_fg = "white"
-results_bg = "black"
+prompt = "black"
+timing = "dark_blue"
+results_fg = "black"
+results_bg = "white"
 results_hl = "blue"
-results_selection_fg = "black"
-results_selection_bg = "white"
-results_selection_hl = "red"
+results_selection_fg = "white"
+results_selection_bg = "dark_grey"
+results_selection_hl = "grey"

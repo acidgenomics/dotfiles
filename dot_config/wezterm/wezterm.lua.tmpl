@@ -4,9 +4,6 @@
 --
 -- JetBrains Mono is the current default font.
 --
--- Alternative light themes:
--- * Builtin Solarized Light
---
 -- @seealso
 -- * https://wezfurlong.org/wezterm/config/files.html
 -- * https://wezfurlong.org/wezterm/config/appearance.html
@@ -30,6 +27,7 @@ function scheme_for_appearance(appearance)
   if appearance:find "Dark" then
     return "Dracula (Official)"
   else
+    -- Alternative: "Builtin Solarized Light"
     return "AtomOneLight"
   end
 end

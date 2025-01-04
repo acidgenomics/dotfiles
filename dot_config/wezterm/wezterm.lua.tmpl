@@ -12,6 +12,8 @@
 local wezterm = require "wezterm"
 local config = {}
 
+config.default_prog = { "{{ lookPath "bash" }}", "-il" }
+
 config.font_size = 16
 config.tab_bar_at_bottom = false
 config.use_fancy_tab_bar = false

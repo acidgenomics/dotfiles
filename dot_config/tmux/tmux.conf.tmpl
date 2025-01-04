@@ -74,7 +74,9 @@ set-option -g history-limit 200000
 # - https://github.com/tmux/tmux/issues/1246
 
 # Set the default terminal inside tmux, which natively supports 256 colors.
-# > set-option -g default-terminal "screen-256color"
+# Usage of 'tmux-256color' here improves italic font support. Alternatively,
+# can fall back to 'screen-256color' but don't set 'xterm-256color' here.
+# Check the assignment against TERM environment variable.
 set-option -g default-terminal "tmux-256color"
 
 # Enable 24-bit true color support.

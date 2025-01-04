@@ -16,33 +16,6 @@
 # | `cyan`      | `dark_cyan`    |
 # | `white`     | `grey`         |
 #
-# Current config defaults:
-#
-# > colors: Colors {
-# >     menubar_bg: Color::Blue,
-# >     menubar_fg: Color::White,
-# >     darkmode_colors: DarkModeColors {
-# >         prompt: Color::White,
-# >         timing: Color::Blue,
-# >         results_fg: Color::White,
-# >         results_bg: Color::Black,
-# >         results_hl: Color::Blue,
-# >         results_selection_fg: Color::Black,
-# >         results_selection_bg: Color::White,
-# >         results_selection_hl: Color::DarkGreen,
-# >     },
-# >     lightmode_colors: LightModeColors {
-# >         prompt: Color::Black,
-# >         timing: Color::DarkBlue,
-# >         results_fg: Color::Black,
-# >         results_bg: Color::White,
-# >         results_hl: Color::Blue,
-# >         results_selection_fg: Color::White,
-# >         results_selection_bg: Color::DarkGrey,
-# >         results_selection_hl: Color::Grey,
-# >     },
-# > },
-#
 # @seealso
 # - https://github.com/cantino/mcfly/pull/343/files
 # - https://github.com/cantino/mcfly/pull/405/files

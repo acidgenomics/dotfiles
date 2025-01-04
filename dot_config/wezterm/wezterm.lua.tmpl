@@ -2,11 +2,18 @@
 --
 -- @note Updated 2025-01-04.
 --
+-- JetBrains Mono is the current default font.
+--
+-- Alternative light themes:
+-- * Builtin Solarized Light
+--
 -- @seealso
 -- * https://wezfurlong.org/wezterm/config/files.html
 -- * https://wezfurlong.org/wezterm/config/appearance.html
+-- * https://wezfurlong.org/wezterm/config/fonts.html
 -- * https://wezfurlong.org/wezterm/config/lua/
 --     wezterm.gui/get_appearance.html
+-- * https://wezfurlong.org/wezterm/colorschemes/index.html
 -- * https://draculatheme.com/wezterm
 
 local wezterm = require "wezterm"
@@ -14,6 +21,7 @@ local config = {}
 
 config.default_prog = { "{{ lookPath "bash" }}", "-il" }
 
+config.font = wezterm.font "JetBrains Mono"
 config.font_size = 16
 config.tab_bar_at_bottom = false
 config.use_fancy_tab_bar = false
@@ -32,7 +40,7 @@ function scheme_for_appearance(appearance)
   if appearance:find "Dark" then
     return "Dracula (Official)"
   else
-    return "Builtin Solarized Light"
+    return "AtomOneLight"
   end
 end
 

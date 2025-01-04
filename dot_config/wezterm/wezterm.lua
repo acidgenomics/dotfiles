@@ -3,12 +3,17 @@
 -- @note Updated 2025-01-04.
 --
 -- @seealso
+-- * https://wezfurlong.org/wezterm/config/files.html
+-- * https://wezfurlong.org/wezterm/config/appearance.html
 -- * https://draculatheme.com/wezterm
 
-return {
-    color_scheme = "Dracula (Official)",
-    font_size = 16,
-    tab_bar_at_bottom = true,
-    use_fancy_tab_bar = false,
-    window_decorations = "RESIZE"
-}
+local wezterm = require "wezterm"
+local config = {}
+
+config.color_scheme = "Dracula (Official)"
+config.font_size = 16
+config.tab_bar_at_bottom = true
+config.use_fancy_tab_bar = false
+config.window_decorations = "RESIZE"
+
+return config

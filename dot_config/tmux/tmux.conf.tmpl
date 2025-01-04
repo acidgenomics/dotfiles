@@ -1,6 +1,6 @@
 # """
 # Tmux configuration.
-# Updated 2025-01-03.
+# Updated 2025-01-04.
 #
 # Restart the server when changing settings:
 # > tmux kill-server
@@ -74,7 +74,8 @@ set-option -g history-limit 200000
 # - https://github.com/tmux/tmux/issues/1246
 
 # Set the default terminal inside tmux, which natively supports 256 colors.
-set-option -g default-terminal "screen-256color"
+# > set-option -g default-terminal "screen-256color"
+set-option -g default-terminal "tmux-256color"
 
 # Enable 24-bit true color support.
 # Note that this value should match the client terminal outside of tmux.

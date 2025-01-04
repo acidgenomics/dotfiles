@@ -13,9 +13,11 @@
 -- * https://wezfurlong.org/wezterm/colorschemes/index.html
 -- * https://draculatheme.com/wezterm
 -- * How to disable hyperlinks:
+--   https://wezfurlong.org/wezterm/config/mouse.html
 --   https://www.reddit.com/r/wezterm/comments/10jda7o/
 
 local wezterm = require "wezterm"
+local act = wezterm.action
 local config = {}
 
 function get_appearance()
@@ -43,5 +45,21 @@ config.use_fancy_tab_bar = false
 config.window_decorations = "RESIZE"
 
 config.color_scheme = scheme_for_appearance(get_appearance())
+
+config.mouse_bindings = {
+  -- Change the default click behavior so that it only selects text and doesn't
+  -- open hyperlinks.
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'NONE',
+    action = act.CompleteSelection 'ClipboardAndPrimarySelection',
+  },
+  -- And make CTRL-Click open hyperlinks.
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'CTRL',
+    action = act.OpenLinkAtMouseCursor,
+  },
+}
 
 return config

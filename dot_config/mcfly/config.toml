@@ -17,9 +17,10 @@
 # | `white`     | `grey`         |
 #
 # @seealso
-# - https://github.com/cantino/mcfly/pull/343/files
-# - https://github.com/cantino/mcfly/pull/405/files
-# - Alacritty rendering issues
+# - https://github.com/cantino/mcfly/pull/319
+# - https://github.com/cantino/mcfly/pull/343
+# - https://github.com/cantino/mcfly/pull/405
+# - Alacritty rendering issues:
 #   https://github.com/cantino/mcfly/issues/316
 # """
 

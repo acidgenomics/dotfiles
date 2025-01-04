@@ -16,7 +16,6 @@
 # | `cyan`      | `dark_cyan`    |
 # | `white`     | `grey`         |
 #
-#
 # Current config defaults:
 #
 # > colors: Colors {
@@ -43,10 +42,12 @@
 # >         results_selection_hl: Color::Grey,
 # >     },
 # > },
-
+#
 # @seealso
 # - https://github.com/cantino/mcfly/pull/343/files
 # - https://github.com/cantino/mcfly/pull/405/files
+# - Alacritty rendering issues
+#   https://github.com/cantino/mcfly/issues/316
 # """
 
 [colors]

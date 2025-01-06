@@ -3,6 +3,11 @@
 -- @note Updated 2025-01-06.
 --
 -- JetBrains Mono is the current default font.
+-- Alternative light theme: "Builtin Solarized Light"
+--
+-- AtomOneLight theme:
+-- https://github.com/mbadolato/iTerm2-Color-Schemes/blob/master/
+--   wezterm/AtomOneLight.toml
 --
 -- @seealso
 -- * https://wezfurlong.org/wezterm/config/files.html
@@ -11,10 +16,10 @@
 -- * https://wezfurlong.org/wezterm/config/lua/
 --     wezterm.gui/get_appearance.html
 -- * https://wezfurlong.org/wezterm/colorschemes/index.html
--- * https://draculatheme.com/wezterm
 -- * How to disable hyperlinks:
 --   https://wezfurlong.org/wezterm/config/mouse.html
 --   https://www.reddit.com/r/wezterm/comments/10jda7o/
+-- * https://draculatheme.com/wezterm
 
 local wezterm = require "wezterm"
 local act = wezterm.action
@@ -27,23 +32,43 @@ function get_appearance()
   return "Dark"
 end
 
-function scheme_for_appearance(appearance)
-  if appearance:find "Dark" then
-    return "Dracula (Official)"
-  else
-    -- Alternative: "Builtin Solarized Light"
-    return "AtomOneLight"
-  end
-end
-
-config.default_prog = { "{{ lookPath "bash" }}", "-il" }
+config.default_prog = { "/opt/koopa/bin/bash", "-il" }
 config.font = wezterm.font "JetBrains Mono"
 config.font_size = 16
 config.hide_tab_bar_if_only_one_tab = true
 config.tab_bar_at_bottom = false
 config.use_fancy_tab_bar = false
 
-config.color_scheme = scheme_for_appearance(get_appearance())
+if get_appearance():find "Dark" then
+  config.color_scheme = "Dracula (Official)"
+else
+  config.color_scheme = "AtomOneLight"
+  config.colors = {
+    tab_bar = {
+      background = "#f9f9f9",
+      active_tab = {
+        bg_color = "#bbbbbb",
+        fg_color = "#2a2c33",
+      },
+      inactive_tab = {
+        bg_color = "#f9f9f9",
+        fg_color = "#2a2c33",
+      },
+      inactive_tab_hover = {
+        bg_color = "#ededed",
+        fg_color = "#2a2c33",
+      },
+      new_tab = {
+        bg_color = "#f9f9f9",
+        fg_color = "#2a2c33",
+      },
+      new_tab_hover = {
+        bg_color = "#ededed",
+        fg_color = "#2a2c33",
+      },
+    },
+  }
+end
 
 config.mouse_bindings = {
   -- Change the default click behavior so that it only selects text and doesn't

@@ -3,7 +3,7 @@
 -- @note Updated 2025-01-06.
 --
 -- JetBrains Mono is the current default font.
--- Alternative light theme: "Builtin Solarized Light"
+-- Alternative light theme: "Builtin Solarized Light".
 --
 -- AtomOneLight theme:
 -- https://github.com/mbadolato/iTerm2-Color-Schemes/blob/master/
@@ -36,6 +36,8 @@ config.default_prog = { "/opt/koopa/bin/bash", "-il" }
 config.font = wezterm.font "JetBrains Mono"
 config.font_size = 16
 config.hide_tab_bar_if_only_one_tab = true
+config.initial_cols = 90
+config.initial_rows = 30
 config.tab_bar_at_bottom = false
 config.use_fancy_tab_bar = false
 
@@ -74,14 +76,14 @@ config.mouse_bindings = {
   -- Change the default click behavior so that it only selects text and doesn't
   -- open hyperlinks.
   {
-    event = { Up = { streak = 1, button = 'Left' } },
-    mods = 'NONE',
-    action = act.CompleteSelection 'ClipboardAndPrimarySelection',
+    event = { Up = { streak = 1, button = "Left" } },
+    mods = "NONE",
+    action = act.CompleteSelection "ClipboardAndPrimarySelection",
   },
   -- And make CTRL-Click open hyperlinks.
   {
-    event = { Up = { streak = 1, button = 'Left' } },
-    mods = 'CTRL',
+    event = { Up = { streak = 1, button = "Left" } },
+    mods = "CTRL",
     action = act.OpenLinkAtMouseCursor,
   },
 }

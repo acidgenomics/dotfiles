@@ -1,6 +1,6 @@
 -- WezTerm configuration
 --
--- @note Updated 2025-01-06.
+-- @note Updated 2025-01-09.
 --
 -- JetBrains Mono is the current default font.
 -- Alternative light theme: "Builtin Solarized Light".
@@ -13,6 +13,8 @@
 -- * https://wezfurlong.org/wezterm/config/files.html
 -- * https://wezfurlong.org/wezterm/config/appearance.html
 -- * https://wezfurlong.org/wezterm/config/fonts.html
+-- * Ligature config (font shaping):
+     https://wezfurlong.org/wezterm/config/font-shaping.html
 -- * https://wezfurlong.org/wezterm/config/lua/
 --     wezterm.gui/get_appearance.html
 -- * https://wezfurlong.org/wezterm/colorschemes/index.html
@@ -35,6 +37,7 @@ end
 config.default_prog = { "/opt/koopa/bin/bash", "-il" }
 config.font = wezterm.font "JetBrains Mono"
 config.font_size = 16
+config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
 config.hide_tab_bar_if_only_one_tab = true
 config.initial_cols = 90
 config.initial_rows = 30

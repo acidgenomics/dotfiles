@@ -1,6 +1,6 @@
 # """
 # Global git configuration.
-# Updated 2024-11-26.
+# Updated 2025-01-30.
 #
 # @section Conditional configuration:
 #
@@ -372,6 +372,9 @@
     directory = {{ env "KOOPA_PREFIX" }}
 
 [status]
+    # Don't show untracked files by default. This results in a significant
+    # speed up for large repos on a shared file system.
+    showUntrackedFiles = no
     # Show summary for all git submodules, which can be slow.
     # > submoduleSummary = true
 

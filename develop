@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# shellcheck source=/dev/null
+source "$(koopa header bash)"
+
 main() {
     [[ "$#" -eq 0 ]] || return 1
     git switch main
-    git remote set-url origin 'git@github.com:acidgenomics/dotfiles.git'
+    if koopa_is_github_ssh_enabled
+    then
+        git remote set-url origin 'git@github.com:acidgenomics/dotfiles.git'
+    fi
     git pull
     return 0
 }

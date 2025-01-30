@@ -38,6 +38,8 @@
 *.gz
 *.gz.*
 *.h5
+*.h5ad
+*.h5mu
 *.idx
 *.jl.*.cov
 *.jl.cov
@@ -54,6 +56,7 @@
 *.o
 *.out
 *.pdb
+*.pickle
 *.pdf
 *.pem
 *.pickle

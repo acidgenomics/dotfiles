@@ -1,4 +1,5 @@
 !Build/
+*$py.class
 **/*.rs.bk
 *-Ex.R
 *.RData
@@ -19,6 +20,8 @@
 *.dpkg-old
 *.egg
 *.egg-info/
+*.env
+*.envrc
 *.err
 *.fa
 *.fa.fai
@@ -55,11 +58,14 @@
 *.pm.tdy
 *.png
 *.pot
+*.py,cover
+*.py[cod]
 *.pyc
 *.rda
 *.rdb
 *.rds
 *.rdx
+*.sage.py
 *.sam
 *.so
 *.spec
@@ -99,6 +105,7 @@
 .dmypy.json
 .eggs/
 .env
+.envrc
 .httr-oauth
 .hypothesis/
 .installed.cfg
@@ -110,6 +117,9 @@
 .nextflow.log*
 .nextflow/
 .nox/
+.pdm-build/
+.pdm-python
+.pdm.toml
 .pybuilder/
 .pyre/
 .pytest_cache/
@@ -184,8 +194,10 @@ docs/build/
 docs/site/
 downloads/
 eggs/
+env
 env.bak/
 env/
+envrc
 fastq-*/
 fastq/
 figures/

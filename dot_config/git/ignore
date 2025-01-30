@@ -13,6 +13,8 @@
 *.bed
 *.bs
 *.bz2
+*.cfg
+*.cloupe
 *.cover
 *.cram
 *.cram.crai
@@ -40,6 +42,7 @@
 *.h5
 *.h5ad
 *.h5mu
+*.html
 *.idx
 *.jl.*.cov
 *.jl.cov
@@ -78,10 +81,13 @@
 *.sra
 *.swp
 *.tar
+*.tif
+*.tiff
 *.tsv
 *.ucf-dist
 *.utf8.md
 *.webloc
+*.xenium
 *.xz
 *.zip
 *.zwc
@@ -193,6 +199,10 @@ celerybeat.pid
 cover/
 cover_db/
 coverage.xml
+credentials
+credentials*
+creds
+creds*
 cython_debug/
 data-raw/
 data/
@@ -278,6 +288,7 @@ sam-*/
 sam/
 sdist/
 secrets
+secrets*
 share/python-wheels/
 sra/
 star-*/

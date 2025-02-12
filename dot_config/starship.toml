@@ -29,7 +29,7 @@ symbol = 'C'
 version_format = '$raw'
 
 [character]
-disabled = false
+disabled = true
 error_symbol = '[✗](red)'
 format = '$symbol '
 success_symbol = '[❯](purple)'

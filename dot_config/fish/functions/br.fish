@@ -1,1 +1,0 @@
-../../broot/launcher/fish/br.fish

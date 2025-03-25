@@ -1,5 +1,6 @@
 {
   "breadcrumbs.enabled": true,
+  "chat.editing.alwaysSaveWithGeneratedChanges": true,
   "debug.terminal.clearBeforeReusing": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "editor.acceptSuggestionOnEnter": "off",
@@ -36,10 +37,12 @@
   "editor.wordWrap": "off",
   "editor.wordWrapColumn": 80,
   "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
   "extensions.autoUpdate": false,
   "extensions.ignoreRecommendations": true,
   "files.associations": {
-    "*.rmd": "rmd"
+    "*.rmd": "rmd",
+    "CODEOWNERS": "ssh_config"
   },
   "files.eol": "\n",
   "files.hotExit": "onExitAndWindowClose",
@@ -50,6 +53,13 @@
   "git.confirmSync": false,
   "git.openRepositoryInParentFolders": "never",
   "git.suggestSmartCommit": false,
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.enable": {
+    "*": true,
+    "markdown": false,
+    "plaintext": false,
+    "scminput": false
+  },
   "githubPullRequests.defaultMergeMethod": "squash",
   "githubPullRequests.fileListLayout": "tree",
   "githubPullRequests.pullBranch": "never",
@@ -98,6 +108,7 @@
     "notebook.source.organizeImports.ruff": "explicit"
   },
   "notebook.formatOnSave.enabled": true,
+  "notebook.output.textLineLimit": 100,
   "path-autocomplete.pathMappings": {
     ".": "${workspace}"
   },
@@ -108,7 +119,8 @@
       "source.organizeImports.ruff": "explicit"
     },
     "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false
   },
   "python.REPL.enableREPLSmartSend": false,
   "python.REPL.sendToNativeREPL": true,
@@ -119,6 +131,7 @@
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
   "python.diagnostics.sourceMapsEnabled": true,
   "python.experiments.enabled": false,
+  "python.interpreter.infoVisibility": "always",
   "python.terminal.activateEnvironment": false,
   "[r]": {
     "editor.formatOnSave": false
@@ -147,10 +160,19 @@
   "r.session.levelOfObjectDetail": "Normal",
   "r.workspaceViewer.removeHiddenItems": true,
   "r.workspaceViewer.showObjectSize": true,
+  "redhat.telemetry.enabled": false,
+  "remote.SSH.connectTimeout": 60,
+  "remote.SSH.enableRemoteCommand": true,
   "remote.SSH.localServerDownload": "off",
   "remote.SSH.maxReconnectionAttempts": 0,
+  "remote.SSH.remoteServerListenOnSocket": true,
   "remote.SSH.useCurlAndWgetConfigurationFiles": true,
+  "remote.autoForwardPortsSource": "hybrid",
   "remote.downloadExtensionsLocally": false,
+  "remote.extensionKind": {
+    "GitHub.copilot": [ "ui" ],
+    "GitHub.copilot-chat": [ "ui" ]
+  },
   "remote.tunnels.alwaysUpdateCLI": true,
   "ruff.path": [
     "{{ lookPath "ruff" }}"
@@ -165,6 +187,7 @@
     "3043"
   ],
   "shellcheck.run": "onSave",
+  "telemetry.telemetryLevel": "off",
   "terminal.external.osxExec": "Alacritty.app",
   "terminal.integrated.cursorBlinking": false,
   "terminal.integrated.cursorStyle": "block",
@@ -208,6 +231,7 @@
   "vim.easymotionDimBackground": false,
   "vim.mouseSelectionGoesIntoVisualMode": false,
   "vim.useSystemClipboard": true,
+  "vsicons.dontShowNewVersionMessage": true,
   "window.autoDetectColorScheme": true,
   "window.commandCenter": true,
   "window.zoomLevel": 0,
@@ -229,8 +253,10 @@
   },
   "workbench.editor.closeOnFileDelete": true,
   "workbench.editor.empty.hint": "hidden",
+  "workbench.editor.enablePreview": false,
   "workbench.editor.highlightModifiedTabs": true,
   "workbench.editor.languageDetection": false,
+  "workbench.iconTheme": "vscode-icons",
   "workbench.panel.defaultLocation": "right",
 {{- if stat (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-1.1.0") }}
   "workbench.preferredDarkColorTheme": "Dracula Pro",

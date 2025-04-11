@@ -30,7 +30,7 @@ version_format = '$raw'
 
 [character]
 disabled = true
-error_symbol = '[✗](red)'
+error_symbol = '[❌](red)'
 format = '$symbol '
 success_symbol = '[❯](purple)'
 
@@ -288,18 +288,10 @@ disabled = true
 
 [shell]
 bash_indicator = "\\$"
-cmd_indicator = 'cmd'
 disabled = false
-elvish_indicator = 'elvish'
 fish_indicator = '🐠'
 format = '[$indicator]($style) '
-ion_indicator = 'ion'
-nu_indicator = 'nu'
-powershell_indicator = 'powershell'
 style = 'purple'
-tcsh_indicator = 'tcsh'
-unknown_indicator = '?'
-xonsh_indicator = 'xonsh'
 zsh_indicator = '%'
 
 [shlvl]
@@ -312,7 +304,7 @@ disabled = true
 disabled = true
 
 [status]
-disabled = true
+disabled = false
 
 [sudo]
 disabled = true

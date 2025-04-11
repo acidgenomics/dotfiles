@@ -1,21 +1,11 @@
 # Global git configuration
 
-## Conditional configuration
-
-See also:
-
-- https://www.brantonboehm.com/code/conditional-git-config/
-- https://blog.scottlowe.org/2023/12/15/conditional-git-configuration/
-- https://news.ycombinator.com/item?id=38942892
-- https://stackoverflow.com/questions/74012449/
-- https://stackoverflow.com/questions/2114111/
-
-## Private credentials
+## User-specific credentials
 
 Do not store sensitive information, such as the Git user credentials ("email",
-"name", "signingkey"), in this file. Add them in a separate 'config-private'
-file instead. This is sourced automatically at the bottom of our configuration
-here.
+"name", "signingkey"), in the main `~/.config/git/config` file. Instead, add
+them in a separate `~/.config/git/config-private` file. This is sourced
+automatically at the bottom of our configuration.
 
 Can check current configuration with:
 
@@ -44,8 +34,9 @@ Alternatively, can use `osxkeychain` on macOS to store PAT tokens in keychain.
 
 Can disable Git Credential Manager for Windows prompts with:
 
-```sh
-modalPrompt = false
+```
+[credential]
+    modalPrompt = false
 ```
 
 ### Repo-specific PAT configuration
@@ -69,6 +60,49 @@ the default configs to be overwritten by personal or work-specific ones.
 See also:
 
 - https://git-scm.com/docs/git-config#_includes
+
+## [includeIf]
+
+How to configure git for multiple identities, such as personal and work accounts
+on a single machine.
+
+Assuming that all Git repos are at `~/git`.
+
+```
+[includeIf "gitdir:git/**"]
+    path = git/.gitconfig
+```
+
+This makes sure that all repos that live underneath the git directory use the
+`git/.gitconfig` file in addition to the main configuration.
+
+That file contains the following:
+
+```
+[includeIf "gitdir:personal/**"]
+    path = personal/.gitconfig
+[includeIf "gitdir:work/**"]
+    path = work/.gitconfig
+```
+
+Finally, in `~/git/personal/.gitconfig` and `~/git/work/.gitconfig`, configure
+the e-mail addresses to use for all repos underneath personal and work.
+
+```
+[user]
+    email = ...
+```
+
+Verify the setup with `git config -l | grep user`.
+
+See also:
+
+- https://www.cynkra.com/2020/08/25/git-multiple-identities/index.html
+- https://www.brantonboehm.com/code/conditional-git-config/
+- https://blog.scottlowe.org/2023/12/15/conditional-git-configuration/
+- https://news.ycombinator.com/item?id=38942892
+- https://stackoverflow.com/questions/74012449/
+- https://stackoverflow.com/questions/2114111/
 
 ## [difftool]
 

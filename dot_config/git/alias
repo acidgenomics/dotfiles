@@ -45,6 +45,7 @@
     p = push
     pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
     r = rebase
+    reset-cache-credential = config --local --unset credential.helper
     retag = "!f() { \
         git tag --delete \"$1\" &> /dev/null; \
         git tag \"$1\"; \

@@ -1,31 +1,6 @@
 # """
 # Global git configuration.
-# Updated 2025-01-30.
-#
-# @section Conditional configuration:
-#
-# See also:
-# - https://www.brantonboehm.com/code/conditional-git-config/
-# - https://blog.scottlowe.org/2023/12/15/conditional-git-configuration/
-# - https://news.ycombinator.com/item?id=38942892
-# - https://stackoverflow.com/questions/74012449/
-# - https://stackoverflow.com/questions/2114111/
-#
-# @section Private credentials:
-#
-# Do not store sensitive information, such as the Git user credentials
-# ("email", "name", "signingkey"), in this file. Add them in a separate
-# 'config-private' file instead. This is sourced automatically at the bottom of
-# our configuration here.
-#
-# Can check current configuration with:
-# > git config --list --show-origin --show-scope
-# > git config --get user-email
-#
-# See also:
-# - https://github.com/alrra/dotfiles/blob/main/src/git/gitconfig
-# - https://github.com/roryk/dotfiles/blob/master/gitconfig
-# - https://github.com/vsbuffalo/dotfiles/blob/master/.gitconfig
+# Updated 2025-04-11.
 #
 # Source file:
 # {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
@@ -34,144 +9,6 @@
 [advice]
     addIgnoredFile = false
     detachedHead = false
-
-[alias]
-    a = add
-    # Add all unstaged changes.
-    aa = add --all
-    # Show more information about current branches.
-    br = branch -vv
-    c = commit
-    # Commit all unstaged changes, interactively.
-    ca = !git add --all && git commit
-    # Catch up from main upstream branch.
-    catchup = !git fetch upstream && git rebase upstream/main
-    # Clean up the repo. Don't mask 'clean' with an alias!
-    cleanup = !git remote prune origin \
-        && git gc \
-        && git clean -dfx \
-        && git stash clear
-    # Commit with a message, non-interactively.
-    cm = commit -m
-    co = checkout
-    # List contributors, ordered by the number of commits.
-    contrib = shortlog --email --no-merges --numbered --summary
-    d = diff
-    # Checkout develop branch.
-    dev = checkout -B develop origin/develop
-    diff-remote = diff origin..main
-    difft = difftool --tool=difftastic
-    f = fetch
-    fa = fetch --all
-    ff = pull --ff-only
-    # Find commits by source code.
-    find = "!f() { \
-        git log --date=short --decorate --pretty=custom -S\"$1\"; \
-    }; f"
-    # Find commits by commit message.
-    find-msg = "!f() { \
-        git log --date=short --decorate --pretty=custom --grep=\"$1\"; \
-    }; f"
-    # Show custom text-based graphical log of the commit history.
-    # - https://git-scm.com/docs/git-log
-    # Currently there's not an easy way to reverse graph mode natively.
-    # - https://zwischenzugs.com/2016/06/04/power-git-log-graphing/
-    # Inspired by these examples:
-    # - https://levelup.gitconnected.com/
-    #     use-git-like-a-senior-engineer-ef6d741c898e
-    # - https://gist.github.com/simonsmith/6779382
-    glog = log \
-        --abbrev-commit \
-        --all \
-        --decorate \
-        --graph \
-        --oneline \
-        --pretty=custom
-    hash = rev-parse HEAD
-    # https://stackoverflow.com/a/4855096
-    ignored = ls-files --directory --exclude-standard --ignored --others
-    # Show the last commit.
-    last = log -1 HEAD
-    # Show custom log of the commit history.
-    ll = log --pretty=custom
-    # List remote branches. Defaults to "origin".
-    lrb = "!f() { \
-        remote=\"${1:-origin}\"; \
-        git ls-remote --heads \"$remote\"; \
-    }; f"
-    # Checkout main branch.
-    main = checkout -B main origin/main
-    no-cache-credential = config --local credential.helper ""
-    p = push
-    pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
-    r = rebase
-    # Remove the tag with the specified tag name if exists and tag the latest
-    # commit with that name.
-    retag = "!f() { \
-        git tag --delete \"$1\" &> /dev/null; \
-        git tag \"$1\"; \
-    }; f"
-    s = status --branch --short
-    short-hash = rev-parse --short=7 HEAD
-    touch = commit --amend --reset-author --no-edit
-    # https://stackoverflow.com/a/15606995
-    tracked = ls-tree -r HEAD --name-only
-    trash = checkout --
-    # Update the content of the last commit by including all staged changes.
-    # Note that the term "update" is used here loosely. Git doesn't actually
-    # update the last commit, but instead, creates a new commit based on the
-    # last commit and replaces it.
-    u = commit --amend --no-edit
-    # Update the content of the last commit by including all local changes.
-    ua = !git add --all && git commit --amend --no-edit
-    # Update the content of the last commit, including all staged changes, and
-    # allow the user to change the commit message.
-    um = commit --amend
-    # Undo commits. By default, only reverts the last commit.
-    undo = "!f() { \
-        num=\"${1:-1}\"; \
-        git reset --soft \"HEAD~$num\"; \
-    }; f"
-    unstage = reset HEAD --
-    # https://stackoverflow.com/a/4855096
-    untracked = ls-files --directory --exclude-standard --others
-    up = !sh -c 'git pull --rebase --prune && git log --pretty HEAD@{1}..'
-    # Start web-based visualizer. This is super cool, give it a try.
-    # If you hit a Ruby error, run `gem install webrick` to resolve.
-    web = instaweb --httpd=webrick
-    # Disabled experimental aliases --------------------------------------------
-    # Credit an author on the latest commit.
-    # > credit = "!f() { \
-    # >     if [ -n \"$1\" ] && [ -n \"$2\" ]; then \
-    # >         git commit --amend --author \"$1 <$2>\" --no-edit --reuse-message=HEAD; \
-    # >     fi \
-    # > }; f"
-    # Credit a co-author on the latest commit.
-    # See also:
-    # - https://help.github.com/en/articles/
-    #     creating-a-commit-with-multiple-authors
-    # - https://help.github.com/en/articles/
-    #     creating-a-commit-on-behalf-of-an-organization
-    # > credit-co-author = "!f() { \
-    # >     if [ -n \"$1\" ] && [ -n \"$2\" ]; then \
-    # >         GIT_EDITOR=\"git interpret-trailers --in-place --trailer='Co-authored-by: $1 <$2>'\" git commit --amend; \
-    # >     fi \
-    # > }; f"
-    # Merge GitHub pull request on top of the current branch or, if a branch
-    # name is specified, on top of the specified branch.
-    # > mpr = "!f() { \
-    # >     current_branch=\"$(git symbolic-ref --short HEAD)\"; \
-    # >     branch=\"${2:-$current_branch}\"; \
-    # >     if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-    # >         git fetch origin refs/pull/$1/head:pr/$1 && \
-    # >         git checkout -B \"$branch\" && \
-    # >         git rebase \"$branch\" pr/$1 && \
-    # >         git checkout -B \"$branch\" && \
-    # >         git merge pr/$1 && \
-    # >         git branch --delete --force pr/$1 && \
-    # >         git commit --amend --message=\"$(git log -1 --pretty=%B)\n\nClose: #$1\"; \
-    # >     fi \
-    # > }; f"
 
 [color]
     ui = true
@@ -193,7 +30,6 @@
     untracked = yellow
 
 [commit]
-    # Currently only requiring GPG signed key on macOS.
     verbose = true
 
 [core]
@@ -203,43 +39,14 @@
     editor = $EDITOR
     excludesfile = ~/.config/git/ignore
     pager = delta
-    # How to resolve issues with UTF-8 on macOS:
-    # - https://opensource.apple.com/source/Git/Git-48/src/git/compat/
-    #     precompose_utf8.c.auto.html
-    # - https://stackoverflow.com/questions/5581857/
     precomposeunicode = false
-    # Currently having issues with AWS CodeCommit on macOS when using newer
-    # OpenSSH (e.g. 8.8p1 instead of 8.1p1).
     sshCommand = "/usr/bin/ssh -F ~/.ssh/config"
 
 [credential]
-    # Enable credential caching.
-    #
-    # Particularly useful for commits over HTTPS, on machines where we don't
-    # have SSH keys configured for GitHub.
-    #
-    # > git config --global credential.helper "cache --timeout=10000000"
-    #
-    # Alternatively, can use 'osxkeychain' on macOS, but SSH keys are
-    # preferred to storing PAT tokens in keychain.
-    #
-    # See also:
-    # - https://git-scm.com/docs/git-credential-store
-    # - https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
-    # - https://happygitwithr.com/credential-caching.html
-    # - https://stackoverflow.com/a/5343146/3911732
     helper = cache --timeout=10000000
-    # Can disable Git Credential Manager for Windows prompts with:
-    # > modalPrompt = false
-    # Enabling 'usehttppath' allows for usage of multiple PAT on a single
-    # machine, which can be useful for updating work and personal repos
-    # side-by-side. However, this will trigger PAT prompt for each repo, which
-    # can be annoying, so disabled by default.
-    usehttppath = false
+    usehttppath = true
 
 [delta]
-    # Dynamic dark/light color theme handling is managed by the
-    # 'theme.gitconfig' include file at the bottom of this config.
     line-numbers = true
     navigate = true
     side-by-side = false
@@ -248,20 +55,13 @@
     colorMoved = default
     tool = difftastic
 [diff "bin"]
-    # Use 'hexdump' to diff binary files.
     textconv = hexdump --canonical --no-squeezing
 [diff "nb2md"]
-    # Diff Jupyter Notebooks as Markdown.
     textconv = nb2md
 
 [difftool]
     prompt = false
 [difftool "difftastic"]
-    # difftastic configuration guide:
-    # https://difftastic.wilfred.me.uk/git.html
-    # Useful global environment variables:
-    # - DFT_BACKGROUND: dark, light.
-    # - DFT_DISPLAY: side-by-side, side-by-side-show-both, inline.
     cmd = difft "$LOCAL" "$REMOTE"
 
 [fetch]
@@ -271,7 +71,6 @@
     zeroPaddedFilemode = warn
 
 [filter "lfs"]
-    # Large file storage (LFS).
     clean = git-lfs clean -- %f
     process = git-lfs filter-process
     required = true
@@ -284,17 +83,6 @@
 {{- if eq .chezmoi.os "darwin" }}
     program = /usr/local/MacGPG2/bin/gpg
 {{- end }}
-
-[help]
-    # If a command is mistyped, make Git automatically run the command it thinks
-    # the user wanted to type while also giving the user some time to prevent it
-    # from doing so.
-    #
-    # https://git-scm.com/book/en/v2/
-    #     Customizing-Git-Git-Configuration#_help_autocorrect
-    #
-    # This can be a bit dangerous, so disabled for now.
-    # > autocorrect = 20
 
 [http]
 {{- if env "HTTP_PROXY" }}
@@ -313,10 +101,6 @@
 [interactive]
     diffFilter = delta --color-only
 
-# This is required for delta to work with git 2.37.0.
-[add.interactive]
-    useBuiltin = false
-
 [merge]
     conflictstyle = diff3
 
@@ -324,39 +108,16 @@
     difftool = true
 
 [pretty]
-    # Pretty formats.
-    # - https://git-scm.com/docs/pretty-formats
     custom = "%C(magenta)%h%C(red)%d %C(yellow)%ar %C(green)%s %C(yellow)(%an)"
-    # This variant looks nicer in dark mode (e.g. Dracula) but performs worse
-    # with light terminal themes (e.g. Solarized Light).
     custom2 = "%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) \
 %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)"
 
 [pull]
-    # Changed in git 2.27.0:
-    #
-    # warning: Pulling without specifying how to reconcile divergent branches is
-    # discouraged. You can squelch this message by running one of the following
-    # commands sometime before your next pull:
-    #
-    #   git config pull.rebase false  # merge (the default strategy)
-    #   git config pull.rebase true   # rebase
-    #   git config pull.ff only       # fast-forward only
-    #
-    # You can replace "git config" with "git config --global" to set a default
-    # preference for all repositories. You can also pass --rebase, --no-rebase,
-    # or --ff-only on the command line to override the configured default per
-    # invocation.
-    #
-    # > ff = no
     rebase = false
 
 [push]
-    # Attempt to automatically set tracking information, if necessary. Helps
-    # avoid extra 'git branch --set-upstream-to=origin/main main' call.
     autoSetupRemote = true
     default = simple
-    # Automatically push relevant annotated tags when pushing branches.
     followTags = true
 
 [rebase]
@@ -367,16 +128,11 @@
 [receive "fsck"]
     zeroPaddedFilemode = warn
 
-# Exclude these directories from dubious ownership warnings.
 [safe]
     directory = {{ env "KOOPA_PREFIX" }}
 
 [status]
-    # Don't show untracked files by default. This results in a significant
-    # speed up for large repos on a shared file system.
     showUntrackedFiles = no
-    # Show summary for all git submodules, which can be slow.
-    # > submoduleSummary = true
 
 [submodule]
     recurse = true
@@ -387,29 +143,22 @@
     zeroPaddedFilemode = warn
 
 [user]
-    # User-specific 'name' and 'email' go in 'config-private'.
-    # Do not guess the user's identity.
     useConfigOnly = true
 
 [include]
-    # The following includes to remain at the end of this file in order to allow
-    # any of the above configs to be overwritten by the local ones.
-    # https://git-scm.com/docs/git-config#_includes
     path = ~/.config/delta/theme.gitconfig
+    path = ~/.config/git/alias
     path = ~/.config/git/config-private
 
-# Conditional configuration of personal repos.
 [includeIf "hasconfig:remote.*.url:ssh://git-personal:*/**"]
     path = ~/.config/git/config-personal
-[includeIf "gitdir:~/git/personal/"]
-    path = ~/.config/git/config-personal
-[includeIf "gitdir:~/personal/"]
-    path = ~/.config/git/config-personal
-
-# Conditional configuration of work repos.
 [includeIf "hasconfig:remote.*.url:ssh://git-work:*/**"]
     path = ~/.config/git/config-work
+[includeIf "gitdir:~/git/personal/"]
+    path = ~/.config/git/config-personal
 [includeIf "gitdir:~/git/work/"]
     path = ~/.config/git/config-work
+[includeIf "gitdir:~/personal/"]
+    path = ~/.config/git/config-personal
 [includeIf "gitdir:~/work/"]
     path = ~/.config/git/config-work

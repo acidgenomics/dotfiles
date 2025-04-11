@@ -1,48 +1,30 @@
 [alias]
     a = add
-    # Add all unstaged changes.
     aa = add --all
-    # Show more information about current branches.
     br = branch -vv
     c = commit
-    # Commit all unstaged changes, interactively.
     ca = !git add --all && git commit
-    # Catch up from main upstream branch.
     catchup = !git fetch upstream && git rebase upstream/main
-    # Clean up the repo. Don't mask 'clean' with an alias!
     cleanup = !git remote prune origin \
         && git gc \
         && git clean -dfx \
         && git stash clear
-    # Commit with a message, non-interactively.
     cm = commit -m
     co = checkout
-    # List contributors, ordered by the number of commits.
     contrib = shortlog --email --no-merges --numbered --summary
     d = diff
-    # Checkout develop branch.
     dev = checkout -B develop origin/develop
     diff-remote = diff origin..main
     difft = difftool --tool=difftastic
     f = fetch
     fa = fetch --all
     ff = pull --ff-only
-    # Find commits by source code.
     find = "!f() { \
         git log --date=short --decorate --pretty=custom -S\"$1\"; \
     }; f"
-    # Find commits by commit message.
     find-msg = "!f() { \
         git log --date=short --decorate --pretty=custom --grep=\"$1\"; \
     }; f"
-    # Show custom text-based graphical log of the commit history.
-    # - https://git-scm.com/docs/git-log
-    # Currently there's not an easy way to reverse graph mode natively.
-    # - https://zwischenzugs.com/2016/06/04/power-git-log-graphing/
-    # Inspired by these examples:
-    # - https://levelup.gitconnected.com/
-    #     use-git-like-a-senior-engineer-ef6d741c898e
-    # - https://gist.github.com/simonsmith/6779382
     glog = log \
         --abbrev-commit \
         --all \
@@ -51,25 +33,18 @@
         --oneline \
         --pretty=custom
     hash = rev-parse HEAD
-    # https://stackoverflow.com/a/4855096
     ignored = ls-files --directory --exclude-standard --ignored --others
-    # Show the last commit.
     last = log -1 HEAD
-    # Show custom log of the commit history.
     ll = log --pretty=custom
-    # List remote branches. Defaults to "origin".
     lrb = "!f() { \
         remote=\"${1:-origin}\"; \
         git ls-remote --heads \"$remote\"; \
     }; f"
-    # Checkout main branch.
     main = checkout -B main origin/main
     no-cache-credential = config --local credential.helper ""
     p = push
     pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
     r = rebase
-    # Remove the tag with the specified tag name if exists and tag the latest
-    # commit with that name.
     retag = "!f() { \
         git tag --delete \"$1\" &> /dev/null; \
         git tag \"$1\"; \
@@ -77,61 +52,16 @@
     s = status --branch --short
     short-hash = rev-parse --short=7 HEAD
     touch = commit --amend --reset-author --no-edit
-    # https://stackoverflow.com/a/15606995
     tracked = ls-tree -r HEAD --name-only
     trash = checkout --
-    # Update the content of the last commit by including all staged changes.
-    # Note that the term "update" is used here loosely. Git doesn't actually
-    # update the last commit, but instead, creates a new commit based on the
-    # last commit and replaces it.
     u = commit --amend --no-edit
-    # Update the content of the last commit by including all local changes.
     ua = !git add --all && git commit --amend --no-edit
-    # Update the content of the last commit, including all staged changes, and
-    # allow the user to change the commit message.
     um = commit --amend
-    # Undo commits. By default, only reverts the last commit.
     undo = "!f() { \
         num=\"${1:-1}\"; \
         git reset --soft \"HEAD~$num\"; \
     }; f"
     unstage = reset HEAD --
-    # https://stackoverflow.com/a/4855096
     untracked = ls-files --directory --exclude-standard --others
     up = !sh -c 'git pull --rebase --prune && git log --pretty HEAD@{1}..'
-    # Start web-based visualizer. This is super cool, give it a try.
-    # If you hit a Ruby error, run `gem install webrick` to resolve.
     web = instaweb --httpd=webrick
-    # Disabled experimental aliases --------------------------------------------
-    # Credit an author on the latest commit.
-    # > credit = "!f() { \
-    # >     if [ -n \"$1\" ] && [ -n \"$2\" ]; then \
-    # >         git commit --amend --author \"$1 <$2>\" --no-edit --reuse-message=HEAD; \
-    # >     fi \
-    # > }; f"
-    # Credit a co-author on the latest commit.
-    # See also:
-    # - https://help.github.com/en/articles/
-    #     creating-a-commit-with-multiple-authors
-    # - https://help.github.com/en/articles/
-    #     creating-a-commit-on-behalf-of-an-organization
-    # > credit-co-author = "!f() { \
-    # >     if [ -n \"$1\" ] && [ -n \"$2\" ]; then \
-    # >         GIT_EDITOR=\"git interpret-trailers --in-place --trailer='Co-authored-by: $1 <$2>'\" git commit --amend; \
-    # >     fi \
-    # > }; f"
-    # Merge GitHub pull request on top of the current branch or, if a branch
-    # name is specified, on top of the specified branch.
-    # > mpr = "!f() { \
-    # >     current_branch=\"$(git symbolic-ref --short HEAD)\"; \
-    # >     branch=\"${2:-$current_branch}\"; \
-    # >     if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-    # >         git fetch origin refs/pull/$1/head:pr/$1 && \
-    # >         git checkout -B \"$branch\" && \
-    # >         git rebase \"$branch\" pr/$1 && \
-    # >         git checkout -B \"$branch\" && \
-    # >         git merge pr/$1 && \
-    # >         git branch --delete --force pr/$1 && \
-    # >         git commit --amend --message=\"$(git log -1 --pretty=%B)\n\nClose: #$1\"; \
-    # >     fi \
-    # > }; f"

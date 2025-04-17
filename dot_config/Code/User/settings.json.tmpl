@@ -1,4 +1,19 @@
 {
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "never",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false
+  },
+  "[r]": {
+    "editor.formatOnSave": false
+  },
   "breadcrumbs.enabled": true,
   "chat.editing.alwaysSaveWithGeneratedChanges": true,
   "debug.terminal.clearBeforeReusing": true,
@@ -113,15 +128,6 @@
     ".": "${workspace}"
   },
   "prettier.tabWidth": 4,
-  "[python]": {
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "never",
-      "source.organizeImports.ruff": "explicit"
-    },
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnSave": true,
-    "editor.formatOnType": false
-  },
   "python.REPL.enableREPLSmartSend": false,
   "python.REPL.sendToNativeREPL": true,
   "python.REPL.provideVariables": true,
@@ -133,9 +139,6 @@
   "python.experiments.enabled": false,
   "python.interpreter.infoVisibility": "always",
   "python.terminal.activateEnvironment": false,
-  "[r]": {
-    "editor.formatOnSave": false
-  },
   "r.alwaysUseActiveTerminal": true,
   "r.bracketedPaste": true,
   "r.helpPanel.enableHoverLinks": false,

@@ -42,6 +42,7 @@
     }; f"
     main = checkout -B main origin/main
     no-cache-credential = config --local credential.helper ""
+    nuke = reset --hard HEAD
     p = push
     pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
     r = rebase

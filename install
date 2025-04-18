@@ -66,7 +66,7 @@ main() {
     )
     if koopa_is_macos
     then
-        # Visual Studio Code.
+        # Code.
         (
             koopa_mkdir "${HOME}/Library/Application Support/Code/User"
             koopa_cd "${HOME}/Library/Application Support/Code/User"
@@ -124,6 +124,21 @@ main() {
                 koopa_ln --verbose \
                     "${dict['xdg_config_home']}/nushell/env.nu" \
                     'env.nu'
+            fi
+        )
+        # ruff.
+        (
+            if [[ -L "${HOME}/Library/Application Support/ruff" ]]
+            then
+                koopa_rm "${HOME}/Library/Application Support/ruff"
+            fi
+            koopa_mkdir "${HOME}/Library/Application Support/ruff"
+            koopa_cd "${HOME}/Library/Application Support/ruff"
+            if [[ ! -L 'pyproject.toml' ]]
+            then
+                koopa_ln --verbose \
+                    "${dict['xdg_config_home']}/ruff/pyproject.toml" \
+                    'pyproject.toml'
             fi
         )
     fi

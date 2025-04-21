@@ -1,6 +1,6 @@
 -- WezTerm configuration
 --
--- @note Updated 2025-01-09.
+-- @note Updated 2025-04-21.
 --
 -- JetBrains Mono is the current default font.
 -- Alternative light theme: "Builtin Solarized Light".
@@ -34,7 +34,7 @@ function get_appearance()
   return "Dark"
 end
 
-config.default_prog = { "/opt/koopa/bin/bash", "-il" }
+config.default_prog = { "{{ lookPath "bash" }}", "-il" }
 config.font = wezterm.font "JetBrains Mono"
 config.font_size = 16
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }

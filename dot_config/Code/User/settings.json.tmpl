@@ -14,8 +14,10 @@
   "[r]": {
     "editor.formatOnSave": false
   },
-  "air.executablePath": "{{ lookPath "air" }}",
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "air") }}
+  "air.executablePath": "{{ env "KOOPA_PREFIX" }}/bin/air",
   "air.executableStrategy": "path",
+{{- end }}
   "breadcrumbs.enabled": true,
   "chat.commandCenter.enabled": false,
   "chat.editing.alwaysSaveWithGeneratedChanges": true,
@@ -95,8 +97,10 @@
   "gitlens.statusBar.pullRequests.enabled": false,
   "gitlens.telemetry.enabled": false,
   "gitlens.virtualRepositories.enabled": false,
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "hadolint") }}
   "hadolint.cliOptions": [],
-  "hadolint.hadolintPath": "{{ lookPath "hadolint" }}",
+  "hadolint.hadolintPath": "{{ env "KOOPA_PREFIX" }}/bin/hadolint",
+{{- end }}
   "html.format.wrapLineLength": 0,
   "http.proxyStrictSSL": true,
 {{- if stat (joinPath (env "KOOPA_PREFIX") "opt" "isort") }}
@@ -136,7 +140,9 @@
   "python.REPL.provideVariables": true,
   "python.analysis.autoImportCompletions": true,
   "python.analysis.typeCheckingMode": "standard",
-  "python.condaPath": "{{ lookPath "conda" }}",
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "conda") }}
+  "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
+{{- end }}
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
   "python.diagnostics.sourceMapsEnabled": true,
   "python.experiments.enabled": false,
@@ -154,8 +160,10 @@
   "r.rmarkdown.chunkBackgroundColor": "",
   "r.rpath.linux": "/usr/bin/R",
   "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
-  "r.rterm.linux": "{{ lookPath "radian" }}",
-  "r.rterm.mac": "{{ lookPath "radian" }}",
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "radian") }}
+  "r.rterm.linux": "{{ env "KOOPA_PREFIX" }}/bin/radian",
+  "r.rterm.mac": "{{ env "KOOPA_PREFIX" }}/bin/radian",
+{{- end }}
   "r.rterm.option": [
     "--no-save",
     "--no-restore",
@@ -183,9 +191,11 @@
     "GitHub.copilot-chat": [ "ui" ]
   },
   "remote.tunnels.alwaysUpdateCLI": true,
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "ruff") }}
   "ruff.path": [
-    "{{ lookPath "ruff" }}"
+    "{{ env "KOOPA_PREFIX" }}/bin/ruff"
   ],
+{{- end }}
   "security.workspace.trust.enabled": false,
   "security.workspace.trust.untrustedFiles": "open",
   "shellcheck.disableVersionCheck": true,

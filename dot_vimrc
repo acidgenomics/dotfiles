@@ -1,6 +1,6 @@
 """
 " Vim configuration.
-" Updated 2023-12-12.
+" Updated 2025-04-24.
 "
 " Refer to my cheat sheet for usage details:
 " https://steinbaugh.com/posts/vim.html
@@ -574,7 +574,6 @@ call plug#begin(vim_plug_home)
 Plug 'godlygeek/tabular'
 
 Plug 'airblade/vim-gitgutter'
-Plug 'dense-analysis/ale'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'jlanzarotta/bufexplorer'
 Plug 'junegunn/fzf.vim'
@@ -597,10 +596,13 @@ Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'vim-pandoc/vim-rmarkdown'
 
-if g:is_nvim && has('macunix')
+if g:is_invim
+    Plug 'neovim/nvim-lspconfig'
     if executable('R')
         Plug 'jalvesaq/Nvim-R'
     endif
+else
+    Plug 'dense-analysis/ale'
 endif
 
 " Automatic dark/light switching on macOS.

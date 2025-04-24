@@ -649,28 +649,30 @@ autocmd VimEnter *
 " - https://github.com/dense-analysis/ale/blob/master/ale_linters/
 "     python/ruff.vim
 
+" Useful commands:
 " > :ALEInfo
 " > :ALEFix
 " > :ALEFixSuggest
 
-" > let g:ale_completion_enabled = 1
-" > let g:ale_disable_lsp = 1
-" > let g:ale_linters_explicit = 1
-" > let g:ale_use_neovim_diagnostics_api = 1
-" > let g:ale_warn_about_trailing_whitespace = 0
-
-let g:ale_fix_on_save = 1
-let g:ale_fixers = {
-    \ '*': ['remove_trailing_lines', 'trim_whitespace'],
-    \ 'python': ['ruff'],
-    \ }
-let g:ale_linters = {
-    \ 'python': ['ruff'],
-    \ 'r': ['languageserver'],
-    \ }
-let g:ale_python_black_options='--line-length=80'
-" > let g:ale_python_ruff_options='--ignore F401'
-let g:ale_python_ruff_format_options='--line-length=80'
+if !g:is_nvim
+    " > let g:ale_completion_enabled = 1
+    " > let g:ale_disable_lsp = 1
+    " > let g:ale_linters_explicit = 1
+    " > let g:ale_use_neovim_diagnostics_api = 1
+    " > let g:ale_warn_about_trailing_whitespace = 0
+    let g:ale_fix_on_save = 1
+    let g:ale_fixers = {
+        \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+        \ 'python': ['ruff'],
+        \ }
+    let g:ale_linters = {
+        \ 'python': ['ruff'],
+        \ 'r': ['languageserver'],
+        \ }
+    let g:ale_python_black_options='--line-length=80'
+    " > let g:ale_python_ruff_options='--ignore F401'
+    let g:ale_python_ruff_format_options='--line-length=80'
+endif
 
 " NERDTree {{{2
 " ------------------------------------------------------------------------------

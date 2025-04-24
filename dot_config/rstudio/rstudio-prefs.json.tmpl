@@ -80,7 +80,9 @@
     "rainbow_parentheses": true,
     "real_time_spellchecking": false,
     "reduced_motion": true,
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "air") }}
     "reformat_on_save": true,
+{{- end }}
     "remove_history_duplicates": true,
     "restore_last_project": false,
     "restore_source_documents": false,

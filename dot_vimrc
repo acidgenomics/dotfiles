@@ -598,6 +598,8 @@ Plug 'vim-pandoc/vim-rmarkdown'
 
 if g:is_nvim
     Plug 'neovim/nvim-lspconfig'
+    Plug 'williamboman/mason-lspconfig.nvim'
+    Plug 'williamboman/mason.nvim'
     if executable('R')
         Plug 'jalvesaq/Nvim-R'
     endif

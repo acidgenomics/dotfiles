@@ -596,7 +596,7 @@ Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'vim-pandoc/vim-rmarkdown'
 
-if g:is_invim
+if g:is_nvim
     Plug 'neovim/nvim-lspconfig'
     if executable('R')
         Plug 'jalvesaq/Nvim-R'

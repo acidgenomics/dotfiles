@@ -1,6 +1,6 @@
 """
 " Vim configuration.
-" Updated 2023-12-12.
+" Updated 2025-04-24.
 "
 " Refer to my cheat sheet for usage details:
 " https://steinbaugh.com/posts/vim.html
@@ -574,7 +574,6 @@ call plug#begin(vim_plug_home)
 Plug 'godlygeek/tabular'
 
 Plug 'airblade/vim-gitgutter'
-Plug 'dense-analysis/ale'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'jlanzarotta/bufexplorer'
 Plug 'junegunn/fzf.vim'
@@ -597,10 +596,15 @@ Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'vim-pandoc/vim-rmarkdown'
 
-if g:is_nvim && has('macunix')
+if g:is_nvim
+    Plug 'neovim/nvim-lspconfig'
+    " > Plug 'williamboman/mason-lspconfig.nvim'
+    " > Plug 'williamboman/mason.nvim'
     if executable('R')
         Plug 'jalvesaq/Nvim-R'
     endif
+else
+    Plug 'dense-analysis/ale'
 endif
 
 " Automatic dark/light switching on macOS.
@@ -645,28 +649,30 @@ autocmd VimEnter *
 " - https://github.com/dense-analysis/ale/blob/master/ale_linters/
 "     python/ruff.vim
 
+" Useful commands:
 " > :ALEInfo
 " > :ALEFix
 " > :ALEFixSuggest
 
-" > let g:ale_completion_enabled = 1
-" > let g:ale_disable_lsp = 1
-" > let g:ale_linters_explicit = 1
-" > let g:ale_use_neovim_diagnostics_api = 1
-" > let g:ale_warn_about_trailing_whitespace = 0
-
-let g:ale_fix_on_save = 1
-let g:ale_fixers = {
-    \ '*': ['remove_trailing_lines', 'trim_whitespace'],
-    \ 'python': ['ruff'],
-    \ }
-let g:ale_linters = {
-    \ 'python': ['ruff'],
-    \ 'r': ['languageserver'],
-    \ }
-let g:ale_python_black_options='--line-length=80'
-" > let g:ale_python_ruff_options='--ignore F401'
-let g:ale_python_ruff_format_options='--line-length=80'
+if !g:is_nvim
+    " > let g:ale_completion_enabled = 1
+    " > let g:ale_disable_lsp = 1
+    " > let g:ale_linters_explicit = 1
+    " > let g:ale_use_neovim_diagnostics_api = 1
+    " > let g:ale_warn_about_trailing_whitespace = 0
+    let g:ale_fix_on_save = 1
+    let g:ale_fixers = {
+        \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+        \ 'python': ['ruff'],
+        \ }
+    let g:ale_linters = {
+        \ 'python': ['ruff'],
+        \ 'r': ['languageserver'],
+        \ }
+    let g:ale_python_black_options='--line-length=80'
+    " > let g:ale_python_ruff_options='--ignore F401'
+    let g:ale_python_ruff_format_options='--line-length=80'
+endif
 
 " NERDTree {{{2
 " ------------------------------------------------------------------------------

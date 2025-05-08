@@ -1,6 +1,6 @@
 """
 " Vim configuration.
-" Updated 2025-04-24.
+" Updated 2025-05-08.
 "
 " Refer to my cheat sheet for usage details:
 " https://steinbaugh.com/posts/vim.html
@@ -575,6 +575,7 @@ Plug 'godlygeek/tabular'
 
 Plug 'airblade/vim-gitgutter'
 Plug 'editorconfig/editorconfig-vim'
+Plug 'github/copilot.vim'
 Plug 'jlanzarotta/bufexplorer'
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/rainbow_parentheses.vim'

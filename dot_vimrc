@@ -574,6 +574,7 @@ call plug#begin(vim_plug_home)
 Plug 'godlygeek/tabular'
 
 Plug 'airblade/vim-gitgutter'
+Plug 'dense-analysis/ale'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'github/copilot.vim'
 Plug 'jlanzarotta/bufexplorer'
@@ -604,8 +605,6 @@ if g:is_nvim
     if executable('R')
         Plug 'jalvesaq/Nvim-R'
     endif
-else
-    Plug 'dense-analysis/ale'
 endif
 
 " Automatic dark/light switching on macOS.
@@ -655,24 +654,37 @@ autocmd VimEnter *
 " > :ALEFix
 " > :ALEFixSuggest
 
-if !g:is_nvim
-    " > let g:ale_completion_enabled = 1
+" > let g:ale_completion_enabled = 1
+" > let g:ale_disable_lsp = 1
+" > let g:ale_linters_explicit = 1
+" > let g:ale_use_neovim_diagnostics_api = 1
+" > let g:ale_warn_about_trailing_whitespace = 0
+
+let g:ale_fix_on_save = 1
+let g:ale_fixers = {
+    \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+    \ 'python': ['ruff'],
+    \ }
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_linters = {
+    \ 'python': ['ruff'],
+    \ 'r': ['languageserver'],
+    \ }
+let g:ale_python_black_options='--line-length=80'
+" > let g:ale_python_ruff_options='--ignore F401'
+let g:ale_python_ruff_format_options='--line-length=80'
+
+if g:is_nvim
+    " If you're running ALE in Neovim with nvim-lspconfig for configuring
+    " particular language servers, ALE will automatically disable its LSP
+    " functionality for any language servers configured with nvim-lspconfig by
+    " default.
+    let g:ale_disable_lsp = 'auto'
+    " If you are running ALE in combination with another LSP client, you may
+    " wish to disable ALE's LSP functionality entirely. You can change the
+    " setting to 1 to always disable all LSP functionality.
     " > let g:ale_disable_lsp = 1
-    " > let g:ale_linters_explicit = 1
-    " > let g:ale_use_neovim_diagnostics_api = 1
-    " > let g:ale_warn_about_trailing_whitespace = 0
-    let g:ale_fix_on_save = 1
-    let g:ale_fixers = {
-        \ '*': ['remove_trailing_lines', 'trim_whitespace'],
-        \ 'python': ['ruff'],
-        \ }
-    let g:ale_linters = {
-        \ 'python': ['ruff'],
-        \ 'r': ['languageserver'],
-        \ }
-    let g:ale_python_black_options='--line-length=80'
-    " > let g:ale_python_ruff_options='--ignore F401'
-    let g:ale_python_ruff_format_options='--line-length=80'
+    let g:ale_use_neovim_diagnostics_api = 1
 endif
 
 " NERDTree {{{2

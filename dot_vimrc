@@ -1,6 +1,6 @@
 """
 " Vim configuration.
-" Updated 2025-05-08.
+" Updated 2025-05-09.
 "
 " Refer to my cheat sheet for usage details:
 " https://steinbaugh.com/posts/vim.html
@@ -783,6 +783,12 @@ let g:black_use_virtualenv=0
 " >     autocmd!
 " >     autocmd BufWritePre *.py Black
 " > augroup end
+
+" copilot {{{2
+" ------------------------------------------------------------------------------
+
+" Disable Copilot by default.
+let g:copilot_enabled = v:false
 
 " editorconfig-vim {{{2
 " ------------------------------------------------------------------------------

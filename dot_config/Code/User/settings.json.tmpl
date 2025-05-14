@@ -23,7 +23,6 @@
 {{- end }}
   "breadcrumbs.enabled": true,
   "chat.commandCenter.enabled": false,
-  "chat.editing.alwaysSaveWithGeneratedChanges": true,
   "debug.terminal.clearBeforeReusing": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "editor.acceptSuggestionOnEnter": "off",
@@ -78,7 +77,6 @@
   "git.confirmSync": false,
   "git.openRepositoryInParentFolders": "never",
   "git.suggestSmartCommit": false,
-  "github.copilot.editor.enableAutoCompletions": true,
   "github.copilot.enable": {
     "*": true,
     "markdown": false,
@@ -97,7 +95,6 @@
   "gitlens.integrations.enabled": false,
   "gitlens.liveshare.allowGuestAccess": false,
   "gitlens.plusFeatures.enabled": false,
-  "gitlens.showWelcomeOnInstall": false,
   "gitlens.showWhatsNewAfterUpgrades": false,
   "gitlens.statusBar.pullRequests.enabled": false,
   "gitlens.telemetry.enabled": false,
@@ -151,7 +148,6 @@
   "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
 {{- end }}
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
-  "python.diagnostics.sourceMapsEnabled": true,
   "python.experiments.enabled": false,
   "python.interpreter.infoVisibility": "always",
   "python.terminal.activateEnvironment": false,
@@ -201,7 +197,6 @@
       "ui"
     ]
   },
-  "remote.tunnels.alwaysUpdateCLI": true,
 {{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "ruff") }}
   "ruff.path": [
     "{{ env "KOOPA_PREFIX" }}/bin/ruff"
@@ -257,7 +252,6 @@
     }
   },
   "typescript.suggest.enabled": false,
-  "typescript.surveys.enabled": false,
   "update.mode": "none",
   "update.showReleaseNotes": false,
   "vim.easymotionDimBackground": false,

@@ -143,7 +143,9 @@
   "python.REPL.enableREPLSmartSend": false,
   "python.REPL.sendToNativeREPL": false,
   "python.REPL.provideVariables": true,
+  "python.analysis.autoFormatStrings": true,
   "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticsSource": "Pyright",
   "python.analysis.typeCheckingMode": "standard",
 {{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "conda") }}
   "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",

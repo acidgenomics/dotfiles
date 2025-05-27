@@ -6,6 +6,7 @@ ACIDGENOMICS_REPO={{ .chezmoi.homeDir }}/git/github/acidgenomics/r-acidgenomics-
 {{- end }}
 
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+CURL_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
 DEFAULT_CA_BUNDLE_PATH={{ .chezmoi.homeDir }}/.local
 REQUESTS_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
 SSL_CERT_FILE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem

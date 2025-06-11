@@ -126,6 +126,9 @@
   ],
   "liveshare.accessibility.soundsEnabled": false,
   "liveshare.accessibility.voiceEnabled": false,
+{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "marimo") }}
+  "marimo.marimoPath": "{{ env "KOOPA_PREFIX" }}/bin/marimo",
+{{- end }}
   "markdownlint.run": "onSave",
   "notebook.codeActionsOnSave": {
     "notebook.source.fixAll": "never",

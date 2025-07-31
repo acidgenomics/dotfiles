@@ -1,6 +1,6 @@
 # """
 # Global git configuration.
-# Updated 2025-04-11.
+# Updated 2025-07-31.
 #
 # Source file:
 # {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
@@ -43,7 +43,10 @@
     sshCommand = "/usr/bin/ssh -F ~/.ssh/config"
 
 [credential]
-    helper = cache --timeout=10000000
+    # Now recommended to use 'gh auth login' and 'gh auth logout' for GitHub
+    # instead of setting helper here.
+    # Can enable in-memory caching for convenience with:
+    # > helper = cache --timeout=10000000
     usehttppath = true
 
 [delta]
@@ -80,7 +83,7 @@
     zeroPaddedFilemode = warn
 
 [gpg]
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (stat "/usr/local/MacGPG2/bin/gpg") }}
     program = /usr/local/MacGPG2/bin/gpg
 {{- end }}
 

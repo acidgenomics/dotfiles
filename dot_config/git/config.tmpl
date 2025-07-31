@@ -48,6 +48,14 @@
     # Can enable in-memory caching for convenience with:
     # > helper = cache --timeout=10000000
     usehttppath = true
+{{- if lookPath "gh" }}
+[credential "https://github.com"]
+    helper =
+    helper = !{{ lookPath "gh" }} auth git-credential
+[credential "https://gist.github.com"]
+    helper =
+    helper = !{{ lookPath "gh" }} auth git-credential
+{{- end }}
 
 [delta]
     line-numbers = true

@@ -17,8 +17,8 @@
   "[toml]": {
     "editor.tabSize": 2
   },
-{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "air") }}
-  "air.executablePath": "{{ env "KOOPA_PREFIX" }}/bin/air",
+{{- if lookPath "air" }}
+  "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
 {{- end }}
   "breadcrumbs.enabled": true,
@@ -99,23 +99,25 @@
   "gitlens.statusBar.pullRequests.enabled": false,
   "gitlens.telemetry.enabled": false,
   "gitlens.virtualRepositories.enabled": false,
-{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "hadolint") }}
+{{- if lookPath "hadolint" }}
   "hadolint.cliOptions": [],
-  "hadolint.hadolintPath": "{{ env "KOOPA_PREFIX" }}/bin/hadolint",
+  "hadolint.hadolintPath": "{{ lookPath "hadolint" }},
 {{- end }}
   "html.format.wrapLineLength": 0,
   "http.proxyStrictSSL": true,
-{{- if stat (joinPath (env "KOOPA_PREFIX") "opt" "isort") }}
+{{- if lookPath "isort" }}
   "isort.args": [
     "--profile",
     "black"
   ],
   "isort.check": true,
+{{- if stat (joinPath (env "KOOPA_PREFIX") "opt" "isort") }}
   "isort.interpreter": [
     "{{ env "KOOPA_PREFIX" }}/opt/isort/libexec/bin/python3"
   ],
+{{- end }}
   "isort.path": [
-    "{{ env "KOOPA_PREFIX" }}/bin/isort"
+    "{{ lookPath "isort" }}"
   ],
   "isort.serverEnabled": false,
 {{- end }}
@@ -126,8 +128,8 @@
   ],
   "liveshare.accessibility.soundsEnabled": false,
   "liveshare.accessibility.voiceEnabled": false,
-{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "marimo") }}
-  "marimo.marimoPath": "{{ env "KOOPA_PREFIX" }}/bin/marimo",
+{{- if lookPath "marimo" }}
+  "marimo.marimoPath": "{{ lookPath "marimo" }}",
 {{- end }}
   "markdownlint.run": "onSave",
   "notebook.codeActionsOnSave": {
@@ -147,8 +149,8 @@
   "python.analysis.autoImportCompletions": true,
   "python.analysis.diagnosticsSource": "Pyright",
   "python.analysis.typeCheckingMode": "standard",
-{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "conda") }}
-  "python.condaPath": "{{ env "KOOPA_PREFIX" }}/bin/conda",
+{{- if lookPath "conda" }}
+  "python.condaPath": "{{ lookPath "conda" }}",
 {{- end }}
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
   "python.experiments.enabled": false,
@@ -166,9 +168,9 @@
   "r.rmarkdown.chunkBackgroundColor": "",
   "r.rpath.linux": "/usr/bin/R",
   "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
-{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "radian") }}
-  "r.rterm.linux": "{{ env "KOOPA_PREFIX" }}/bin/radian",
-  "r.rterm.mac": "{{ env "KOOPA_PREFIX" }}/bin/radian",
+{{- if lookPath "radian" }}
+  "r.rterm.linux": "{{ lookPath "radian" }}",
+  "r.rterm.mac": "{{ lookPath "radian" }}",
 {{- end }}
   "r.rterm.option": [
     "--no-save",
@@ -200,9 +202,9 @@
       "ui"
     ]
   },
-{{- if stat (joinPath (env "KOOPA_PREFIX") "bin" "ruff") }}
+{{- if lookPath "ruff" }}
   "ruff.path": [
-    "{{ env "KOOPA_PREFIX" }}/bin/ruff"
+    "{{ lookPath "ruff" }}"
   ],
 {{- end }}
   "security.workspace.trust.enabled": false,

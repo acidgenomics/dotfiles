@@ -1,23 +1,23 @@
 {
-{{- if lookPath "black" }}
-    "black-formatter.path": [
-        "{{ lookPath "black" }}"
-    ],
-{{- end }}
-{{- if stat (joinPath (env "KOOPA_PREFIX") "opt" "black") }}
-    "black-formatter.interpreter": [
-        "{{ env "KOOPA_PREFIX" }}/opt/black/libexec/bin/python3"
-    ],
-{{- end }}
+    "[python]": {
+        "editor.formatOnSave": true
+    },
+    "[r]": {
+        "editor.formatOnSave": true
+    },
     "editor.autoClosingBrackets": "never",
     "editor.autoClosingComments": "never",
     "editor.autoClosingDelete": "never",
     "editor.autoClosingOvertype": "never",
     "editor.autoClosingQuotes": "never",
     "editor.autoSurround": "never",
+    "editor.codeLens": false,
     "editor.fontFamily": "'JetBrains Mono', monospace",
     "editor.fontSize": 16,
     "editor.pasteAs.enabled": false,
+    "files.associations": {
+        "renv.lock": "json"
+    },
 {{- if lookPath "git" }}
     "git.path": "{{ lookPath "git" }}",
 {{- end }}
@@ -35,5 +35,8 @@
     "quarto.path": "{{ lookPath "quarto" }}",
 {{- end }}
     "update.mode": "none",
-    "update.showReleaseNotes": false
+    "update.showReleaseNotes": false,
+    "workbench.editor.empty.hint": "hidden",
+    "workbench.keybindings.rstudioKeybindings": true,
+    "workbench.startupEditor": "newUntitledFile"
 }

@@ -1,0 +1,11 @@
+{
+  "python.analysis.autoSearchPaths": false,
+{{- if lookPath "conda" }}
+  "python.condaPath": "{{ lookPath "conda" }}",
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
+  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3"
+{{- else if lookPath "python3" }}
+  "python.defaultInterpreterPath": "{{ lookPath "python3" }}"
+{{- end }}
+}

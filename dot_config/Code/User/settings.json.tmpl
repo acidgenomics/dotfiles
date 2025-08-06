@@ -124,7 +124,7 @@
   "javascript.suggest.enabled": false,
   "jupyter.kernels.trusted": [
 {{- if stat (joinPath .chezmoi.homeDir ".venv" "share" "jupyter") }}
-    "{{ .chezmoi.homeDir }}/.venv/share/jupyter/kernels/python3/kernel.json",
+    "{{ .chezmoi.homeDir }}/.venv/share/jupyter/kernels/python3/kernel.json"
 {{- else if stat (joinPath (env "KOOPA_PREFIX") "opt" "anaconda") }}
     "{{ env "KOOPA_PREFIX" }}/opt/anaconda/share/jupyter/kernels/python3/kernel.json"
 {{- else if stat (joinPath (env "KOOPA_PREFIX") "opt" "jupyterlab") }}

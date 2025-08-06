@@ -123,8 +123,13 @@
 {{- end }}
   "javascript.suggest.enabled": false,
   "jupyter.kernels.trusted": [
-    "{{ env "KOOPA_PREFIX" }}/opt/anaconda/share/jupyter/kernels/python3/kernel.json",
+{{- if stat (joinPath .chezmoi.homeDir ".venv", "share", "jupyter") }}
+    "{{ .chezmoi.homeDir }}/.venv/share/jupyter/kernels/python3/kernel.json",
+{{- else if stat (joinPath (env "KOOPA_PREFIX") "opt" "anaconda") }}
+    "{{ env "KOOPA_PREFIX" }}/opt/anaconda/share/jupyter/kernels/python3/kernel.json"
+{{- else if stat (joinPath (env "KOOPA_PREFIX") "opt" "jupyterlab") }}
     "{{ env "KOOPA_PREFIX" }}/opt/jupyterlab/libexec/share/jupyter/kernels/python3/kernel.json"
+{{- end }}
   ],
   "liveshare.accessibility.soundsEnabled": false,
   "liveshare.accessibility.voiceEnabled": false,
@@ -152,7 +157,11 @@
 {{- if lookPath "conda" }}
   "python.condaPath": "{{ lookPath "conda" }}",
 {{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
+  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
+{{- else if lookPath "python3" }}
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
+{{- end }}
   "python.experiments.enabled": false,
   "python.interpreter.infoVisibility": "always",
   "python.terminal.activateEnvironment": false,

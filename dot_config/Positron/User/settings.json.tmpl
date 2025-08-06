@@ -1,43 +1,46 @@
 {
-    "[python]": {
-        "editor.formatOnSave": true
-    },
-    "[r]": {
-        "editor.formatOnSave": true
-    },
-    "editor.autoClosingBrackets": "never",
-    "editor.autoClosingComments": "never",
-    "editor.autoClosingDelete": "never",
-    "editor.autoClosingOvertype": "never",
-    "editor.autoClosingQuotes": "never",
-    "editor.autoSurround": "never",
-    "editor.codeLens": false,
-    "editor.fontFamily": "'JetBrains Mono', monospace",
-    "editor.fontSize": 16,
-    "editor.pasteAs.enabled": false,
-    "files.associations": {
-        "renv.lock": "json"
-    },
+  "[python]": {
+    "editor.formatOnSave": true
+  },
+  "[r]": {
+    "editor.formatOnSave": true
+  },
+  "editor.autoClosingBrackets": "never",
+  "editor.autoClosingComments": "never",
+  "editor.autoClosingDelete": "never",
+  "editor.autoClosingOvertype": "never",
+  "editor.autoClosingQuotes": "never",
+  "editor.autoSurround": "never",
+  "editor.codeLens": false,
+  "editor.fontFamily": "'JetBrains Mono', monospace",
+  "editor.fontSize": 16,
+  "editor.pasteAs.enabled": false,
+  "files.associations": {
+    "renv.lock": "json"
+  },
 {{- if lookPath "git" }}
-    "git.path": "{{ lookPath "git" }}",
+  "git.path": "{{ lookPath "git" }}",
 {{- end }}
+  "python.analysis.autoSearchPaths": false,
 {{- if lookPath "conda" }}
-    "python.condaPath": "{{ lookPath "conda" }}",
+  "python.condaPath": "{{ lookPath "conda" }}",
 {{- end }}
-{{- if lookPath "python3" }}
-    "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
+{{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
+  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
+{{- else if lookPath "python3" }}
+  "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
 {{- end }}
-    "python.experiments.enabled": false,
+  "python.experiments.enabled": false,
 {{- if lookPath "python3" }}
-    "python.pythonPath": "{{ lookPath "python3" }}",
+  "python.pythonPath": "{{ lookPath "python3" }}",
 {{- end }}
 {{- if lookPath "quarto" }}
-    "quarto.path": "{{ lookPath "quarto" }}",
+  "quarto.path": "{{ lookPath "quarto" }}",
 {{- end }}
-    "update.mode": "none",
-    "update.showReleaseNotes": false,
-    "window.autoDetectColorScheme": true,
-    "workbench.editor.empty.hint": "hidden",
-    "workbench.keybindings.rstudioKeybindings": true,
-    "workbench.startupEditor": "newUntitledFile"
+  "update.mode": "none",
+  "update.showReleaseNotes": false,
+  "window.autoDetectColorScheme": true,
+  "workbench.editor.empty.hint": "hidden",
+  "workbench.keybindings.rstudioKeybindings": true,
+  "workbench.startupEditor": "newUntitledFile"
 }

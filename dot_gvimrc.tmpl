@@ -1,6 +1,6 @@
 """
 " GUI Vim configuration.
-" Updated 2024-08-23.
+" Updated 2025-08-21.
 "
 " Intended primarily for MacVim.
 "
@@ -22,4 +22,6 @@ set guifont=JetBrains\ Mono\ Regular:h16
 " Customize the line height.
 " > set linespace=8
 
+{{- if lookPath "bash" }}
 set shell={{ lookPath "bash" }}
+{{- end }}

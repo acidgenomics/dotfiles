@@ -34,7 +34,9 @@ function get_appearance()
   return "Dark"
 end
 
+{{- if lookPath "bash" }}
 config.default_prog = { "{{ lookPath "bash" }}", "-il" }
+{{- end }}
 config.font = wezterm.font "JetBrains Mono"
 config.font_size = 16
 config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }

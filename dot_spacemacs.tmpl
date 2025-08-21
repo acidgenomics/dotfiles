@@ -121,7 +121,9 @@ This function should only modify configuration layer settings."
             ;; > shell-default-height 30
             shell-default-position 'right
             shell-default-shell 'ansi-term
+{{- if lookPath "bash" }}
             shell-default-term-shell "{{ lookPath "bash" }}"
+{{- end }}
             shell-default-width 80)
      syntax-checking
      tmux

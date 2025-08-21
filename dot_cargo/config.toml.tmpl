@@ -1,6 +1,8 @@
 [http]
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
 cainfo = "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem"
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+cainfo = "/etc/ssl/certs/ca-certificates.crt"
 {{- end }}
 debug = true
 {{- if env "HTTP_PROXY" }}

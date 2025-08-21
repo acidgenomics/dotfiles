@@ -1,9 +1,8 @@
 # """
-# Kitty configuration
+# Kitty configuration.
+# Updated 2025-21.
 #
-# @note Updated 2025-01-03.
-#
-# @seealso
+# See also:
 # - https://sw.kovidgoyal.net/kitty/conf/
 # - kitty +kitten themes
 # - https://sw.kovidgoyal.net/kitty/kittens/themes/
@@ -27,7 +26,9 @@ initial_window_width 90c
 italic_font auto
 macos_show_window_title_in none
 remember_window_size no
+{{- if lookPath "bash" }}
 shell {{ lookPath "bash" }}
+{{- end }}
 shell_integration no-cursor
 tab_bar_edge top
 tab_bar_style powerline

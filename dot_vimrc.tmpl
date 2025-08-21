@@ -1,17 +1,17 @@
 """
 " Vim configuration.
-" Updated 2025-05-09.
+" Updated 2025-08-21.
 "
 " Refer to my cheat sheet for usage details:
 " https://steinbaugh.com/posts/vim.html
 """
 
-" Notes {{{1
+" Notes
 " ==============================================================================
 "
 " Consider moving useful notes documented here to the main Vim cheatsheet.
 "
-" Vim package manager {{{2
+" Vim package manager
 " ------------------------------------------------------------------------------
 "
 " Create a folder named 'pack' inside your '.vim' configuration folder. Direct
@@ -28,18 +28,18 @@
 " - https://shapeshed.com/vim-packages/
 " - https://hackingcpp.com/dev/vim_plugins.html
 "
-" Runtimepath {{{2
+" Runtimepath
 " ------------------------------------------------------------------------------
 "
 " Check runtimepath (rtp) configuration with ':set runtimepath?' or
 " ':echo $VIMRUNTIME'.
 "
-" Neovim-specific commands {{{2
+" Neovim-specific commands
 " ------------------------------------------------------------------------------
 " - ':vs|:te': Vertically split a terminal (like ':vert term' in Vim).
 "   https://github.com/neovim/neovim/issues/3192
 "
-" Language server protocol (LSP) support and plugins {{{2
+" Language server protocol (LSP) support and plugins
 " ------------------------------------------------------------------------------
 "
 " For additional LSP configuration, consider adding support for
@@ -47,7 +47,7 @@
 " - https://github.com/hrsh7th/nvim-cmp
 " - https://github.com/williamboman/mason.nvim
 
-" Pre-flight checks {{{1
+" Pre-flight checks
 " ==============================================================================
 
 let g:is_nvim=has('nvim')
@@ -72,7 +72,7 @@ set nocompatible
 " and poor user experience.
 set updatetime=300
 
-" Global variables {{{1
+" Global variables
 " ==============================================================================
 
 " Refer to ':help expand' for details.
@@ -89,7 +89,7 @@ let g:koopa_prefix=$KOOPA_PREFIX
 
 " > let g:arch=substitute(system('uname -m'), '\n', '', '')
 
-" Highlighting {{{1
+" Highlighting
 " ==============================================================================
 
 " Enable syntax highlighting.
@@ -111,7 +111,7 @@ syntax on
 " - https://vim.fandom.com/wiki/Highlight_unwanted_spaces
 " - https://github.com/nasamuffin/dotfiles/blob/master/vimrc
 
-" Key mppings (bindings) {{{1
+" Key mppings (bindings)
 " ==============================================================================
 
 " Refer to ':help localleader' for details.
@@ -122,7 +122,7 @@ let maplocalleader="\\"
 " https://unix.stackexchange.com/a/307974
 set backspace=indent,eol,start
 
-" Normal mode {{{2
+" Normal mode
 " ------------------------------------------------------------------------------
 
 " 'w!' still failed? Try 'w!!' to write as root.
@@ -166,7 +166,7 @@ nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
 " Surround current word in double quotes.
 nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
 
-" Insert mode {{{2
+" Insert mode
 " ------------------------------------------------------------------------------
 
 " Escape from insert mode without stretching to hit Esc key.
@@ -175,7 +175,7 @@ inoremap jk <esc>
 " Delete line in insert mode using Ctrl+d.
 inoremap <c-d> <esc>ddi
 
-" Visual mode {{{2
+" Visual mode
 " ------------------------------------------------------------------------------
 
 " Delete, paste, and yank more intuitively.
@@ -186,7 +186,7 @@ inoremap <c-d> <esc>ddi
 " > vnoremap p "0p
 " > vnoremap y "0y
 
-" Muscle memory {{{2
+" Muscle memory
 " ------------------------------------------------------------------------------
 
 " Enforce muscle memory of HJKL instead of arrow keys.
@@ -205,13 +205,13 @@ inoremap <c-d> <esc>ddi
 " Change Caps Lock Key to Escape.
 " Note that Esc will continue to work with this setup.
 
-" Text formatting {{{1
+" Text formatting
 " ==============================================================================
 
 " Always enforce UTF-8.
 set encoding=utf-8
 
-" Wrapping and margins {{{2
+" Wrapping and margins
 " ------------------------------------------------------------------------------
 
 " Enable soft wrapping.
@@ -241,7 +241,7 @@ set colorcolumn=81
 " diagnostics appear/become resolved.
 set signcolumn=yes
 
-" Spaces and tabs {{{2
+" Spaces and tabs
 " ------------------------------------------------------------------------------
 
 " Smart tab mode.
@@ -272,7 +272,7 @@ set tabstop=4
 " > :set expandtab tabstop=4 shiftwidth=4
 " > :%retab
 
-" Whitespace {{{2
+" Whitespace
 " ------------------------------------------------------------------------------
 
 " Enable file-type-specific indentation.
@@ -289,10 +289,10 @@ else
     set list listchars=tab:>-,trail:.
 endif
 
-" Navigation {{{1
+" Navigation
 " ==============================================================================
 
-" Mouse integration {{{2
+" Mouse integration
 " ------------------------------------------------------------------------------
 
 " Enable mouse integration that attempts to play nicely with tmux.
@@ -305,13 +305,13 @@ if !g:is_nvim
     set ttymouse=sgr
 endif
 
-" Window management {{{2
+" Window management
 " ------------------------------------------------------------------------------
 
 set splitbelow
 set splitright
 
-" Interface elements {{{2
+" Interface elements
 " ------------------------------------------------------------------------------
 
 " Highlight current line.
@@ -331,7 +331,7 @@ set ruler
 set wildmenu
 set wildmode=list:longest,full
 
-" Line numbers {{{2
+" Line numbers
 " ------------------------------------------------------------------------------
 
 " Enable line numbers.
@@ -341,7 +341,7 @@ set number
 " Using this currently because it's easier to paste on Windows with tmux.
 " > set nonumber
 
-" Search (matching) {{{2
+" Search (matching)
 " ------------------------------------------------------------------------------
 
 set hlsearch
@@ -359,7 +359,7 @@ set smartcase
 " > :xnoremap / /\v
 " > :xnoremap s/ s/\v
 
-" Folding {{{2
+" Folding
 " ------------------------------------------------------------------------------
 
 " foldmethod alternatives: indent, syntax
@@ -372,7 +372,7 @@ set foldmethod=marker
 set foldlevelstart=99
 set nofoldenable
 
-" File management {{{1
+" File management
 " ==============================================================================
 
 " Disable creation of 'foo~' files.
@@ -384,13 +384,13 @@ set nobackup
 " This also creates FS cruft but is useful for recovery.
 " > set noswapfile
 
-" vim-galore tips {{{1
+" vim-galore tips
 " ==============================================================================
 
 " Some fantastic usability vips from the 'vim-galore' guide.
 " Refer to https://github.com/mhinz/vim-galore for details.
 
-" Disable audible and visual bells {{{2
+" Disable audible and visual bells
 " ------------------------------------------------------------------------------
 
 " This is often annoying when scrolling inside a document using mouse or
@@ -400,7 +400,7 @@ set noerrorbells
 set novisualbell
 set t_vb=
 
-" Don't lose selection when shifting sidewards {{{2
+" Don't lose selection when shifting sidewards
 " ------------------------------------------------------------------------------
 
 " If you select one or more lines, you can use `<` and `>` for shifting them
@@ -415,7 +415,7 @@ xnoremap >  >gv
 " Now you can use `>>>>>` on your visual selection without any problems.
 " The same can be achieved using `.`, which repeats the last change.
 
-" Quickly move current line {{{2
+" Quickly move current line
 " ------------------------------------------------------------------------------
 
 " These mappings also take a count, so 2]e moves the current line 2 lines below.
@@ -423,7 +423,7 @@ xnoremap >  >gv
 nnoremap [e  :<c-u>execute 'move -1-'. v:count1<cr>
 nnoremap ]e  :<c-u>execute 'move +'. v:count1<cr>
 
-" Quickly add empty lines {{{2
+" Quickly add empty lines
 " ------------------------------------------------------------------------------
 
 " Now 5[<space> inserts 5 blank lines above the current line.
@@ -431,7 +431,7 @@ nnoremap ]e  :<c-u>execute 'move +'. v:count1<cr>
 nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
 nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
 
-" Saner behavior of n and N {{{2
+" Saner behavior of n and N
 " ------------------------------------------------------------------------------
 
 " The direction of n and N depends on whether / or ? was used for searching
@@ -447,7 +447,7 @@ nnoremap <expr> N  'nN'[v:searchforward]
 xnoremap <expr> N  'nN'[v:searchforward]
 onoremap <expr> N  'nN'[v:searchforward]
 
-" Cursor style {{{2
+" Cursor style
 " ------------------------------------------------------------------------------
 
 " This simply tells Vim to print a certain sequence of characters (escape
@@ -491,7 +491,7 @@ if !has('gui_running') && has('macunix') && !g:is_nvim
     " > endif
 endif
 
-" Smarter cursorline {{{2
+" Smarter cursorline
 " ------------------------------------------------------------------------------
 
 " I love the cursorline, but I only want to use it in the current window and not
@@ -500,8 +500,13 @@ endif
 autocmd InsertLeave,WinEnter * set cursorline
 autocmd InsertEnter,WinLeave * set nocursorline
 
-" Terminal {{{1
+" Terminal
 " ==============================================================================
+
+{{- if lookPath "bash" }}
+" Set default shell to Bash.
+set shell={{ lookPath "bash" }}
+{{- end }}
 
 " Automatically enter insert mode for terminal shells.
 " Also need to disable line numbers by default on Neovim.
@@ -524,7 +529,7 @@ if g:is_nvim
     augroup end
 endif
 
-" Clipboard / pasteboard {{{1
+" Clipboard / pasteboard
 " ==============================================================================
 
 " Enable copy to clipboard (for macOS).
@@ -545,7 +550,7 @@ if has('macunix')
     endif
 endif
 
-" Plugins {{{1
+" Plugins
 " ==============================================================================
 
 " Plugins declared here are managed by vim-plug.
@@ -640,7 +645,7 @@ autocmd VimEnter *
     \|   PlugInstall --sync | q
     \| endif
 
-" ALE {{{2
+" ALE
 " ------------------------------------------------------------------------------
 
 " Configuration details:
@@ -687,7 +692,7 @@ if g:is_nvim
     let g:ale_use_neovim_diagnostics_api = 1
 endif
 
-" NERDTree {{{2
+" NERDTree
 " ------------------------------------------------------------------------------
 
 " Consider using nerdtree-git-plugin.
@@ -728,7 +733,7 @@ let g:NERDTreeWinSize=24
 " Leave 80 chars for editing.
 " > let g:NERDTreeWinSize = str2nr(system('expr $COLUMNS - 81'))
 
-" Nvim-R {{{2
+" Nvim-R
 " ------------------------------------------------------------------------------
 
 " Documentation details:
@@ -750,7 +755,7 @@ let g:R_rconsole_height=20
 let g:R_rconsole_width=80
 let g:R_syntax_folding=1
 
-" SimpylFold {{{2
+" SimpylFold
 " ------------------------------------------------------------------------------
 
 " Useful for Python IDE.
@@ -758,7 +763,7 @@ let g:R_syntax_folding=1
 " > set foldmethod=indent
 " > let g:SimpylFold_docstring_preview=1
 
-" airline {{{2
+" airline
 " ------------------------------------------------------------------------------
 
 " Consider adding tmuxline integration.
@@ -770,7 +775,7 @@ let g:R_syntax_folding=1
 " > let g:airline#extensions#tabline#left_alt_sep='|'
 " > let g:airline#extensions#tabline#left_sep=' '
 
-" black {{{2
+" black
 " ------------------------------------------------------------------------------
 
 " https://black.readthedocs.io/en/stable/integrations/editors.html#vim
@@ -784,13 +789,13 @@ let g:black_use_virtualenv=0
 " >     autocmd BufWritePre *.py Black
 " > augroup end
 
-" copilot {{{2
+" copilot
 " ------------------------------------------------------------------------------
 
 " Disable Copilot by default.
 let g:copilot_enabled = v:false
 
-" editorconfig-vim {{{2
+" editorconfig-vim
 " ------------------------------------------------------------------------------
 
 " Can debug settings with:
@@ -820,21 +825,7 @@ autocmd FileType json setlocal
     \ shiftwidth=2
     \ softtabstop=2
 
-" jedi-vim {{{2
-" ------------------------------------------------------------------------------
-
-" This plugin can freak out in an active conda environment.
-
-" > let g:jedi#auto_initialization=0
-" > let g:jedi#auto_vim_configuration=1
-" > let g:jedi#completions_enabled=0
-" > let g:jedi#popup_on_dot=0
-" > let g:jedi#popup_select_first=1
-" > let g:jedi#show_call_signatures=1
-" > let g:jedi#use_splits_not_buffers='left'
-" > let g:jedi#use_tabs_not_buffers=1
-
-" fzf {{{2
+" fzf
 " ------------------------------------------------------------------------------
 
 " How to update rtp with variable in path:
@@ -861,7 +852,21 @@ if isdirectory(g:fzf_dir)
     command Fzf FZF
 endif
 
-" prettier {{{2
+" jedi-vim
+" ------------------------------------------------------------------------------
+
+" This plugin can freak out in an active conda environment.
+
+" > let g:jedi#auto_initialization=0
+" > let g:jedi#auto_vim_configuration=1
+" > let g:jedi#completions_enabled=0
+" > let g:jedi#popup_on_dot=0
+" > let g:jedi#popup_select_first=1
+" > let g:jedi#show_call_signatures=1
+" > let g:jedi#use_splits_not_buffers='left'
+" > let g:jedi#use_tabs_not_buffers=1
+
+" prettier
 " ------------------------------------------------------------------------------
 
 " Can manually trigger formatting with ':Prettier'.
@@ -874,7 +879,7 @@ let g:prettier#config#require_pragma='false'
 let g:prettier#config#tab_width=2
 let g:prettier#config#use_tabs='false'
 
-" rainbow_parentheses {{{2
+" rainbow_parentheses
 " ------------------------------------------------------------------------------
 
 " Activation based on file type
@@ -883,7 +888,7 @@ augroup rainbow_lisp
     autocmd FileType clojure,lisp,r,scheme RainbowParentheses
 augroup END
 
-" startify {{{2
+" startify
 " ------------------------------------------------------------------------------
 
 " Disable the plugin, if necessary.
@@ -891,7 +896,7 @@ augroup END
 
 let g:startify_custom_header=''
 
-" vim-markdown {{{2
+" vim-markdown
 " ------------------------------------------------------------------------------
 
 " Completely disable Markdown-specific code folding.
@@ -910,7 +915,7 @@ autocmd BufNewFile,BufFilePre,BufRead *.ronn set filetype=markdown
 " https://github.com/preservim/vim-markdown/issues/126#issuecomment-1430463951
 autocmd BufNewFile,BufRead *.md filetype plugin indent off
 
-" vim-pandoc {{{2
+" vim-pandoc
 " ------------------------------------------------------------------------------
 
 " How to disable formatting of Markdown files:
@@ -922,19 +927,17 @@ autocmd BufNewFile,BufRead *.md filetype plugin indent off
 " NOTE This must come before the plugin activation step.
 " > let g:pandoc#filetypes#pandoc_markdown = 0
 
-" vim-pandoc-syntax {{{2
+" vim-pandoc-syntax
 " ------------------------------------------------------------------------------
 
 let g:pandoc#syntax#conceal#blacklist = ['strikeout', 'list', 'quotes']
 
-" Colors (theme) {{{1
+" Colors (theme)
 " ==============================================================================
 
-" Set Vim-specific sequences for RGB colors.
-" https://tomlankhorst.nl/iterm-tmux-vim-true-color/
-set termguicolors
-let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+if has('termguicolors')
+    set termguicolors
+endif
 
 " Dynamically set dark/light mode, if supported.
 " https://apas.gr/2018/11/dark-mode-macos-safari-iterm-vim/

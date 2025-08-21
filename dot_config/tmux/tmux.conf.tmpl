@@ -1,6 +1,6 @@
 # """
 # Tmux configuration.
-# Updated 2025-01-04.
+# Updated 2025-08-21.
 #
 # Restart the server when changing settings:
 # > tmux kill-server
@@ -27,7 +27,9 @@ bind r source-file ~/.config/tmux/tmux.conf
 # Default shell
 # ==============================================================================
 
+{{- if lookPath "bash" }}
 set -g default-shell "{{ lookPath "bash" }}"
+{{- end }}
 
 # Server options
 # ==============================================================================

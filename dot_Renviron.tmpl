@@ -10,6 +10,11 @@ CURL_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
 DEFAULT_CA_BUNDLE_PATH={{ .chezmoi.homeDir }}/.local
 REQUESTS_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
 SSL_CERT_FILE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+DEFAULT_CA_BUNDLE_PATH=/etc/ssl/certs
+REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 {{- end }}
 
 {{- if env "HTTP_PROXY" }}

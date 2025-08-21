@@ -1,5 +1,7 @@
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
 cacert={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+cacert=/etc/ssl/certs/ca-certificates.crt
 {{- end }}
 connect-timeout=60
 # > insecure

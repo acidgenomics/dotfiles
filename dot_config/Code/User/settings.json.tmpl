@@ -228,7 +228,9 @@
   ],
   "shellcheck.run": "onSave",
   "telemetry.telemetryLevel": "off",
-  "terminal.external.osxExec": "Alacritty.app",
+{{- if and (eq .chezmoi.os "darwin") (stat "/Applications/Ghostty.app") }}
+  "terminal.external.osxExec": "Ghostty.app",
+{{- end }}
   "terminal.integrated.cursorBlinking": false,
   "terminal.integrated.cursorStyle": "block",
   "terminal.integrated.defaultLocation": "editor",

@@ -1,0 +1,6 @@
+{
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "remote.autoForwardPorts": false,
+  "terminal.integrated.defaultProfile.linux": "bash"
+}

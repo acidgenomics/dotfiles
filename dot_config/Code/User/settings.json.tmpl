@@ -177,10 +177,14 @@
   "r.removeLeadingComments": true,
   "r.rmarkdown.chunkBackgroundColor": "",
   "r.rpath.linux": "/usr/bin/R",
+{{- if eq .chezmoi.os "darwin" }}
   "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
+{{- end }}
 {{- if lookPath "radian" }}
   "r.rterm.linux": "{{ lookPath "radian" }}",
+{{- if eq .chezmoi.os "darwin" }}
   "r.rterm.mac": "{{ lookPath "radian" }}",
+{{- end }}
 {{- end }}
   "r.rterm.option": [
     "--no-save",

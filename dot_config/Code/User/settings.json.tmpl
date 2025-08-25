@@ -241,15 +241,18 @@
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.defaultProfile.osx": "bash",
   "terminal.integrated.enableMultiLinePasteWarning": "never",
+{{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.env.osx": {
     "PYTHONPATH": "${workspaceFolder}",
     "R_HOME": "/Library/Frameworks/R.framework/Resources"
   },
+{{- end }}
   "terminal.integrated.fontSize": 16,
   "terminal.integrated.fontWeightBold": "normal",
   "terminal.integrated.inheritEnv": false,
   "terminal.integrated.initialHint": false,
   "terminal.integrated.localEchoEnabled": "off",
+{{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.profiles.osx": {
     "bash": {
       "args": [
@@ -273,6 +276,7 @@
 {{- end }}
     }
   },
+{{- end }}
   "typescript.suggest.enabled": false,
   "update.mode": "none",
   "update.showReleaseNotes": false,

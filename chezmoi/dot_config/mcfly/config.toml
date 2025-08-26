@@ -1,0 +1,51 @@
+# """
+# McFly configuration
+#
+# @note Updated 2025-01-04.
+#
+# The following colors are supported, according to README:
+#
+# | Light       | Dark           |
+# | :---------- | :------------- |
+# | `dark_grey` | `black`        |
+# | `red`       | `dark_red`     |
+# | `green`     | `dark_green`   |
+# | `yellow`    | `dark_yellow`  |
+# | `blue`      | `dark_blue`    |
+# | `magenta`   | `dark_magenta` |
+# | `cyan`      | `dark_cyan`    |
+# | `white`     | `grey`         |
+#
+# @seealso
+# - https://github.com/cantino/mcfly/pull/319
+# - https://github.com/cantino/mcfly/pull/343
+# - https://github.com/cantino/mcfly/pull/405
+# - Alacritty rendering issues:
+#   https://github.com/cantino/mcfly/issues/316
+# """
+
+[colors]
+
+[colors.menubar]
+bg = "blue"
+fg = "white"
+
+[colors.darkmode]
+prompt = "white"
+timing = "blue"
+results_fg = "white"
+results_bg = "black"
+results_hl = "blue"
+results_selection_fg = "black"
+results_selection_bg = "white"
+results_selection_hl = "dark_green"
+
+[colors.lightmode]
+prompt = "black"
+timing = "dark_blue"
+results_fg = "black"
+results_bg = "white"
+results_hl = "blue"
+results_selection_fg = "white"
+results_selection_bg = "dark_grey"
+results_selection_hl = "grey"

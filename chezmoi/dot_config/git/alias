@@ -1,0 +1,69 @@
+[alias]
+    a = add
+    aa = add --all
+    br = branch -vv
+    c = commit
+    ca = !git add --all && git commit
+    catchup = !git fetch upstream && git rebase upstream/main
+    cleanup = !git remote prune origin \
+        && git gc \
+        && git clean -dfx \
+        && git stash clear
+    cm = commit -m
+    co = checkout
+    contrib = shortlog --email --no-merges --numbered --summary
+    d = diff
+    dev = checkout -B develop origin/develop
+    diff-remote = diff origin..main
+    difft = difftool --tool=difftastic
+    f = fetch
+    fa = fetch --all
+    ff = pull --ff-only
+    find = "!f() { \
+        git log --date=short --decorate --pretty=custom -S\"$1\"; \
+    }; f"
+    find-msg = "!f() { \
+        git log --date=short --decorate --pretty=custom --grep=\"$1\"; \
+    }; f"
+    glog = log \
+        --abbrev-commit \
+        --all \
+        --decorate \
+        --graph \
+        --oneline \
+        --pretty=custom
+    hash = rev-parse HEAD
+    ignored = ls-files --directory --exclude-standard --ignored --others
+    last = log -1 HEAD
+    ll = log --pretty=custom
+    lrb = "!f() { \
+        remote=\"${1:-origin}\"; \
+        git ls-remote --heads \"$remote\"; \
+    }; f"
+    main = checkout -B main origin/main
+    no-cache-credential = config --local credential.helper ""
+    nuke = reset --hard HEAD
+    p = push
+    pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
+    r = rebase
+    reset-cache-credential = config --local --unset credential.helper
+    retag = "!f() { \
+        git tag --delete \"$1\" &> /dev/null; \
+        git tag \"$1\"; \
+    }; f"
+    s = status --branch --short
+    short-hash = rev-parse --short=7 HEAD
+    touch = commit --amend --reset-author --no-edit
+    tracked = ls-tree -r HEAD --name-only
+    trash = checkout --
+    u = commit --amend --no-edit
+    ua = !git add --all && git commit --amend --no-edit
+    um = commit --amend
+    undo = "!f() { \
+        num=\"${1:-1}\"; \
+        git reset --soft \"HEAD~$num\"; \
+    }; f"
+    unstage = reset HEAD --
+    untracked = ls-files --directory --exclude-standard --others
+    up = !sh -c 'git pull --rebase --prune && git log --pretty HEAD@{1}..'
+    web = instaweb --httpd=webrick

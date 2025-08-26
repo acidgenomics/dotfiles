@@ -1,0 +1,27 @@
+"""
+" GUI Vim configuration.
+" Updated 2025-08-21.
+"
+" Intended primarily for MacVim.
+"
+" See also:
+" - https://stackoverflow.com/questions/2886436
+" - https://stackoverflow.com/questions/8483371
+"""
+
+" Maximize the window by default.
+set columns=9999
+set lines=999
+
+" Don’t blink cursor in normal mode.
+set guicursor=n:blinkon0
+
+" Set default font.
+set guifont=JetBrains\ Mono\ Regular:h16
+
+" Customize the line height.
+" > set linespace=8
+
+{{- if lookPath "bash" }}
+set shell={{ lookPath "bash" }}
+{{- end }}

@@ -1,0 +1,44 @@
+# """
+# SpaceVim configuration.
+# @note Updated 2023-11-22.
+#
+# Well-supported color schemes are documented here:
+# https://spacevim.org/layers/colorscheme/
+#
+# Here's how to enable Dracula theme, for reference.
+# Note that proper statusline support is currently missing.
+#
+# > [[custom_plugins]]
+# >     repo = "dracula/vim"
+# >     name = "dracula"
+# >     merged = false
+#
+# See also:
+# - https://draculatheme.com/vim
+# - https://github.com/dracula/vim/issues/190
+# """
+
+[options]
+    buffer_index_type = 4
+    colorscheme = "dracula"
+    colorscheme_bg = "dark"
+    enable_guicolors = true
+    enable_statusline_mode = false
+    enable_tabline_filetype_icon = true
+    guifont = "JetBrainsMono NF:h16"
+    relativenumber = false
+    statusline_iseparator = "arrow"
+    statusline_separator = "arrow"
+
+[[layers]]
+    name = "autocomplete"
+    auto_completion_return_key_behavior = "complete"
+    auto_completion_tab_key_behavior = "smart"
+
+[[layers]]
+    name = "colorscheme"
+
+[[layers]]
+    name = "shell"
+    default_position = "right"
+    default_height = 30

@@ -1,0 +1,5 @@
+[auth]
+disable_credentials = true
+
+[component_manager]
+disable_update_check = true

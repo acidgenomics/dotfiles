@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+__dotfiles_zlogout() {
+    # """
+    # Tasks to perform on ZSH logout.
+    # @note Updated 2023-05-03.
+    # """
+    [[ -f "${HOME:?}/.logout" ]] || return 0
+    source "${HOME:?}/.logout"
+    return 0
+}
+
+__dotfiles_zlogout

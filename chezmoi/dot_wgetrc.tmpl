@@ -1,0 +1,22 @@
+adjust_extension=on
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+ca_certificate={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+ca_certificate=/etc/ssl/certs/ca-certificates.crt
+{{- end }}
+check_certificate=on
+follow_ftp=on
+{{- if env "HTTP_PROXY" }}
+http_proxy={{ env "HTTP_PROXY" }}
+{{- end }}
+no_parent=on
+retry_connrefused=on
+robots=off
+server_response=on
+timeout=60
+timestamping=on
+tries=3
+trust_server_names=on
+{{- if env "HTTP_PROXY" }}
+use_proxy=on
+{{- end }}

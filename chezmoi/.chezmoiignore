@@ -1,0 +1,23 @@
+*.md
+*/*.md
+*/*/*.md
+*/*/*/*.md
+{{- if ne .chezmoi.os "linux" }}
+.local/share/code-server-posit/
+.local/share/code-server/
+.positron-server/
+.vscode-server/
+{{- end }}
+LICENSE
+{{- if ne .chezmoi.os "darwin" }}
+Library/
+{{- end }}
+README.md
+develop
+etc/
+install
+todo.org
+uninstall
+{{ if ne .chezmoi.os "darwin" }}
+.terminfo/
+{{- end }}

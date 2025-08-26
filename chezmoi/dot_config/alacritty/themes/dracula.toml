@@ -1,0 +1,68 @@
+# """
+# Dracula scheme.
+# @note Updated 2024-01-02.
+#
+# @seealso
+# - https://draculatheme.com/alacritty
+# """
+
+[colors.bright]
+black = "#7970a9"
+blue = "#aa99ff"
+cyan = "#99ffee"
+green = "#a2ff99"
+magenta = "#ff99cc"
+red = "#ffaa99"
+white = "#ffffff"
+yellow = "#ffff99"
+
+[colors.cursor]
+cursor = "#746da1"
+text = "CellForeground"
+
+[colors.footer_bar]
+background = "#22212c"
+foreground = "#f8f8f2"
+
+[colors.hints.end]
+background = "#22212c"
+foreground = "#ffff80"
+
+[colors.hints.start]
+background = "#ffff80"
+foreground = "#22212c"
+
+[colors.line_indicator]
+background = "None"
+foreground = "None"
+
+[colors.normal]
+black = "#7970a9"
+blue = "#9580ff"
+cyan = "#80ffea"
+green = "#8aff80"
+magenta = "#ff80bf"
+red = "#ff9580"
+white = "#f8f8f2"
+yellow = "#ffff80"
+
+[colors.primary]
+background = "#22212c"
+bright_foreground = "#ffffff"
+foreground = "#f8f8f2"
+
+[colors.search.focused_match]
+background = "#ffca80"
+foreground = "#454158"
+
+[colors.search.matches]
+background = "#8aff80"
+foreground = "#454158"
+
+[colors.selection]
+background = "#454158"
+text = "CellForeground"
+
+[colors.vi_mode_cursor]
+cursor = "CellForeground"
+text = "CellBackground"

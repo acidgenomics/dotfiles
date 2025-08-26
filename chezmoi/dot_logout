@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+
+# """
+# Scripts to run when logging out of current session.
+# Updated 2022-05-06.
+# """
+
+# In POSIX sh, SHLVL is undefined.
+# shellcheck disable=SC2039
+if [ "${SHLVL:-0}" -eq 1 ]
+then
+    # When leaving the console, clear the screen to increase privacy.
+    if [ -x '/usr/bin/clear_console' ]
+    then
+        '/usr/bin/clear_console' -q
+    fi
+    # Delete HISTFILE.
+    # > if [ -f "${HISTFILE:-}" ]
+    # > then
+    # >     rm "$HISTFILE"
+    # > fi
+fi

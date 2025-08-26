@@ -15,15 +15,20 @@ source "$(koopa header bash)"
 main() {
     # """
     # Install dotfiles.
-    # @note Updated 2024-11-26.
+    # @note Updated 2025-08-26.
     # """
     local -A app dict
     [[ -d "${HOME:-}" ]] || return 1
     app['chezmoi']="$(koopa_locate_chezmoi)"
     koopa_assert_is_executable "${app[@]}"
     dict['prefix']="$(koopa_script_parent_dir)"
+    dict['chezmoi_prefix']="${dict['prefix']}/chezmoi"
     dict['xdg_config_home']="$(koopa_xdg_config_home)"
     dict['xdg_data_home']="$(koopa_xdg_data_home)"
+    koopa_assert_is_dir \
+        "${dict['chezmoi_prefix']}" \
+        "${dict['xdg_config_home']}" \
+        "${dict['xdg_data_home']}"
     koopa_add_config_link "${dict['prefix']}" 'dotfiles'
     # > if koopa_is_linux
     # > then
@@ -42,10 +47,11 @@ main() {
         fi
     fi
     (
+        koopa_cd "${dict['chezmoi_prefix']}"
         "${app['chezmoi']}" \
             --force \
             --no-pager \
-            --source="${dict['prefix']}" \
+            --source="${dict['chezmoi_prefix']}" \
             --verbose \
             apply
     )

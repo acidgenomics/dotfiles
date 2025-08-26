@@ -1,0 +1,25 @@
+# """
+# Ghosty configuration.
+# Last updated 2025-08-01.
+#
+# Reference documentation:
+# - https://ghostty.org/docs/config
+# - ghostty +show-config --default --docs | less
+# - ghostty +list-fonts
+# - ghostty +list-themes
+#
+# Reload configuration with:
+# - macOS: <CMD> + <SHIFT> + ,
+# - Linux: <CTRL> + <SHIFT> + ,
+# """
+
+{{- if lookPath "bash" }}
+command = {{ lookPath "bash" }} -il
+{{- end }}
+cursor-style-blink = false
+# > font-family = "JetBrains Mono"
+font-size = 16
+# > shell-integration = none
+theme = "light:AtomOneLight,dark:Dracula"
+window-height = 30
+window-width = 100

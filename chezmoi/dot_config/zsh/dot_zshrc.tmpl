@@ -1,0 +1,113 @@
+#!/usr/bin/env zsh
+
+# """
+# Z shell (Zsh) configuration.
+# Refer to '~/.profile' file for POSIX shell configuration details.
+#
+# Source file:
+# {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
+#
+# Git repo:
+# https://github.com/acidgenomics/dotfiles/
+# """
+
+__dotfiles_zshrc() {
+    case "${ZSH_VERSION:-}" in
+        '1.'* | \
+        '2.'* | \
+        '3.'* | \
+        '4.'* | \
+        '5.0' | '5.0.'* | \
+        '5.1' | '5.1.'* | \
+        '5.2' | '5.2.'* | \
+        '5.3' | '5.3.'* | \
+        '5.4' | '5.4.'* | \
+        '5.5' | '5.5.'* | \
+        '5.6' | '5.6.'* | \
+        '5.7' | '5.7.'*)
+            return 0
+            ;;
+    esac
+    [[ -o 'interactive' ]] || return 0
+    if [[ -f "${HOME}/.profile" ]]
+    then
+        source "${HOME}/.profile"
+    fi
+    # zsh-autosuggestions
+    # --------------------------------------------------------------------------
+    # Set the suggestion text color.
+    # Define using xterm-256 color code.
+    #
+    # 'fg=240' also works well with Dracula theme.
+    #
+    # See also:
+    # - https://stackoverflow.com/questions/47310537
+    # - https://upload.wikimedia.org/wikipedia/
+    #       commons/1/15/Xterm_256color_chart.svg
+    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=005'
+    # zsh-syntax-highlighting
+    # --------------------------------------------------------------------------
+    # Copied from:
+    # https://github.com/dracula/zsh-syntax-highlighting/blob/master/
+    #   zsh-syntax-highlighting.sh
+    #
+    # This needs to be defined in '~/.zshrc' prior to activation of
+    # zsh-syntax-highlighting plugin.
+    #
+    # Ensure that this is only selectively enabled in dark mode, so we don't mess
+    # up highlighting appearance when using light themes, such as Solarized.
+    if [[ "${KOOPA_COLOR_MODE:-}" == 'dark' ]]
+    then
+        ZSH_HIGHLIGHT_HIGHLIGHTERS=('main' 'cursor')
+        typeset -gA ZSH_HIGHLIGHT_STYLES
+        ZSH_HIGHLIGHT_STYLES['alias']='fg=#50FA7B'
+        ZSH_HIGHLIGHT_STYLES['arg0']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['assign']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['autodirectory']='fg=#FFB86C,italic'
+        ZSH_HIGHLIGHT_STYLES['back-dollar-quoted-argument']='fg=#FF79C6'
+        ZSH_HIGHLIGHT_STYLES['back-double-quoted-argument']='fg=#FF79C6'
+        ZSH_HIGHLIGHT_STYLES['back-quoted-argument-delimiter']='fg=#FF79C6'
+        ZSH_HIGHLIGHT_STYLES['back-quoted-argument-unclosed']='fg=#FF5555'
+        ZSH_HIGHLIGHT_STYLES['back-quoted-argument']='fg=#BD93F9'
+        ZSH_HIGHLIGHT_STYLES['builtin']='fg=#8BE9FD'
+        ZSH_HIGHLIGHT_STYLES['command-substitution-delimiter-quoted']='fg=#F1FA8C'
+        ZSH_HIGHLIGHT_STYLES['command-substitution-delimiter-unquoted']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['command-substitution-delimiter']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['command-substitution-quoted']='fg=#F1FA8C'
+        ZSH_HIGHLIGHT_STYLES['command']='fg=#50FA7B'
+        ZSH_HIGHLIGHT_STYLES['commandseparator']='fg=#FF79C6'
+        ZSH_HIGHLIGHT_STYLES['comment']='fg=#6272A4'
+        ZSH_HIGHLIGHT_STYLES['cursor']='standout'
+        ZSH_HIGHLIGHT_STYLES['default']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['dollar-double-quoted-argument']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['dollar-quoted-argument-unclosed']='fg=#FF5555'
+        ZSH_HIGHLIGHT_STYLES['dollar-quoted-argument']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['double-hyphen-option']='fg=#FFB86C'
+        ZSH_HIGHLIGHT_STYLES['double-quoted-argument-unclosed']='fg=#FF5555'
+        ZSH_HIGHLIGHT_STYLES['double-quoted-argument']='fg=#F1FA8C'
+        ZSH_HIGHLIGHT_STYLES['function']='fg=#50FA7B'
+        ZSH_HIGHLIGHT_STYLES['global-alias']='fg=#50FA7B'
+        ZSH_HIGHLIGHT_STYLES['globbing']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['hashed-command']='fg=#8BE9FD'
+        ZSH_HIGHLIGHT_STYLES['history-expansion']='fg=#BD93F9'
+        ZSH_HIGHLIGHT_STYLES['named-fd']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['numeric-fd']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['path']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['path_pathseparator']='fg=#FF79C6'
+        ZSH_HIGHLIGHT_STYLES['path_prefix']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['path_prefix_pathseparator']='fg=#FF79C6'
+        ZSH_HIGHLIGHT_STYLES['precommand']='fg=#50FA7B,italic'
+        ZSH_HIGHLIGHT_STYLES['process-substitution-delimiter']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['rc-quote']='fg=#F1FA8C'
+        ZSH_HIGHLIGHT_STYLES['redirection']='fg=#F8F8F2'
+        ZSH_HIGHLIGHT_STYLES['reserved-word']='fg=#8BE9FD'
+        ZSH_HIGHLIGHT_STYLES['single-hyphen-option']='fg=#FFB86C'
+        ZSH_HIGHLIGHT_STYLES['single-quoted-argument-unclosed']='fg=#FF5555'
+        ZSH_HIGHLIGHT_STYLES['single-quoted-argument']='fg=#F1FA8C'
+        ZSH_HIGHLIGHT_STYLES['suffix-alias']='fg=#50FA7B'
+        ZSH_HIGHLIGHT_STYLES['unknown-token']='fg=#FF5555'
+    fi
+    return 0
+}
+
+__dotfiles_zshrc

@@ -1,0 +1,49 @@
+# """
+# tealdeer (tldr) configuration.
+# Updated 2021-09-01.
+#
+# @section Style targets:
+#
+# - description: The initial description text
+# - command_name: The command name as part of the example code
+# - example_text: The text that describes an example
+# - example_code: The example itself (except the command_name and example_variable)
+# - example_variable: The variables in the example
+#
+# @section Override config directory:
+#
+# The directory where the configuration file resides may be overwritten by the
+# environment variable 'TEALDEER_CONFIG_DIR'. Remember to use an absolute path.
+# Variable expansion will not be performed on the path.
+#
+# @section Override cache directory:
+#
+# Similarly, the cache directory where the pages are downloaded to, also follows
+# OS conventions. On Linux, it will usually be at '~/.cache/tealdeer/'. The path
+# can be overwritten using the environment variable 'TEALDEER_CACHE_DIR'.
+# Remember to use an absolute path. Variable expansion will not be performed on
+# the path.
+#
+# @seealso
+# - https://dbrgn.github.io/tealdeer/config.html
+# - https://dbrgn.github.io/tealdeer/config_style.html
+# """
+
+[display]
+compact = false
+use_pager = true
+
+[style.command_name]
+bold = false
+foreground = "blue"
+
+[style.example_code]
+foreground = "blue"
+
+[style.example_variable]
+foreground = "blue"
+underline = true
+
+[updates]
+auto_update = true
+auto_update_interval_hours = 720

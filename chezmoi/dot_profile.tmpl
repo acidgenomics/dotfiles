@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# """
+# POSIX shell profile configuration.
+# Used for Bash and Zsh shell configuration.
+#
+# Source file:
+# {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
+#
+# Git repo:
+# https://github.com/acidgenomics/dotfiles/
+# """
+
+__koopa_activate_user_profile() {
+    # """
+    # Activate koopa shell for current user.
+    #
+    # See also:
+    # - https://koopa.acidgenomics.com/
+    # - https://github.com/acidgenomics/koopa/
+    #
+    # """
+    __kvar_xdg_config_home="${XDG_CONFIG_HOME:-}"
+    if [ -z "$__kvar_xdg_config_home" ]
+    then
+        __kvar_xdg_config_home="${HOME:?}/.config"
+    fi
+    __kvar_script="${__kvar_xdg_config_home}/koopa/activate"
+    if [ -r "$__kvar_script" ]
+    then
+        # shellcheck source=/dev/null
+        . "$__kvar_script"
+    fi
+    unset -v __kvar_script __kvar_xdg_config_home
+    return 0
+}
+
+__koopa_activate_user_profile

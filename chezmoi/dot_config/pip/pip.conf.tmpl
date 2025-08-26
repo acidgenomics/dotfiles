@@ -1,0 +1,13 @@
+[global]
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+cert={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+cert=/etc/ssl/certs/ca-certificates.crt
+{{- end }}
+disable-pip-version-check=True
+no-cache-dir=True
+no-warn-script-location=True
+progress-bar=on
+require-virtualenv=True
+timeout=120
+upgrade=True

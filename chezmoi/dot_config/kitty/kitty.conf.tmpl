@@ -1,0 +1,37 @@
+# """
+# Kitty configuration.
+# Updated 2025-21.
+#
+# See also:
+# - https://sw.kovidgoyal.net/kitty/conf/
+# - kitty +kitten themes
+# - https://sw.kovidgoyal.net/kitty/kittens/themes/
+# - Automatic dark/light mode switching
+#   https://felix-kling.de/blog/2021/
+#     linux-toggle-dark-mode.html#kittys-built-in-solution-easy
+# """
+
+include current-theme.conf
+
+bold_font auto
+bold_italic_font auto
+cursor_blink_interval 0
+cursor_shape block
+detect_urls no
+enable_audio_bell no
+font_family JetBrainsMono NF
+font_size 16.0
+initial_window_height 30c
+initial_window_width 90c
+italic_font auto
+macos_show_window_title_in none
+remember_window_size no
+{{- if lookPath "bash" }}
+shell {{ lookPath "bash" }}
+{{- end }}
+shell_integration no-cursor
+tab_bar_edge top
+tab_bar_style powerline
+tab_powerline_style slanted
+tab_title_max_length 10
+update_check_interval 0

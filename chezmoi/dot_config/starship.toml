@@ -1,0 +1,338 @@
+add_newline = true
+command_timeout = 5000
+scan_timeout = 30
+
+[aws]
+disabled = true
+
+[azure]
+disabled = true
+
+[battery]
+disabled = false
+format = '[\[$symbol$percentage\]]($style) '
+
+[[battery.display]]
+threshold = 20
+
+[buf]
+disabled = true
+
+[bun]
+disabled = true
+
+[c]
+disabled = false
+format = '[<$symbol( $version(-$name))>]($style) '
+style = 'yellow'
+symbol = 'C'
+version_format = '$raw'
+
+[character]
+disabled = true
+error_symbol = '[❌](red)'
+format = '$symbol '
+success_symbol = '[❯](purple)'
+
+[cmake]
+disabled = false
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'cmake'
+version_format = '$raw'
+
+[cmd_duration]
+disabled = true
+
+[cobol]
+disabled = true
+
+[conda]
+disabled = false
+format = '[<$symbol: $environment>]($style) '
+style = 'yellow'
+symbol = 'conda'
+
+[container]
+disabled = true
+
+[crystal]
+disabled = true
+
+[daml]
+disabled = true
+
+[dart]
+disabled = true
+
+[deno]
+disabled = true
+
+[directory]
+disabled = false
+format = '[$path]($style)[$read_only]($read_only_style) '
+read_only = ''
+read_only_style = 'yellow'
+style = 'blue'
+truncate_to_repo = false
+truncation_length = 0
+truncation_symbol = ''
+
+[docker_context]
+disabled = true
+
+[dotnet]
+disabled = true
+
+[elixir]
+disabled = true
+
+[elm]
+disabled = true
+
+[env_var]
+disabled = true
+
+[erlang]
+disabled = true
+
+[fennel]
+disabled = true
+
+[fill]
+disabled = true
+
+[fossil_branch]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[git_branch]
+always_show_remote = false
+disabled = false
+format = '[$branch]($style) '
+only_attached  = false
+style = 'green'
+
+[git_commit]
+commit_hash_length = 7
+disabled = false
+format = '[$hash]($style) '
+only_detached = false
+style = 'green'
+tag_disabled = true
+
+[git_metrics]
+disabled = true
+
+[git_state]
+disabled = false
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = 'bold yellow'
+
+[git_status]
+disabled = false
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = 'bold red'
+
+[golang]
+disabled = true
+
+[gradle]
+disabled = true
+
+[guix_shell]
+disabled = true
+
+[haskell]
+disabled = false
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'haskell'
+version_format = '$raw'
+
+[haxe]
+disabled = true
+
+[helm]
+disabled = true
+
+[hg_branch]
+disabled = true
+
+[hostname]
+disabled = false
+format = "[$hostname]($style)\n"
+ssh_only = true
+style = 'cyan'
+trim_at = ''
+
+[java]
+disabled = true
+
+[jobs]
+disabled = true
+
+[julia]
+disabled = false
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'julia'
+version_format = '$raw'
+
+[kotlin]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[line_break]
+disabled = false
+
+[localip]
+disabled = true
+
+[lua]
+disabled = true
+
+[memory_usage]
+disabled = true
+
+[meson]
+disabled = true
+
+[nim]
+disabled = true
+
+[nix_shell]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[ocaml]
+disabled = true
+
+[opa]
+disabled = true
+
+[openstack]
+disabled = true
+
+[os]
+disabled = true
+
+[package]
+disabled = false
+format = '[$symbol $version]($style) '
+style = 'yellow'
+symbol = '📦'
+version_format = '$raw'
+
+[perl]
+disabled = true
+
+[php]
+disabled = true
+
+[pijul_channel]
+disabled = true
+
+[pulumi]
+disabled = true
+
+[purescript]
+disabled = true
+
+[python]
+disabled = false
+format = '[<$symbol( $version)(: $virtualenv)>]($style) '
+python_binary = 'python3'
+style = 'yellow'
+symbol = 'python'
+version_format = '$raw'
+
+[raku]
+disabled = true
+
+[red]
+disabled = true
+
+[rlang]
+detect_extensions = ['R', 'Rd', 'Rmd', 'Rproj']
+detect_files = ['']
+detect_folders = ['.Rproj.user']
+disabled = false
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'R'
+version_format = '$raw'
+
+[ruby]
+disabled = false
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'ruby'
+version_format = '$raw'
+
+[rust]
+disabled = false
+format = '[<$symbol( $version)>]($style) '
+style = 'yellow'
+symbol = 'rust'
+version_format = '$raw'
+
+[scala]
+disabled = true
+
+[shell]
+bash_indicator = "\\$"
+disabled = false
+fish_indicator = '🐠'
+format = '[$indicator]($style) '
+style = 'purple'
+zsh_indicator = '%'
+
+[shlvl]
+disabled = true
+
+[singularity]
+disabled = true
+
+[spack]
+disabled = true
+
+[status]
+disabled = false
+
+[sudo]
+disabled = true
+
+[swift]
+disabled = true
+
+[terraform]
+disabled = true
+
+[time]
+disabled = true
+
+[username]
+disabled = false
+format = '[$user]($style)[@](cyan)'
+show_always = false
+style_root = 'bold cyan'
+style_user = 'cyan'
+
+[vagrant]
+disabled = true
+
+[vlang]
+disabled = true
+
+[vcsh]
+disabled = true
+
+[zig]
+disabled = true

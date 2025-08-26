@@ -1,0 +1,11 @@
+[global]
+{{- if env "HTTP_PROXY" }}
+http-proxy-host = {{ env "HTTP_PROXY" | splitList ":" | rest | first | substr 2 -1 }}
+http-proxy-port = {{ env "HTTP_PROXY" | splitList ":" | last }}
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+ssl-authority-files = {{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+ssl-authority-files = /etc/ssl/certs/ca-certificates.crt
+{{- end }}
+ssl-trust-default-ca = yes

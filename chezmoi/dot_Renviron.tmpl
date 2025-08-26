@@ -1,0 +1,28 @@
+RSTUDIO_THEME_DARK=Dracula
+RSTUDIO_THEME_LIGHT=Xcode
+
+{{- if stat (joinPath .chezmoi.homeDir "git" "github" "acidgenomics" "r-acidgenomics-com") }}
+ACIDGENOMICS_REPO={{ .chezmoi.homeDir }}/git/github/acidgenomics/r-acidgenomics-com
+{{- end }}
+
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+CURL_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+DEFAULT_CA_BUNDLE_PATH={{ .chezmoi.homeDir }}/.local
+REQUESTS_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+SSL_CERT_FILE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
+CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+DEFAULT_CA_BUNDLE_PATH=/etc/ssl/certs
+REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+{{- end }}
+
+{{- if env "HTTP_PROXY" }}
+HTTP_PROXY={{ env "HTTP_PROXY" }}
+http_proxy={{ env "HTTP_PROXY" }}
+{{- end }}
+
+{{- if env "HTTPS_PROXY" }}
+HTTPS_PROXY={{ env "HTTPS_PROXY" }}
+https_proxy={{ env "HTTPS_PROXY" }}
+{{- end }}

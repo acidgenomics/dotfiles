@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# """
+# Bash shell configuration.
+# Refer to '~/.profile' file for POSIX shell configuration details.
+#
+# Source file:
+# {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
+#
+# Git repo:
+# https://github.com/acidgenomics/dotfiles/
+# """
+
+__dotfiles_bashrc() {
+    case "${BASH_VERSION:-}" in
+        '1.'* | '2.'* | '3.'*)
+            return 0
+            ;;
+    esac
+    [[ "$-" == *i* ]] || return 0
+    if [[ -f '/etc/bashrc' ]]
+    then
+        # shellcheck source=/dev/null
+        source '/etc/bashrc'
+    fi
+    if [[ -d "${HOME}/.bashrc.d" ]]
+    then
+        local rc_file
+        for rc_file in "${HOME}/.bashrc.d/"*
+        do
+            if [[ -f "$rc_file" ]]
+            then
+                # shellcheck source=/dev/null
+                source "$rc_file"
+            fi
+        done
+    fi
+    if [[ -f "${HOME}/.profile" ]]
+    then
+        # shellcheck source=/dev/null
+        source "${HOME}/.profile"
+    fi
+    return 0
+}
+
+__dotfiles_bashrc

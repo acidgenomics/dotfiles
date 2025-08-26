@@ -1,0 +1,968 @@
+"""
+" Vim configuration.
+" Updated 2025-08-21.
+"
+" Refer to my cheat sheet for usage details:
+" https://steinbaugh.com/posts/vim.html
+"""
+
+" Notes
+" ==============================================================================
+"
+" Consider moving useful notes documented here to the main Vim cheatsheet.
+"
+" Vim package manager
+" ------------------------------------------------------------------------------
+"
+" Create a folder named 'pack' inside your '.vim' configuration folder. Direct
+" subfolders of 'pack' can be used to organize packages/plugins into
+" collections.
+"
+" Put plugins that should be loaded at startup into:
+"   .vim/pack/<collection>/start/<plugin>
+"
+" Put plugins that should be added on demand with ':packadd' into:
+"   .vim/pack/<collection>/opt/<plugin>
+"
+" See also:
+" - https://shapeshed.com/vim-packages/
+" - https://hackingcpp.com/dev/vim_plugins.html
+"
+" Runtimepath
+" ------------------------------------------------------------------------------
+"
+" Check runtimepath (rtp) configuration with ':set runtimepath?' or
+" ':echo $VIMRUNTIME'.
+"
+" Neovim-specific commands
+" ------------------------------------------------------------------------------
+" - ':vs|:te': Vertically split a terminal (like ':vert term' in Vim).
+"   https://github.com/neovim/neovim/issues/3192
+"
+" Language server protocol (LSP) support and plugins
+" ------------------------------------------------------------------------------
+"
+" For additional LSP configuration, consider adding support for
+" mason.nvim or nvim-cmp:
+" - https://github.com/hrsh7th/nvim-cmp
+" - https://github.com/williamboman/mason.nvim
+
+" Pre-flight checks
+" ==============================================================================
+
+let g:is_nvim=has('nvim')
+let g:is_vim8=v:version >= 800 ? 1 : 0
+
+" Check that Vim version matches minimum requirement.
+if g:is_vim8 && !g:is_nvim && v:version < 801
+    :echom "ERROR: Vim 8.1+ is required for '~/.vimrc' config."
+    finish
+endif
+
+" Check that Neovim version matches minimum requirement.
+if g:is_nvim && !has('nvim-0.6')
+    :echom "ERROR: nvim 0.6+ is required for '~/.vimrc' config."
+    finish
+endif
+
+" Disable vi compatibility mode.
+set nocompatible
+
+" Having longer updatetime (default is 4000 ms = 4s) leads to noticeable delays
+" and poor user experience.
+set updatetime=300
+
+" Global variables
+" ==============================================================================
+
+" Refer to ':help expand' for details.
+" Here '<sfile>' refers to sourced script file name, i.e. '~/.vimrc'.
+let g:user_home=expand('<sfile>:p:h')
+let g:vim_home=join([g:user_home, '.vim'], '/')
+
+let g:plugins_home=join([g:vim_home, 'pack', 'dist', 'start'], '/')
+let g:themes_home=join([g:vim_home, 'pack', 'theme', 'start'], '/')
+let g:vim_plug_home=join([g:vim_home, 'plugged'], '/')
+
+let g:koopa_color_mode=$KOOPA_COLOR_MODE
+let g:koopa_prefix=$KOOPA_PREFIX
+
+" > let g:arch=substitute(system('uname -m'), '\n', '', '')
+
+" Highlighting
+" ==============================================================================
+
+" Enable syntax highlighting.
+syntax on
+
+" Note that 'colorscheme' definition (e.g. dracula) can clear all user-defined
+" highlight groups. Use ':autocmd ColorScheme' before 'colorscheme' command to
+" ensure that the highlight group gets created and is not cleared by future
+" 'colorscheme' commands. See ':help :colorscheme' for details.
+
+" Highlight TODO or FIXME comments.
+" > highlight Todos cterm=bold ctermbg=red ctermfg=white gui=bold guibg=red \
+" >     guifg=white
+" > :autocmd ColorScheme * highlight Todos cterm=bold ctermbg=red \
+" >     ctermfg=white gui=bold guibg=red guifg=white
+" > :match Todos /\(TODO\|FIXME\)/
+
+" See also:
+" - https://vim.fandom.com/wiki/Highlight_unwanted_spaces
+" - https://github.com/nasamuffin/dotfiles/blob/master/vimrc
+
+" Key mppings (bindings)
+" ==============================================================================
+
+" Refer to ':help localleader' for details.
+let mapleader=','
+let maplocalleader="\\"
+
+" Fix backspace key to work as expected.
+" https://unix.stackexchange.com/a/307974
+set backspace=indent,eol,start
+
+" Normal mode
+" ------------------------------------------------------------------------------
+
+" 'w!' still failed? Try 'w!!' to write as root.
+cmap w!! w !sudo tee >/dev/null %
+
+" Edit my vimrc file.
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+
+" Source my vimrc file.
+nnoremap <leader>sv :source $MYVIMRC<cr>
+
+" Add blank line without entering insert mode.
+nnoremap <enter> o<esc>
+" > nnoremap <s-enter> O<esc>
+
+" Enable code fold toggling with the spacebar.
+nnoremap <space> za
+
+" Delete line without copying to clipboard, using leader prefix mapping.
+" https://stackoverflow.com/a/11993928/3911732
+nnoremap <leader>d "_dd
+
+" Split navigation keys:
+"
+" - Ctrl+J move to the split below
+" - Ctrl+K move to the split above
+" - Ctrl+L move to the split to the right
+" - Ctrl+H move to the split to the left
+"
+" In other words, press Ctrl plus the standard VIM movement key to move to a
+" specific pane.
+
+nnoremap <c-j> <c-w><c-j>
+nnoremap <c-k> <c-w><c-k>
+nnoremap <c-l> <c-w><c-l>
+nnoremap <c-h> <c-w><c-h>
+
+" Surround current word in single quotes.
+nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
+
+" Surround current word in double quotes.
+nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
+
+" Insert mode
+" ------------------------------------------------------------------------------
+
+" Escape from insert mode without stretching to hit Esc key.
+inoremap jk <esc>
+
+" Delete line in insert mode using Ctrl+d.
+inoremap <c-d> <esc>ddi
+
+" Visual mode
+" ------------------------------------------------------------------------------
+
+" Delete, paste, and yank more intuitively.
+" https://superuser.com/questions/321547/
+
+" > vnoremap P "0P
+" > vnoremap d "0d
+" > vnoremap p "0p
+" > vnoremap y "0y
+
+" Muscle memory
+" ------------------------------------------------------------------------------
+
+" Enforce muscle memory of HJKL instead of arrow keys.
+" It's better practice to escape back to normal mode and navigate there.
+" Note that this will break trackpad and can do weird things on macOS.
+" > noremap <up> <nop>
+" > noremap <down> <nop>
+" > noremap <left> <nop>
+" > noremap <right> <nop>
+
+" Enforce muscle memory of JK exit instead of Esc.
+" > inoremap <esc> <nop>
+
+" Mapping Esc to Caps Lock is a good ergonomic alternative.
+" On macOS: System Preferences > Keyboard > Modifier Keys...
+" Change Caps Lock Key to Escape.
+" Note that Esc will continue to work with this setup.
+
+" Text formatting
+" ==============================================================================
+
+" Always enforce UTF-8.
+set encoding=utf-8
+
+" Wrapping and margins
+" ------------------------------------------------------------------------------
+
+" Enable soft wrapping.
+" Use nowrap to disable.
+set wrap
+
+" Enable hard line wrapping width.
+" Can be generally annoying.
+" Consider enabling for specific file types instead.
+" > set textwidth=80
+
+" Disable automatic line breaks.
+" https://stackoverflow.com/questions/2280030
+set textwidth=0
+set wrapmargin=0
+
+" Set the right margin color column.
+" https://stackoverflow.com/questions/2182427
+"
+" Can define relative to 'textwidth' (hard wrapping) with:
+" > set colorcolumn=+1
+"
+" For 80c width, use 80 + 1.
+set colorcolumn=81
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+set signcolumn=yes
+
+" Spaces and tabs
+" ------------------------------------------------------------------------------
+
+" Smart tab mode.
+set smarttab
+
+" Expand (detab) tab to spaces.
+" This can be annoying when working with TSV files.
+set expandtab
+
+" When indenting with '>', shift as 4 spaces.
+set shiftwidth=4
+
+" Tab columns will display as 4 spaces.
+set softtabstop=4
+
+" Display tab (\t) visually as 4 spaces.
+" Can also set using 'ts' instead of 'tabstop'.
+set tabstop=4
+
+" Entab files.
+" This is often useful for git configuration files.
+" https://stackoverflow.com/questions/9104706
+" > :set noexpandtab tabstop=4 shiftwidth=4
+" > :%retab!
+
+" Detab files.
+" https://stackoverflow.com/a/323014/3911732
+" > :set expandtab tabstop=4 shiftwidth=4
+" > :%retab
+
+" Whitespace
+" ------------------------------------------------------------------------------
+
+" Enable file-type-specific indentation.
+if has('autocmd')
+    filetype on
+    filetype indent on
+    filetype plugin on
+endif
+
+" Whitespace indicators.
+if has('multi_byte')
+    set list listchars=tab:»·,trail:·
+else
+    set list listchars=tab:>-,trail:.
+endif
+
+" Navigation
+" ==============================================================================
+
+" Mouse integration
+" ------------------------------------------------------------------------------
+
+" Enable mouse integration that attempts to play nicely with tmux.
+" 'a' means 'all' here.
+set mouse=a
+if !g:is_nvim
+    " Don't set to 'xterm2' here, very buggy.
+    " https://unix.stackexchange.com/questions/50733/
+    " https://github.com/microsoft/terminal/issues/5454
+    set ttymouse=sgr
+endif
+
+" Window management
+" ------------------------------------------------------------------------------
+
+set splitbelow
+set splitright
+
+" Interface elements
+" ------------------------------------------------------------------------------
+
+" Highlight current line.
+set cursorline
+
+" Show command in bottom bar.
+set showcmd
+
+" Always show status line.
+" Disable with '0'.
+set laststatus=2
+
+" Always show ruler at bottom.
+set ruler
+
+" Command mode menus.
+set wildmenu
+set wildmode=list:longest,full
+
+" Line numbers
+" ------------------------------------------------------------------------------
+
+" Enable line numbers.
+set number
+
+" Disable line numbers.
+" Using this currently because it's easier to paste on Windows with tmux.
+" > set nonumber
+
+" Search (matching)
+" ------------------------------------------------------------------------------
+
+set hlsearch
+set ignorecase
+set incsearch
+set showmatch
+set smartcase
+
+" Use regular expression matching by default.
+" https://github.com/nasamuffin/dotfiles/blob/master/vimrc
+" > :nnoremap / /\v
+" > :cnoremap %s/ %s/\v
+" > :cnoremap s/ s/\v
+" > :xnoremap '<,'>s/ '<,'>s/\v
+" > :xnoremap / /\v
+" > :xnoremap s/ s/\v
+
+" Folding
+" ------------------------------------------------------------------------------
+
+" foldmethod alternatives: indent, syntax
+set foldmethod=marker
+
+" Disable collapsed folds by default.
+" Restore folds with 'zc'.
+" https://stackoverflow.com/questions/8316139
+" Restore folds with 'zc'.
+set foldlevelstart=99
+set nofoldenable
+
+" File management
+" ==============================================================================
+
+" Disable creation of 'foo~' files.
+" These are annoying and create file system cruft.
+set nobackup
+" > set nowritebackup
+
+" Disable the swap file, if desired.
+" This also creates FS cruft but is useful for recovery.
+" > set noswapfile
+
+" vim-galore tips
+" ==============================================================================
+
+" Some fantastic usability vips from the 'vim-galore' guide.
+" Refer to https://github.com/mhinz/vim-galore for details.
+
+" Disable audible and visual bells
+" ------------------------------------------------------------------------------
+
+" This is often annoying when scrolling inside a document using mouse or
+" trackpad input instead of the keyboard.
+
+set noerrorbells
+set novisualbell
+set t_vb=
+
+" Don't lose selection when shifting sidewards
+" ------------------------------------------------------------------------------
+
+" If you select one or more lines, you can use `<` and `>` for shifting them
+" sidewards. Unfortunately you immediately lose the selection afterwards.
+"
+" You can use `gv` to reselect the last selection (see `:h gv`), thus you can
+" work around it like this:
+
+xnoremap <  <gv
+xnoremap >  >gv
+
+" Now you can use `>>>>>` on your visual selection without any problems.
+" The same can be achieved using `.`, which repeats the last change.
+
+" Quickly move current line
+" ------------------------------------------------------------------------------
+
+" These mappings also take a count, so 2]e moves the current line 2 lines below.
+
+nnoremap [e  :<c-u>execute 'move -1-'. v:count1<cr>
+nnoremap ]e  :<c-u>execute 'move +'. v:count1<cr>
+
+" Quickly add empty lines
+" ------------------------------------------------------------------------------
+
+" Now 5[<space> inserts 5 blank lines above the current line.
+
+nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
+nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
+
+" Saner behavior of n and N
+" ------------------------------------------------------------------------------
+
+" The direction of n and N depends on whether / or ? was used for searching
+" forward or backward respectively. This is pretty confusing to me.
+"
+" If you want n to always search forward and N backward, use this:
+
+nnoremap <expr> n  'Nn'[v:searchforward]
+xnoremap <expr> n  'Nn'[v:searchforward]
+onoremap <expr> n  'Nn'[v:searchforward]
+
+nnoremap <expr> N  'nN'[v:searchforward]
+xnoremap <expr> N  'nN'[v:searchforward]
+onoremap <expr> N  'nN'[v:searchforward]
+
+" Cursor style
+" ------------------------------------------------------------------------------
+
+" This simply tells Vim to print a certain sequence of characters (escape
+" sequence) when entering/leaving insert mode. The underlying terminal, or
+" programs like tmux that sit between Vim and the terminal, will process and
+" evaluate it.
+"
+" There's one drawback though: there are many terminal emulator
+" implementations and not all use the same sequences for doing the same things.
+" The sequences used above might not work with your implementation. Your
+" implementation might not even support different cursor styles.
+"
+" Cursor options (replace the number after '\e['):
+"
+" - 0: blinking block.
+" - 1: blinking block.
+" - 2: steady block.
+" - 3: blinking underline.
+" - 4: steady underline.
+" - 5: blinking bar.
+" - 6: steady bar.
+"
+" See also:
+" - https://nickjanetakis.com/blog/change-your-vim-cursor-from-a-block-to-
+"     line-in-normal-and-insert-mode
+" - https://stackoverflow.com/questions/6488683/
+
+if !has('gui_running') && has('macunix') && !g:is_nvim
+    let &t_EI = "\e[2 q"
+    let &t_SI = "\e[6 q"
+    let &t_SR = "\e[4 q"
+    " Legacy approach that handles tmux:
+    " > if empty($TMUX)
+    " >     let &t_SI="\<Esc>]50;CursorShape=1\x7"
+    " >     let &t_EI="\<Esc>]50;CursorShape=0\x7"
+    " >     let &t_SR="\<Esc>]50;CursorShape=2\x7"
+    " > else
+    " >     let &t_SI="\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    " >     let &t_EI="\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+    " >     let &t_SR="\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
+    " > endif
+endif
+
+" Smarter cursorline
+" ------------------------------------------------------------------------------
+
+" I love the cursorline, but I only want to use it in the current window and not
+" when being in insert mode:
+
+autocmd InsertLeave,WinEnter * set cursorline
+autocmd InsertEnter,WinLeave * set nocursorline
+
+" Terminal
+" ==============================================================================
+
+{{- if lookPath "bash" }}
+" Set default shell to Bash.
+set shell={{ lookPath "bash" }}
+{{- end }}
+
+" Automatically enter insert mode for terminal shells.
+" Also need to disable line numbers by default on Neovim.
+"
+" See also:
+" - :help :terminal
+" - https://vi.stackexchange.com/questions/3670/
+"     how-to-enter-insert-mode-when-entering-neovim-terminal-pane
+" - https://www.reddit.com/r/neovim/comments/akcp97/
+"     how_to_automatically_enter_insert_mode_on_opening/
+" - https://stackoverflow.com/questions/63906439/
+"     how-to-disable-line-numbers-in-neovim-terminal
+" - https://vi.stackexchange.com/questions/22307/
+"     neovim-go-into-insert-mode-when-clicking-in-a-terminal-in-a-pane
+if g:is_nvim
+    autocmd TermOpen * setlocal nonumber norelativenumber
+    autocmd TermOpen * startinsert
+    augroup terminal_setup | au!
+        autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i
+    augroup end
+endif
+
+" Clipboard / pasteboard
+" ==============================================================================
+
+" Enable copy to clipboard (for macOS).
+"
+" Note that this won't work for PuTTY on Windows. Instead, hold down SHIFT
+" and then you can highlight with the mouse. Yank doesn't integrate well
+" with the Windows clipboard unless you use X11 forwarding.
+"
+" See also:
+" - https://stackoverflow.com/questions/677986
+" - https://stackoverflow.com/a/4313348
+" - https://vi.stackexchange.com/questions/14486/
+
+if has('macunix')
+    set clipboard=unnamed
+    if g:is_nvim
+        set clipboard+=unnamedplus
+    endif
+endif
+
+" Plugins
+" ==============================================================================
+
+" Plugins declared here are managed by vim-plug.
+" https://github.com/junegunn/vim-plug
+"
+" Useful commands:
+" - ':PlugInstall' to install plugins.
+" - ':PlugUpdate' to update plugins.
+"
+" Consider including:
+" - 'chrisbra/csv.vim'
+" - 'github/copilot.vim'
+" - 'tpope/vim-rails'
+" - 'vim-ruby/vim-ruby'
+"
+" Additional useful color schemes:
+" > Plug 'altercation/vim-colors-solarized'
+" > Plug 'overcache/NeoSolarized'  " better truecolor support?
+
+" This must be defined before markdown plugin is loaded.
+let g:pandoc#filetypes#pandoc_markdown = 0
+
+call plug#begin(vim_plug_home)
+
+" tabular must be installed before vim-markdown.
+Plug 'godlygeek/tabular'
+
+Plug 'airblade/vim-gitgutter'
+Plug 'dense-analysis/ale'
+Plug 'editorconfig/editorconfig-vim'
+Plug 'github/copilot.vim'
+Plug 'jlanzarotta/bufexplorer'
+Plug 'junegunn/fzf.vim'
+Plug 'junegunn/rainbow_parentheses.vim'
+Plug 'mhinz/vim-grepper'
+Plug 'mhinz/vim-signify'
+Plug 'nanotee/zoxide.vim'
+Plug 'preservim/nerdtree'
+Plug 'preservim/vim-markdown'
+Plug 'psf/black'
+Plug 'quarto-dev/quarto-vim'
+Plug 'rust-lang/rust.vim'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-surround'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-pandoc/vim-markdownfootnotes'
+Plug 'vim-pandoc/vim-pandoc'
+Plug 'vim-pandoc/vim-pandoc-syntax'
+Plug 'vim-pandoc/vim-rmarkdown'
+
+if g:is_nvim
+    Plug 'neovim/nvim-lspconfig'
+    " > Plug 'williamboman/mason-lspconfig.nvim'
+    " > Plug 'williamboman/mason.nvim'
+    if executable('R')
+        Plug 'jalvesaq/Nvim-R'
+    endif
+endif
+
+" Automatic dark/light switching on macOS.
+" Consider replacing this with:
+" https://github.com/f-person/auto-dark-mode.nvim
+if has('gui_running') && has('macunix')
+    Plug 'L-TChen/auto-dark-mode.vim'
+endif
+
+" Color scheme plugins.
+if g:koopa_color_mode == 'light' || (has('gui_running') && has('macunix'))
+    Plug 'rakr/vim-one'
+    Plug 'vim-airline/vim-airline-themes'
+    " Iceberg defines a Nord-like light theme, but the cursor is currently too
+    " hard to see in NORMAL mode.
+    " > Plug 'cocopon/iceberg.vim',
+    " > Plug 'lifepillar/vim-solarized8',
+    " > Plug 'vim-airline/vim-airline-themes',
+else
+    if !isdirectory(join([themes_home, 'dracula_pro'], '/'))
+        Plug 'dracula/vim', { 'as': 'dracula' }
+    endif
+    " > Plug 'nordtheme/vim'
+endif
+
+call plug#end()
+
+" Automatically install missing plugins on startup.
+" https://github.com/junegunn/vim-plug/wiki/
+"     extra#automatically-install-missing-plugins-on-startup
+autocmd VimEnter *
+    \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+    \|   PlugInstall --sync | q
+    \| endif
+
+" ALE
+" ------------------------------------------------------------------------------
+
+" Configuration details:
+" - https://github.com/dense-analysis/ale
+" - https://github.com/dense-analysis/ale/blob/master/doc/ale-python.txt
+" - https://github.com/dense-analysis/ale/blob/master/ale_linters/
+"     python/ruff.vim
+
+" Useful commands:
+" > :ALEInfo
+" > :ALEFix
+" > :ALEFixSuggest
+
+" > let g:ale_completion_enabled = 1
+" > let g:ale_disable_lsp = 1
+" > let g:ale_linters_explicit = 1
+" > let g:ale_use_neovim_diagnostics_api = 1
+" > let g:ale_warn_about_trailing_whitespace = 0
+
+let g:ale_fix_on_save = 1
+let g:ale_fixers = {
+    \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+    \ 'python': ['ruff'],
+    \ }
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_linters = {
+    \ 'python': ['ruff'],
+    \ 'r': ['languageserver'],
+    \ }
+let g:ale_python_black_options='--line-length=80'
+" > let g:ale_python_ruff_options='--ignore F401'
+let g:ale_python_ruff_format_options='--line-length=80'
+
+if g:is_nvim
+    " If you're running ALE in Neovim with nvim-lspconfig for configuring
+    " particular language servers, ALE will automatically disable its LSP
+    " functionality for any language servers configured with nvim-lspconfig by
+    " default.
+    let g:ale_disable_lsp = 'auto'
+    " If you are running ALE in combination with another LSP client, you may
+    " wish to disable ALE's LSP functionality entirely. You can change the
+    " setting to 1 to always disable all LSP functionality.
+    " > let g:ale_disable_lsp = 1
+    let g:ale_use_neovim_diagnostics_api = 1
+endif
+
+" NERDTree
+" ------------------------------------------------------------------------------
+
+" Consider using nerdtree-git-plugin.
+" https://github.com/Xuyuanp/nerdtree-git-plugin
+
+" Map a specific key or shortcut to open NERDTree.
+map <C-n> :NERDTreeToggle<CR>
+
+" Always open a NERDTree automatically at startup.
+" > autocmd vimenter * NERDTree
+
+" Open a NERDTree automatically when vim starts up if no files were specified.
+" > autocmd StdinReadPre * let s:std_in=1
+" > autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+" Open NERDTree automatically when vim starts up on opening a directory.
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter *
+    \ if argc() == 1 && isdirectory(argv()[0]) && !exists('s:std_in')
+    \ | exe 'NERDTree' argv()[0]
+    \ | wincmd p
+    \ | ene |
+    \ exe 'cd '.argv()[0]
+    \ | endif
+
+" Close vim if the only window left open is a NERDTree.
+autocmd bufenter *
+    \ if (winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree())
+    \ | q | endif
+
+let g:NERDTreeDirArrowCollapsible='▾'
+let g:NERDTreeDirArrowExpandable='▸'
+let g:NERDTreeMapCloseChildren='-'
+let g:NERDTreeMapOpenRecursively='+'
+let g:NERDTreeMinimalUI=1
+let g:NERDTreeWinSize=24
+
+" Leave 80 chars for editing.
+" > let g:NERDTreeWinSize = str2nr(system('expr $COLUMNS - 81'))
+
+" Nvim-R
+" ------------------------------------------------------------------------------
+
+" Documentation details:
+" - https://raw.githubusercontent.com/jalvesaq/Nvim-R/master/doc/Nvim-R.txt
+" - https://github.com/randy3k/radian
+
+let g:R_app = "radian"
+let g:R_args = []
+let g:R_assign=0
+let g:R_bracketed_paste = 1
+let g:R_cmd = "R"
+let g:R_hl_term = 0
+let g:R_indent_commented=0
+let g:R_indent_ess_comments=1
+let g:R_min_editor_width=80
+let g:R_notmuxconf=1
+let g:R_rcomment_string='## '
+let g:R_rconsole_height=20
+let g:R_rconsole_width=80
+let g:R_syntax_folding=1
+
+" SimpylFold
+" ------------------------------------------------------------------------------
+
+" Useful for Python IDE.
+" https://github.com/tmhedberg/SimpylFold
+" > set foldmethod=indent
+" > let g:SimpylFold_docstring_preview=1
+
+" airline
+" ------------------------------------------------------------------------------
+
+" Consider adding tmuxline integration.
+" https://github.com/edkolev/tmuxline.vim
+
+" Tab line.
+" > let g:airline#extensions#tabline#enabled=1
+" > let g:airline#extensions#tabline#formatter='default'
+" > let g:airline#extensions#tabline#left_alt_sep='|'
+" > let g:airline#extensions#tabline#left_sep=' '
+
+" black
+" ------------------------------------------------------------------------------
+
+" https://black.readthedocs.io/en/stable/integrations/editors.html#vim
+
+" Use our system install from koopa rather than a venv.
+let g:black_use_virtualenv=0
+
+" Run black automatically on save.
+" > augroup black_on_save
+" >     autocmd!
+" >     autocmd BufWritePre *.py Black
+" > augroup end
+
+" copilot
+" ------------------------------------------------------------------------------
+
+" Disable Copilot by default.
+let g:copilot_enabled = v:false
+
+" editorconfig-vim
+" ------------------------------------------------------------------------------
+
+" Can debug settings with:
+" > let g:EditorConfig_verbose=1
+" > :verbose set expandtab? shiftwidth? softtabstop? tabstop?
+"
+" See also:
+" - https://github.com/editorconfig/editorconfig-vim/issues/56
+" - https://stackoverflow.com/questions/31295455/
+" - https://stackoverflow.com/questions/64051846/
+
+let g:EditorConfig_core_mode='vim_core'
+
+" NOTE If we enable this, need to selectively load the plugin, depending on
+" whether 'editorconfig' is installed.
+" > let g:EditorConfig_core_mode='external_command'
+" > let g:EditorConfig_exec_path='editorconfig'
+
+let g:EditorConfig_exclude_patterns=['fugitive://.*']
+
+" Potentially useful:
+" > autocmd FileType gitcommit let b:EditorConfig_disable = 1
+" > let g:EditorConfig_disable_rules = ['trim_trailing_whitespace']
+" > let g:EditorConfig_core_vimscript_debug = 1
+
+autocmd FileType json setlocal
+    \ shiftwidth=2
+    \ softtabstop=2
+
+" fzf
+" ------------------------------------------------------------------------------
+
+" How to update rtp with variable in path:
+" - https://vi.stackexchange.com/questions/11601/
+" - https://superuser.com/questions/806595/
+"
+" Check that configuration is enabled with ':Files' command.
+"
+" See also:
+" - https://github.com/junegunn/fzf/blob/master/README-VIM.md
+" - https://github.com/junegunn/fzf.vim#commands
+" - https://github.com/junegunn/fzf.vim/issues/1102
+" - https://www.reddit.com/r/vim/comments/ifegzw/
+"     how_do_i_add_fzf_using_vim_8_packages/
+
+let g:fzf_dir = join([g:koopa_prefix, 'opt', 'fzf'], '/')
+if isdirectory(g:fzf_dir)
+    " The 'set rtp+=' approach only works for a hard-coded path, and does not
+    " support variables. For variables, we have to use 'let &rtp' instead. The
+    " comma is necessary here to deliniate the directory in the path string.
+    let &rtp.=','.g:fzf_dir
+    " Ensure we can use ':fzf' and ':Fzf' aliases in addition to ':FZF'.
+    cnoreabbrev fzf FZF
+    command Fzf FZF
+endif
+
+" jedi-vim
+" ------------------------------------------------------------------------------
+
+" This plugin can freak out in an active conda environment.
+
+" > let g:jedi#auto_initialization=0
+" > let g:jedi#auto_vim_configuration=1
+" > let g:jedi#completions_enabled=0
+" > let g:jedi#popup_on_dot=0
+" > let g:jedi#popup_select_first=1
+" > let g:jedi#show_call_signatures=1
+" > let g:jedi#use_splits_not_buffers='left'
+" > let g:jedi#use_tabs_not_buffers=1
+
+" prettier
+" ------------------------------------------------------------------------------
+
+" Can manually trigger formatting with ':Prettier'.
+
+" > let g:prettier#autoformat_config_files=['.prettierrc']
+" > let g:prettier#autoformat_config_present=1
+let g:prettier#autoformat=1
+let g:prettier#autoformat_require_pragma=0
+let g:prettier#config#require_pragma='false'
+let g:prettier#config#tab_width=2
+let g:prettier#config#use_tabs='false'
+
+" rainbow_parentheses
+" ------------------------------------------------------------------------------
+
+" Activation based on file type
+augroup rainbow_lisp
+    autocmd!
+    autocmd FileType clojure,lisp,r,scheme RainbowParentheses
+augroup END
+
+" startify
+" ------------------------------------------------------------------------------
+
+" Disable the plugin, if necessary.
+" > let g:startify_disable_at_vimenter=1
+
+let g:startify_custom_header=''
+
+" vim-markdown
+" ------------------------------------------------------------------------------
+
+" Completely disable Markdown-specific code folding.
+" > let g:vim_markdown_folding_disabled=1
+
+" Potentially useful:
+" > let g:vim_markdown_folding_style_pythonic=1
+" > let g:vim_markdown_override_foldtext=0
+
+let g:vim_markdown_folding_level=2
+
+" Add support for ronn files.
+autocmd BufNewFile,BufFilePre,BufRead *.ronn set filetype=markdown
+
+" Disable annoying list indentation handling.
+" https://github.com/preservim/vim-markdown/issues/126#issuecomment-1430463951
+autocmd BufNewFile,BufRead *.md filetype plugin indent off
+
+" vim-pandoc
+" ------------------------------------------------------------------------------
+
+" How to disable formatting of Markdown files:
+" - ftdetect/pandoc.vim file
+" - https://github.com/vim-pandoc/vim-pandoc/issues/70
+" - https://github.com/vim-pandoc/vim-pandoc/issues/382
+" - https://www.reddit.com/r/vim/comments/lafqyq/vimpandoc_markdown_conflict/
+
+" NOTE This must come before the plugin activation step.
+" > let g:pandoc#filetypes#pandoc_markdown = 0
+
+" vim-pandoc-syntax
+" ------------------------------------------------------------------------------
+
+let g:pandoc#syntax#conceal#blacklist = ['strikeout', 'list', 'quotes']
+
+" Colors (theme)
+" ==============================================================================
+
+if has('termguicolors')
+    set termguicolors
+endif
+
+" Dynamically set dark/light mode, if supported.
+" https://apas.gr/2018/11/dark-mode-macos-safari-iterm-vim/
+if (has('gui_running') && has('macunix')) || g:koopa_color_mode == 'light'
+    set background=light
+    if isdirectory(join([vim_plug_home, 'vim-one'], '/'))
+        colorscheme one
+        let g:airline_theme='one'
+    endif
+    " > if isdirectory(join([vim_plug_home, 'iceberg.vim'], '/'))
+    " >     colorscheme iceberg
+    " > endif
+    " > if isdirectory(join([vim_plug_home, 'vim-solarized8'], '/'))
+    " >     colorscheme solarized8
+    " >     let g:airline_theme='solarized'
+    " > endif
+else
+    set background=dark
+    if isdirectory(join([themes_home, 'dracula_pro'], '/'))
+        packadd! dracula_pro
+        colorscheme dracula_pro
+    elseif isdirectory(join([vim_plug_home, 'dracula'], '/'))
+        colorscheme dracula
+    endif
+    " > if isdirectory(join([vim_plug_home, 'nord-vim'], '/'))
+    " >     colorscheme nord
+    " > endif
+endif

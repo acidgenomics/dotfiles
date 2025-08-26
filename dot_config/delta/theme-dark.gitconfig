@@ -1,5 +1,0 @@
-[delta]
-    features = theme_dark
-[delta "theme_dark"]
-    dark = true
-    syntax-theme = Dracula

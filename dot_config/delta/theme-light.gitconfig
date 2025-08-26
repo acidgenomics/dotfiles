@@ -1,5 +1,0 @@
-[delta]
-    features = theme_light
-[delta "theme_light"]
-    light = true
-    syntax-theme = Solarized (light)

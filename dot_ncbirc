@@ -1,9 +1,0 @@
-# """
-# NCBI tools configuration.
-# @note Updated 2022-02-07.
-#
-# @seealso
-# - https://twitter.com/dpryan79/status/1490607953291972609
-# """
-
-BLAST_USAGE_REPORT=false

@@ -8,16 +8,7 @@
 .positron-server/
 .vscode-server/
 {{- end }}
-LICENSE
 {{- if ne .chezmoi.os "darwin" }}
-Library/
-{{- end }}
-README.md
-develop
-etc/
-install
-todo.org
-uninstall
-{{ if ne .chezmoi.os "darwin" }}
 .terminfo/
+Library/
 {{- end }}

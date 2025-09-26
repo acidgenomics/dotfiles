@@ -240,7 +240,9 @@
   "terminal.integrated.cursorStyle": "block",
   "terminal.integrated.defaultLocation": "editor",
   "terminal.integrated.defaultProfile.linux": "bash",
+{{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.defaultProfile.osx": "bash",
+{{- end }}
   "terminal.integrated.enableMultiLinePasteWarning": "never",
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.env.osx": {
@@ -248,6 +250,7 @@
     "R_HOME": "/Library/Frameworks/R.framework/Resources"
   },
 {{- end }}
+  "terminal.integrated.enableFileLinks": "off",
   "terminal.integrated.fontSize": 16,
   "terminal.integrated.fontWeightBold": "normal",
   "terminal.integrated.inheritEnv": false,

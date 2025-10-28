@@ -156,6 +156,7 @@
 .tox/
 .venv
 .venv/
+.venv*/
 .vscode-server-extensions/
 .vscode/
 .webassets-cache

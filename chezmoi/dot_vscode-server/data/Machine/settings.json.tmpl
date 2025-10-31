@@ -6,8 +6,9 @@
   "python.condaPath": "{{ lookPath "conda" }}",
 {{- end }}
 {{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
-  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3"
+  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
 {{- else if lookPath "python3" }}
-  "python.defaultInterpreterPath": "{{ lookPath "python3" }}"
+  "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
 {{- end }}
+  "terminal.integrated.stickyScroll.enabled": false
 }

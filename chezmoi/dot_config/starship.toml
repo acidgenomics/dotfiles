@@ -93,6 +93,18 @@ disabled = true
 [env_var]
 disabled = true
 
+[env_var.SLURM_SUBMIT_HOST]
+disabled = false
+format = "via [slurm $env_value]($style) "
+
+# > [env_var.SLURM_TOPOLOGY_ADDR]
+# > disabled = false
+# > format = "[$env_value]($style) "
+
+# > [env_var.SLURM_TOPOLOGY_ADDR_PATTERN]
+# > disabled = false
+# > format = "[$env_value]($style) "
+
 [erlang]
 disabled = true
 

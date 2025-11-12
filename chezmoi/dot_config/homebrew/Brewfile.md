@@ -53,11 +53,13 @@ Updated 2024-12-19.
 - neovide
 - netnewswire
 - nordvpn
+- omnidb
 - onyx
 - oracle-jdk
 - osxfuse
 - pacifist
 - pastebot
+- pgadmin4
 - plex-media-server
 - positron
 - powershell

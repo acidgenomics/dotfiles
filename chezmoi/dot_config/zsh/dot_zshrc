@@ -3,12 +3,6 @@
 # """
 # Z shell (Zsh) configuration.
 # Refer to '~/.profile' file for POSIX shell configuration details.
-#
-# Source file:
-# {{ .chezmoi.sourceDir }}{{ .chezmoi.pathSeparator }}{{ .chezmoi.sourceFile }}
-#
-# Git repo:
-# https://github.com/acidgenomics/dotfiles/
 # """
 
 __dotfiles_zshrc() {

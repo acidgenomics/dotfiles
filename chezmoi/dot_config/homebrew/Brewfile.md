@@ -10,6 +10,7 @@ Updated 2024-12-19.
 - adobe-dng-converter
 - aerial
 - airfoil
+- alfred
 - anaconda
 - audacity
 - audio-hijack
@@ -80,11 +81,11 @@ Updated 2024-12-19.
 - tor-browser
 - tower
 - vanilla
+- vip-access
 - virtualbox
 - vscodium
 - webex
 - wine-stable
-- xld
 
 ## Cask reinstallation
 

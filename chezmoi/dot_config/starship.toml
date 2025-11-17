@@ -1,6 +1,6 @@
 add_newline = true
-command_timeout = 5000
-scan_timeout = 30
+command_timeout = 1000
+scan_timeout = 100
 
 [aws]
 disabled = true

@@ -9,16 +9,24 @@ Dracula configuration:
 https://draculatheme.com/pygments
 """
 
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 from copy import deepcopy
 from IPython.utils.PyColorize import linux_theme, theme_table
+{{- end }}
 
 # pylint: disable=undefined-variable
 c = get_config()  # noqa
 
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 dracula = deepcopy(linux_theme)
 dracula.base = "dracula"
 theme_table["dracula"] = dracula
+{{- end }}
 
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 c.TerminalInteractiveShell.colors = "dracula"
+{{- else }}
+c.TerminalInteractiveShell.colors = "Neutral"
+{{- end }}
 c.TerminalInteractiveShell.editor = "nvim"
 c.TerminalInteractiveShell.true_color = True

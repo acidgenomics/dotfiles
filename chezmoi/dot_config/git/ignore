@@ -19,6 +19,7 @@
 *.cram
 *.cram.crai
 *.crt
+*.csv
 *.db
 *.der
 *.dpkg-old
@@ -58,6 +59,7 @@
 *.mtx
 *.o
 *.out
+*.parquet
 *.pdb
 *.pickle
 *.pdf
@@ -88,6 +90,8 @@
 *.utf8.md
 *.webloc
 *.xenium
+*.xls
+*.xlsx
 *.xz
 *.zip
 *.zwc

@@ -81,6 +81,7 @@
   "github.copilot.enable": {
     "*": false
   },
+  "github.copilot.nextEditSuggestions.enabled": true,
   "githubPullRequests.defaultMergeMethod": "squash",
   "githubPullRequests.fileListLayout": "tree",
   "githubPullRequests.pullBranch": "never",
@@ -103,7 +104,9 @@
   "hadolint.hadolintPath": "{{ lookPath "hadolint" }},
 {{- end }}
   "html.format.wrapLineLength": 0,
+  "http.experimental.systemCertificatesV2": true,
   "http.proxyStrictSSL": true,
+  "http.systemCertificatesNode": true,
 {{- if lookPath "isort" }}
   "isort.args": [
     "--profile",
@@ -160,7 +163,8 @@
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python3",
   "python.experiments.enabled": false,
   "python.interpreter.infoVisibility": "always",
-  "python.terminal.activateEnvironment": false,
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.useEnvFile": true,
   "r.alwaysUseActiveTerminal": true,
   "r.bracketedPaste": true,
   "r.helpPanel.enableHoverLinks": false,

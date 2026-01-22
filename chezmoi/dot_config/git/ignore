@@ -136,7 +136,6 @@
 .pybuilder/
 .pyre/
 .pytest_cache/
-.python-version
 .pytype/
 .ropeproject
 .ruff_cache

@@ -30,7 +30,9 @@
     autocrlf = input
     editor = $EDITOR
     excludesfile = ~/.config/git/ignore
-    pager = delta
+{{- if lookPath "delta" }}
+    pager = {{ lookPath "delta" }}
+{{- end }}
     precomposeunicode = false
     sshCommand = "/usr/bin/ssh -F ~/.ssh/config"
 
@@ -49,14 +51,18 @@
     helper = !{{ lookPath "gh" }} auth git-credential
 {{- end }}
 
+{{- if lookPath "delta" }}
 [delta]
     line-numbers = true
     navigate = true
     side-by-side = false
+{{- end }}
 
 [diff]
     colorMoved = default
-    tool = difftastic
+{{- if lookPath "difftastic" }}
+    tool = {{ lookPath "difftastic" }}
+{{- end }}
 [diff "bin"]
     textconv = hexdump --canonical --no-squeezing
 [diff "nb2md"]
@@ -64,8 +70,10 @@
 
 [difftool]
     prompt = false
+{{- if lookPath "difftastic" }}
 [difftool "difftastic"]
     cmd = difft "$LOCAL" "$REMOTE"
+{{- end }}
 
 [fetch]
     fsckobjects = false
@@ -102,7 +110,9 @@
     templateDir = ~/.config/git/template
 
 [interactive]
-    diffFilter = delta --color-only
+{{- if lookPath "delta" }}
+    diffFilter = {{ lookPath "delta" }} --color-only
+{{- end }}
 
 [merge]
     conflictstyle = diff3

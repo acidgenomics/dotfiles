@@ -60,8 +60,8 @@
 
 [diff]
     colorMoved = default
-{{- if lookPath "difftastic" }}
-    tool = {{ lookPath "difftastic" }}
+{{- if lookPath "difft" }}
+    tool = difftastic
 {{- end }}
 [diff "bin"]
     textconv = hexdump --canonical --no-squeezing
@@ -70,9 +70,9 @@
 
 [difftool]
     prompt = false
-{{- if lookPath "difftastic" }}
+{{- if lookPath "difft" }}
 [difftool "difftastic"]
-    cmd = difft "$LOCAL" "$REMOTE"
+    cmd = {{ lookPath "difft" }} "$LOCAL" "$REMOTE"
 {{- end }}
 
 [fetch]

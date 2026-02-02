@@ -86,6 +86,7 @@
 *.tif
 *.tiff
 *.tsv
+*.txt
 *.ucf-dist
 *.utf8.md
 *.webloc

@@ -1,10 +1,4 @@
-"""
-" Vim configuration.
-" Updated 2025-08-21.
-"
-" Refer to my cheat sheet for usage details:
-" https://steinbaugh.com/posts/vim.html
-"""
+" vim: set filetype=vim:
 
 " Notes
 " ==============================================================================
@@ -111,7 +105,7 @@ syntax on
 " - https://vim.fandom.com/wiki/Highlight_unwanted_spaces
 " - https://github.com/nasamuffin/dotfiles/blob/master/vimrc
 
-" Key mppings (bindings)
+" Key mappings (bindings)
 " ==============================================================================
 
 " Refer to ':help localleader' for details.
@@ -931,6 +925,12 @@ autocmd BufNewFile,BufRead *.md filetype plugin indent off
 " ------------------------------------------------------------------------------
 
 let g:pandoc#syntax#conceal#blacklist = ['strikeout', 'list', 'quotes']
+
+" File type overrides
+" ==============================================================================
+
+autocmd BufRead,BufNewFile .env set filetype=dotenv
+autocmd BufRead,BufNewFile .tmpl set filetype=txt
 
 " Colors (theme)
 " ==============================================================================

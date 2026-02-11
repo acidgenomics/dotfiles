@@ -3,3 +3,6 @@ disable_credentials = true
 
 [component_manager]
 disable_update_check = true
+
+[core]
+disable_usage_reporting = true

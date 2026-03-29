@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""
-Python interactive startup configuration.
-Updated 2020-07-13.
 
-See also:
+"""Python interactive startup configuration.
+
+See Also
+--------
 - https://stackoverflow.com/questions/33683744
 - https://www.codementor.io/@arpitbhayani/
       personalize-your-python-prompt-13ts4kw6za
 """
 
-import sys
+from sys import ps1, ps2, version_info
 
-sys.ps1 = '\x1b[1;49;35m>>>\x1b[0m '
-sys.ps2 = '\x1b[1;49;31m...\x1b[0m '
+if version_info >= (3, 13): # noqa UP036
+    ps1 = '\x1b[1;49;35m>>>\x1b[0m '
+    ps2 = '\x1b[1;49;31m...\x1b[0m '

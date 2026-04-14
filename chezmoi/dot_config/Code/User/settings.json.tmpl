@@ -120,6 +120,7 @@
   "isort.serverEnabled": false,
 {{- end }}
   "javascript.suggest.enabled": false,
+  "jupyter.askForKernelRestart": false,
   "jupyter.kernels.trusted": [
 {{- if stat (joinPath .chezmoi.homeDir ".venv" "share" "jupyter") }}
     "{{ .chezmoi.homeDir }}/.venv/share/jupyter/kernels/python3/kernel.json"

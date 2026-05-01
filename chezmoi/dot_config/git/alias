@@ -1,6 +1,7 @@
 [alias]
     a = add
     aa = add --all
+    author = !printf '%s <%s>\n' "$(git config user.name)" "$(git config user.email)"
     br = branch -vv
     c = commit
     ca = !git add --all && git commit

@@ -1,0 +1,11 @@
+#!/bin/csh
+# Csh/Tcsh shell configuration.
+# Koopa activation.
+if ( $?XDG_DATA_HOME ) then
+    setenv KOOPA_PREFIX "${XDG_DATA_HOME}/koopa"
+else
+    setenv KOOPA_PREFIX "${HOME}/.local/share/koopa"
+endif
+if ( -f "${KOOPA_PREFIX}/activate.csh" ) then
+    source "${KOOPA_PREFIX}/activate.csh"
+endif

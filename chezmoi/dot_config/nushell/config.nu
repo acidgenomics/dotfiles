@@ -534,3 +534,6 @@ let-env config = {
     }
   ]
 }
+
+# Koopa activation.
+use ($env.KOOPA_PREFIX + "/lang/nushell/include/header.nu") *

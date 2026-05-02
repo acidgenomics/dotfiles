@@ -1,156 +1,125 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-set -o errexit  # -e
-set -o errtrace  # -E
-set -o nounset  # -u
-set -o pipefail
+"""Install dotfiles."""
 
-KOOPA_PREFIX="${KOOPA_PREFIX:-/opt/koopa}"
-PATH="${KOOPA_PREFIX}/bin:/usr/local/bin:/usr/bin:/bin"
-export PATH
+import os
+import subprocess
+import sys
+from pathlib import Path
 
-# shellcheck source=/dev/null
-source "$(koopa header bash)"
+_PREFIX = Path(__file__).resolve().parent
+_KOOPA_PREFIX = str(_PREFIX.parents[2])
+_PYTHON_SRC = os.path.join(_KOOPA_PREFIX, "lang", "python", "src")
+if _PYTHON_SRC not in sys.path:
+    sys.path.insert(0, _PYTHON_SRC)
 
-main() {
-    # """
-    # Install dotfiles.
-    # @note Updated 2026-01-05.
-    # """
-    local -A app dict
-    [[ -d "${HOME:-}" ]] || return 1
-    app['chezmoi']="$(koopa_locate_chezmoi)"
-    koopa_assert_is_executable "${app[@]}"
-    dict['prefix']="$(koopa_script_parent_dir)"
-    dict['chezmoi_prefix']="${dict['prefix']}/chezmoi"
-    dict['koopa_prefix']="$(koopa_koopa_prefix)"
-    dict['xdg_config_home']="$(koopa_xdg_config_home)"
-    dict['xdg_data_home']="$(koopa_xdg_data_home)"
-    dict['activate_script']="${dict['koopa_prefix']}/activate"
-    koopa_assert_is_dir \
-        "${dict['chezmoi_prefix']}" \
-        "${dict['koopa_prefix']}" \
-        "${dict['xdg_config_home']}" \
-        "${dict['xdg_data_home']}"
-    koopa_assert_is_file "${dict['activate_script']}"
-    koopa_add_config_link \
-        "${dict['activate_script']}" 'activate' \
-        "${dict['prefix']}" 'dotfiles'
-    if [[ -d "${HOME}/.ssh" ]]
-    then
-        koopa_chmod '0700' "${HOME}/.ssh"
-        if [[ -f "${HOME}/.ssh/authorized_keys" ]]
-        then
-            koopa_chmod '0600' "${HOME}/.ssh/authorized_keys"
-        fi
-        if [[ -f "${HOME}/.ssh/config" ]]
-        then
-            koopa_chmod '0600' "${HOME}/.ssh/config"
-        fi
-    fi
-    (
-        koopa_cd "${dict['chezmoi_prefix']}"
-        "${app['chezmoi']}" \
-            --force \
-            --no-pager \
-            --source="${dict['chezmoi_prefix']}" \
-            --verbose \
-            apply
+from koopa.assert_ import assert_is_dir, assert_is_executable, assert_is_file
+from koopa.file_ops import chmod, ln, mkdir, rm
+from koopa.locate import locate
+from koopa.prefix import koopa_prefix
+from koopa.system import is_macos
+from koopa.xdg import xdg_config_home, xdg_data_home
+
+
+def _add_config_link(source: str, name: str) -> None:
+    config_dir = os.path.join(xdg_config_home(), "koopa")
+    mkdir(config_dir)
+    dest = os.path.join(config_dir, name)
+    if os.path.islink(dest):
+        return
+    ln(source, dest)
+
+
+def main() -> None:
+    home = os.environ.get("HOME", "")
+    if not os.path.isdir(home):
+        return
+    chezmoi = locate("chezmoi")
+    assert_is_executable(chezmoi)
+    prefix = str(_PREFIX)
+    chezmoi_prefix = os.path.join(prefix, "chezmoi")
+    koopa_pfx = koopa_prefix()
+    xdg_config = xdg_config_home()
+    xdg_data = xdg_data_home()
+    activate_script = os.path.join(koopa_pfx, "activate")
+    assert_is_dir(chezmoi_prefix, koopa_pfx, xdg_config, xdg_data)
+    assert_is_file(activate_script)
+    _add_config_link(activate_script, "activate")
+    _add_config_link(prefix, "dotfiles")
+    ssh_dir = os.path.join(home, ".ssh")
+    if os.path.isdir(ssh_dir):
+        chmod(ssh_dir, "0700")
+        auth_keys = os.path.join(ssh_dir, "authorized_keys")
+        if os.path.isfile(auth_keys):
+            chmod(auth_keys, "0600")
+        ssh_config = os.path.join(ssh_dir, "config")
+        if os.path.isfile(ssh_config):
+            chmod(ssh_config, "0600")
+    subprocess.run(
+        [
+            chezmoi,
+            "--force",
+            "--no-pager",
+            f"--source={chezmoi_prefix}",
+            "--verbose",
+            "apply",
+        ],
+        cwd=chezmoi_prefix,
+        check=True,
     )
-    (
-        koopa_cd "${HOME:?}"
-        if [[ ! -L '.zprofile' ]]
-        then
-            koopa_ln --verbose \
-                "${dict['xdg_config_home']}/zsh/.zprofile" \
-                '.zprofile'
-        fi
-        if [[ ! -L '.zshrc' ]]
-        then
-            koopa_ln --verbose \
-                "${dict['xdg_config_home']}/zsh/.zshrc" \
-                '.zshrc'
-        fi
-    )
-    if koopa_is_macos
-    then
-        # Code.
-        (
-            koopa_mkdir "${HOME}/Library/Application Support/Code/User"
-            koopa_cd "${HOME}/Library/Application Support/Code/User"
-            if [[ ! -L 'keybindings.json' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/Code/User/keybindings.json" \
-                    'keybindings.json'
-            fi
-            if [[ ! -L 'settings.json' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/Code/User/settings.json" \
-                    'settings.json'
-            fi
-        )
+    zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
+    zprofile_dest = os.path.join(home, ".zprofile")
+    if not os.path.islink(zprofile_dest):
+        ln(zprofile_src, zprofile_dest)
+    zshrc_src = os.path.join(xdg_config, "zsh", ".zshrc")
+    zshrc_dest = os.path.join(home, ".zshrc")
+    if not os.path.islink(zshrc_dest):
+        ln(zshrc_src, zshrc_dest)
+    if is_macos():
+        app_support = os.path.join(home, "Library", "Application Support")
+        # VS Code.
+        code_dir = os.path.join(app_support, "Code", "User")
+        mkdir(code_dir)
+        for f in ("keybindings.json", "settings.json"):
+            dest = os.path.join(code_dir, f)
+            if not os.path.islink(dest):
+                ln(os.path.join(xdg_config, "Code", "User", f), dest)
         # McFly.
-        (
-            koopa_mkdir "${HOME}/Library/Application Support/McFly"
-            koopa_cd "${HOME}/Library/Application Support/McFly"
-            if [[ ! -L 'config.toml' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/mcfly/config.toml" \
-                    'config.toml'
-            fi
-        )
+        mcfly_dir = os.path.join(app_support, "McFly")
+        mkdir(mcfly_dir)
+        mcfly_dest = os.path.join(mcfly_dir, "config.toml")
+        if not os.path.islink(mcfly_dest):
+            ln(os.path.join(xdg_config, "mcfly", "config.toml"), mcfly_dest)
         # Positron.
-        (
-            koopa_mkdir "${HOME}/Library/Application Support/Positron/User"
-            koopa_cd "${HOME}/Library/Application Support/Positron/User"
-            if [[ ! -L 'settings.json' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/Positron/User/settings.json" \
-                    'settings.json'
-            fi
-        )
+        positron_dir = os.path.join(app_support, "Positron", "User")
+        mkdir(positron_dir)
+        positron_dest = os.path.join(positron_dir, "settings.json")
+        if not os.path.islink(positron_dest):
+            ln(
+                os.path.join(xdg_config, "Positron", "User", "settings.json"),
+                positron_dest,
+            )
         # nushell.
-        (
-            if [[ -L "${HOME}/Library/Application Support/nushell" ]]
-            then
-                koopa_rm "${HOME}/Library/Application Support/nushell"
-            fi
-            koopa_mkdir "${HOME}/Library/Application Support/nushell"
-            koopa_cd "${HOME}/Library/Application Support/nushell"
-            if [[ ! -L 'config.nu' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/nushell/config.nu" \
-                    'config.nu'
-            fi
-            if [[ ! -L 'env.nu' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/nushell/env.nu" \
-                    'env.nu'
-            fi
-        )
+        nushell_dir = os.path.join(app_support, "nushell")
+        if os.path.islink(nushell_dir):
+            rm(nushell_dir)
+        mkdir(nushell_dir)
+        for f in ("config.nu", "env.nu"):
+            dest = os.path.join(nushell_dir, f)
+            if not os.path.islink(dest):
+                ln(os.path.join(xdg_config, "nushell", f), dest)
         # ruff.
-        (
-            if [[ -L "${HOME}/Library/Application Support/ruff" ]]
-            then
-                koopa_rm "${HOME}/Library/Application Support/ruff"
-            fi
-            koopa_mkdir "${HOME}/Library/Application Support/ruff"
-            koopa_cd "${HOME}/Library/Application Support/ruff"
-            if [[ ! -L 'pyproject.toml' ]]
-            then
-                koopa_ln --verbose \
-                    "${dict['xdg_config_home']}/ruff/pyproject.toml" \
-                    'pyproject.toml'
-            fi
-        )
-    fi
-    return 0
-}
+        ruff_dir = os.path.join(app_support, "ruff")
+        if os.path.islink(ruff_dir):
+            rm(ruff_dir)
+        mkdir(ruff_dir)
+        ruff_dest = os.path.join(ruff_dir, "pyproject.toml")
+        if not os.path.islink(ruff_dest):
+            ln(
+                os.path.join(xdg_config, "ruff", "pyproject.toml"),
+                ruff_dest,
+            )
 
-main "$@"
+
+if __name__ == "__main__":
+    main()

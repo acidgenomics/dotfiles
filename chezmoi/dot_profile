@@ -16,18 +16,18 @@ __koopa_activate_user_profile() {
     # - https://koopa.acidgenomics.com/
     # - https://github.com/acidgenomics/koopa/
     # """
-    __kvar_xdg_config_home="${XDG_CONFIG_HOME:-}"
-    if [ -z "$__kvar_xdg_config_home" ]
+    __kvar_xdg_data_home="${XDG_DATA_HOME:-}"
+    if [ -z "$__kvar_xdg_data_home" ]
     then
-        __kvar_xdg_config_home="${HOME:?}/.config"
+        __kvar_xdg_data_home="${HOME:?}/.local/share"
     fi
-    __kvar_script="${__kvar_xdg_config_home}/koopa/activate"
+    __kvar_script="${__kvar_xdg_data_home}/koopa/activate.sh"
     if [ -r "$__kvar_script" ]
     then
         # shellcheck source=/dev/null
         . "$__kvar_script"
     fi
-    unset -v __kvar_script __kvar_xdg_config_home
+    unset -v __kvar_script __kvar_xdg_data_home
     return 0
 }
 

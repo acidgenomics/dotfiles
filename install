@@ -13,9 +13,8 @@ _PYTHON_SRC = os.path.join(_KOOPA_PREFIX, "lang", "python", "src")
 if _PYTHON_SRC not in sys.path:
     sys.path.insert(0, _PYTHON_SRC)
 
-from koopa.assert_ import assert_is_dir, assert_is_executable, assert_is_file
+from koopa.build import locate
 from koopa.file_ops import chmod, ln, mkdir, rm
-from koopa.locate import locate
 from koopa.prefix import koopa_prefix
 from koopa.system import is_macos
 from koopa.xdg import xdg_config_home, xdg_data_home
@@ -35,13 +34,16 @@ def main() -> None:
     if not os.path.isdir(home):
         return
     chezmoi = locate("chezmoi")
-    assert_is_executable(chezmoi)
+    assert os.path.isfile(chezmoi) and os.access(
+        chezmoi, os.X_OK
+    ), f"Not executable: {chezmoi}"
     prefix = str(_PREFIX)
     chezmoi_prefix = os.path.join(prefix, "chezmoi")
     koopa_pfx = koopa_prefix()
     xdg_config = xdg_config_home()
     xdg_data = xdg_data_home()
-    assert_is_dir(chezmoi_prefix, koopa_pfx, xdg_config, xdg_data)
+    for _d in (chezmoi_prefix, koopa_pfx, xdg_config, xdg_data):
+        assert os.path.isdir(_d), f"Directory not found: {_d}"
     old_activate = os.path.join(xdg_config, "koopa", "activate")
     if os.path.islink(old_activate):
         os.unlink(old_activate)

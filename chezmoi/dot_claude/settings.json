@@ -15,7 +15,9 @@
       "Bash(git merge*)",
       "Bash(git push*)",
       "Bash(git rebase*)",
-      "Bash(git reset*)"
+      "Bash(git reset*)",
+      "Bash(rm -rf *)",
+      "Read(./.env*)"
     ]
   }
 }

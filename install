@@ -41,10 +41,10 @@ def main() -> None:
     koopa_pfx = koopa_prefix()
     xdg_config = xdg_config_home()
     xdg_data = xdg_data_home()
-    activate_script = os.path.join(koopa_pfx, "activate")
     assert_is_dir(chezmoi_prefix, koopa_pfx, xdg_config, xdg_data)
-    assert_is_file(activate_script)
-    _add_config_link(activate_script, "activate")
+    old_activate = os.path.join(xdg_config, "koopa", "activate")
+    if os.path.islink(old_activate):
+        os.unlink(old_activate)
     _add_config_link(prefix, "dotfiles")
     ssh_dir = os.path.join(home, ".ssh")
     if os.path.isdir(ssh_dir):

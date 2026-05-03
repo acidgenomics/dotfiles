@@ -23,7 +23,18 @@
   "air.executableStrategy": "path",
 {{- end }}
   "breadcrumbs.enabled": true,
-  "chat.commandCenter.enabled": false,
+  "chat.editing.autoAcceptDelay": 10,
+  "chat.tools.global.autoApprove": true,
+  "chat.tools.terminal.autoApprove": {
+    "/^.*$/": true
+  },
+  "chat.tools.terminal.enableAutoApprove": true,
+  "chat.tools.urls.autoApprove": {
+    "https://*/*": {
+      "approveRequest": true,
+      "approveResponse": true
+    }
+  },
   "claudeCode.disableLoginPrompt": true,
   "claudeCode.preferredLocation": "panel",
   "debug.terminal.clearBeforeReusing": true,
@@ -121,7 +132,7 @@
   ],
   "isort.serverEnabled": false,
 {{- end }}
-  "javascript.suggest.enabled": false,
+  "js/ts.suggest.enabled": false,
   "jupyter.askForKernelRestart": false,
   "jupyter.kernels.trusted": [
 {{- if stat (joinPath .chezmoi.homeDir ".venv" "share" "jupyter") }}
@@ -286,7 +297,6 @@
   },
 {{- end }}
   "terminal.integrated.stickyScroll.enabled": false,
-  "typescript.suggest.enabled": false,
   "update.mode": "none",
   "update.showReleaseNotes": false,
   "vim.easymotionDimBackground": false,

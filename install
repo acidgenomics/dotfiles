@@ -34,9 +34,7 @@ def main() -> None:
     if not os.path.isdir(home):
         return
     chezmoi = locate("chezmoi")
-    assert os.path.isfile(chezmoi) and os.access(
-        chezmoi, os.X_OK
-    ), f"Not executable: {chezmoi}"
+    assert os.path.isfile(chezmoi) and os.access(chezmoi, os.X_OK), f"Not executable: {chezmoi}"
     prefix = str(_PREFIX)
     chezmoi_prefix = os.path.join(prefix, "chezmoi")
     koopa_pfx = koopa_prefix()
@@ -57,18 +55,16 @@ def main() -> None:
         ssh_config = os.path.join(ssh_dir, "config")
         if os.path.isfile(ssh_config):
             chmod(ssh_config, "0600")
-    subprocess.run(
-        [
-            chezmoi,
-            "--force",
-            "--no-pager",
-            f"--source={chezmoi_prefix}",
-            "--verbose",
-            "apply",
-        ],
-        cwd=chezmoi_prefix,
-        check=True,
-    )
+    chezmoi_args = [
+        chezmoi,
+        "--force",
+        "--no-pager",
+        f"--source={chezmoi_prefix}",
+    ]
+    if os.environ.get("KOOPA_VERBOSE") == "1":
+        chezmoi_args.append("--verbose")
+    chezmoi_args.append("apply")
+    subprocess.run(chezmoi_args, cwd=chezmoi_prefix, check=True)
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
     zprofile_dest = os.path.join(home, ".zprofile")
     if not os.path.islink(zprofile_dest):

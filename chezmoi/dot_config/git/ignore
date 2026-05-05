@@ -61,9 +61,9 @@
 *.out
 *.parquet
 *.pdb
-*.pickle
 *.pdf
 *.pem
+*.pickle
 *.pickle
 *.pm.tdy
 *.png
@@ -116,6 +116,7 @@
 ._*
 .apdisk/
 .cache
+.claude/settings.local.json
 .coverage
 .coverage.*
 .dmypy.json
@@ -159,8 +160,8 @@
 .tmp/
 .tox/
 .venv
-.venv/
 .venv*/
+.venv/
 .vscode-server-extensions/
 .vscode/
 .webassets-cache

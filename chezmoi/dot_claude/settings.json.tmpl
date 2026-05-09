@@ -14,13 +14,13 @@
     "CLAUDE_CODE_USE_BEDROCK": "1",
     "ENABLE_LSP_TOOL": "1",
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
-    "CURL_CA_BUNDLE": {{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",
+    "CURL_CA_BUNDLE": "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",
     "DEFAULT_CA_BUNDLE_PATH": "{{ .chezmoi.homeDir }}/.local",
-    "REQUESTS_CA_BUNDLE: "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",
-    "SSL_CERT_FILE: "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem"
+    "REQUESTS_CA_BUNDLE": "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",
+    "SSL_CERT_FILE": "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem"
 {{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
     "CURL_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
-    "DEFAULT_CA_BUNDLE_PATH: "/etc/ssl/certs",
+    "DEFAULT_CA_BUNDLE_PATH": "/etc/ssl/certs",
     "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
     "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
 {{- end }}
@@ -44,7 +44,7 @@
       "mcp__mcp-atlassian__*",
       "mcp__read-website-fast__*",
       "mcp__tooluniverse__*"
-    ]
+    ],
     "deny": [
       "Bash(git add*)",
       "Bash(git commit*)",

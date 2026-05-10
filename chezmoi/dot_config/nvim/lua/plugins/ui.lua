@@ -8,7 +8,7 @@ return {
         'Mofiqul/dracula.nvim',
         lazy = false,
         priority = 1000,
-        cond = not is_light and not vim.fn.isdirectory(dracula_pro),
+        cond = not is_light and vim.fn.isdirectory(dracula_pro) == 0,
         config = function()
             vim.cmd.colorscheme('dracula')
         end,

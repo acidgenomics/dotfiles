@@ -2,17 +2,35 @@
 vim.opt.shell = '{{ lookPath "bash" }}'
 {{- end }}
 
--- Bash
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+if not vim.uv.fs_stat(lazypath) then
+    vim.fn.system({
+        'git', 'clone', '--filter=blob:none',
+        'https://github.com/folke/lazy.nvim.git',
+        '--branch=stable',
+        lazypath,
+    })
+end
+vim.opt.rtp:prepend(lazypath)
+
+require('lazy').setup('plugins', {
+    defaults = { lazy = true },
+    install = { colorscheme = { 'dracula', 'habamax' } },
+    checker = { enabled = false },
+    change_detection = { notify = false },
+})
+
+-- LSP (Neovim 0.11+ native API)
 {{- if lookPath "bash-language-server" }}
 vim.lsp.enable('bashls')
 {{- end }}
-
--- Python
 {{- if lookPath "ruff" }}
 vim.lsp.enable('ruff')
 {{- end }}
-
--- R
 {{- if lookPath "air" }}
 vim.lsp.enable('air')
+{{- end }}
+{{- if lookPath "rust-analyzer" }}
+vim.lsp.enable('rust_analyzer')
 {{- end }}

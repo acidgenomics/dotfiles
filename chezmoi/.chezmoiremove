@@ -13,3 +13,4 @@
 .SpaceVim/
 .SpaceVim.d/
 .emacs-profiles.el
+.spacemacs.d/init.el

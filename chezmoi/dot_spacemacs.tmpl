@@ -258,9 +258,10 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Redirect auto-generated custom variables away from .spacemacs so the
   ;; tracked dotfile is never modified by Emacs itself.
   (setq custom-file "~/.config/spacemacs/custom.el")
-  ;; Only use MELPA — gnu/nongnu/spacelpa are network-blocked in this env.
-  (setq configuration-layer-elpa-archives
-        '(("melpa" . "melpa.org/packages/"))))
+  ;; hl-todo is excluded (requires compat from blocked GNU ELPA) but
+  ;; spacemacs-visual layer calls global-hl-todo-mode in :init unconditionally.
+  (unless (fboundp 'global-hl-todo-mode)
+    (defalias 'global-hl-todo-mode #'ignore)))
 
 (defun dotspacemacs/user-load ()
   "Library to load while dumping.

@@ -4,13 +4,14 @@
 ;; Updated 2022-02-25.
 
 (setq-default
- fci-rule-color "#FFB86C"
  fill-column 80
  show-paren-delay 0
  standard-indent 4
  tab-width 4
  tramp-default-method "ssh"
  )
+
+(global-display-fill-column-indicator-mode 1)
 
 ;; Make HOME and END keys work like Vim, moving to start/end of line.
 ;; See also:

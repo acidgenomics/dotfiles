@@ -2,13 +2,15 @@
 
 (setq doom-font (font-spec :family "JetBrainsMono NF" :size 16))
 (setq doom-theme 'doom-dracula)
-;; > (setq doom-theme 'doom-nord)
-;; Can use 'doom-nord-light' for light theme.
-;; > (setq doom-theme 'doom-nord-light)
+;; Light theme alternative:
+;; > (setq doom-theme 'doom-one-light)
 
 (setq display-line-numbers-type t)
 (setq make-backup-files nil)
 (setq org-directory "~/org/")
+
+;; Corfu auto-completion.
+(setq corfu-auto t)
 
 ;; ESS / R configuration.
 (setq
@@ -28,5 +30,5 @@
  inferior-R-args "--no-restore --no-save")
 
 ;; Start Doom maximized.
-;; https://github.com/hlissner/doom-emacs/issues/397
+;; https://github.com/doomemacs/doomemacs/issues/397
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))

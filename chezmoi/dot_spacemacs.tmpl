@@ -103,7 +103,7 @@ This function should only modify configuration layer settings."
           inferior-R-args "--no-restore --no-save")
      evil-commentary
      git
-     ivy
+     helm
      json
      julia
      latex
@@ -127,6 +127,7 @@ This function should only modify configuration layer settings."
             shell-default-width 80)
      syntax-checking
      tmux
+     tree-sitter
      yaml
      )
    dotspacemacs-additional-packages
@@ -146,10 +147,6 @@ This function is called at the very beginning of Spacemacs startup,
 before layer configuration.
 It should only modify the values of Spacemacs settings."
   (setq-default
-   dotspacemacs-enable-emacs-pdumper nil
-   dotspacemacs-emacs-pdumper-executable-file "emacs"
-   dotspacemacs-emacs-dumper-dump-file (format "spacemacs-%s.pdmp" emacs-version)
-   dotspacemacs-elpa-https t
    dotspacemacs-elpa-timeout 5
    dotspacemacs-gc-cons '(100000000 0.1)
    dotspacemacs-read-process-output-max (* 1024 1024)
@@ -160,12 +157,14 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-editing-style 'vim
    dotspacemacs-startup-buffer-show-version t
    dotspacemacs-startup-banner nil
+   dotspacemacs-startup-banner-scale 'auto
    dotspacemacs-startup-lists '((recents . 5)
                                 (projects . 7))
    dotspacemacs-startup-buffer-responsive t
    dotspacemacs-show-startup-list-numbers t
    dotspacemacs-startup-buffer-multi-digit-delay 0.4
    dotspacemacs-startup-buffer-show-icons t
+   dotspacemacs-default-icons-font 'nerd-icons
    dotspacemacs-new-empty-buffer-major-mode 'text-mode
    dotspacemacs-scratch-mode 'text-mode
    dotspacemacs-scratch-buffer-persistent nil
@@ -180,8 +179,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)
    dotspacemacs-colorize-cursor-according-to-state t
    dotspacemacs-default-font '("JetBrainsMono NF"
-                               :powerline-scale 1.1
-                               :size 16
+                               :size 16.0
                                :weight normal
                                :width normal)
    dotspacemacs-leader-key "SPC"
@@ -216,6 +214,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-scroll-bar-while-scrolling t
    dotspacemacs-line-numbers t
    dotspacemacs-folding-method 'evil
+   dotspacemacs-undo-system 'undo-redo
    dotspacemacs-smartparens-strict-mode nil
    dotspacemacs-activate-smartparens-mode nil
    dotspacemacs-smart-closing-parenthesis nil
@@ -250,7 +249,10 @@ See the header of this file for more information."
 This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
-If you are unsure, try setting them in `dotspacemacs/user-config' first.")
+If you are unsure, try setting them in `dotspacemacs/user-config' first."
+  ;; Redirect auto-generated custom variables away from .spacemacs so the
+  ;; tracked dotfile is never modified by Emacs itself.
+  (setq custom-file "~/.config/spacemacs/custom.el"))
 
 (defun dotspacemacs/user-load ()
   "Library to load while dumping.
@@ -264,23 +266,8 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  (add-to-list 'load-path "~/.config/spacemacs/user-config.el")
+  (load "~/.config/spacemacs/user-config.el")
+  (when (file-exists-p custom-file)
+    (load custom-file))
   )
 
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(evil-want-Y-yank-to-eol nil)
- '(package-selected-packages
-   (quote
-    (kubernetes anaphora dracula-theme yapfify yaml-mode xterm-color ws-butler winum which-key wgrep web-mode volatile-highlights vimrc-mode vi-tilde-fringe uuidgen use-package unfill tramp-term toml-mode toc-org tagedit spaceline powerline smex smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rake rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode popwin poly-R poly-noweb poly-markdown pip-requirements persp-mode pcre2el pbcopy paradox spinner osx-trash osx-dictionary orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-plus-contrib org-mime org-download org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lorem-ipsum live-py-mode linum-relative link-hint launchctl ivy-hydra indent-guide hydra lv hy-mode dash-functional hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-make haml-mode google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flycheck-rust flycheck-pos-tip pos-tip flycheck flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-mc evil-matchit magit transient git-commit with-editor evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-commentary evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu ess-smart-equals ess-R-data-view ctable ess julia-mode eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav ein skewer-mode polymode deferred request auto-complete websocket js2-mode simple-httpd dumb-jump popup dockerfile-mode docker json-mode tablist magit-popup docker-tramp json-snatcher json-reformat diminish diff-hl dactyl-mode cython-mode csv-mode counsel-projectile projectile pkg-info epl counsel swiper ivy column-enforce-mode clean-aindent-mode chruby cargo markdown-mode rust-mode bundler inf-ruby bind-map bind-key auto-highlight-symbol auto-compile packed async anaconda-mode pythonic f dash s aggressive-indent adaptive-wrap ace-window ace-link avy))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

@@ -12,3 +12,4 @@
 .tmux/
 .SpaceVim/
 .SpaceVim.d/
+.emacs-profiles.el

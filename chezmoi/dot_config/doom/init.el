@@ -21,10 +21,10 @@
 ;; - https://docs.doomemacs.org/
 ;;
 ;; When updating, ensure that this file is in sync with template:
-;; https://raw.githubusercontent.com/hlissner/doom-emacs/master/init.example.el
+;; https://raw.githubusercontent.com/doomemacs/doomemacs/master/templates/init.example.el
 ;;
-;; NOTE If fonts on startup screen look weird, need to reinstall all-the-icons.
-;; > M-x all-the-icons-install-fonts
+;; NOTE If fonts on startup screen look weird, need to reinstall nerd-icons.
+;; > M-x nerd-icons-install-fonts
 
 ;; =============================================================================
 
@@ -34,7 +34,8 @@
        ;;layout            ; auie,ctsrnm is the superior home row
 
        :completion
-       company             ; the ultimate code completion backend
+       ;;company           ; the ultimate code completion backend
+       (corfu +orderless)  ; complete with cap(f), cape and a flying feather!
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;;ivy               ; a search engine for love and life
@@ -69,7 +70,7 @@
        (evil +everywhere)  ; come to the dark side, we have cookies
        file-templates      ; auto-snippets for empty files
        fold                ; (nigh) universal code folding
-       ;;(format +onsave)  ; automated prettiness
+       (format +onsave)    ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
        ;;lispy             ; vim for lisp, for people who don't like vim
        ;;multiple-cursors  ; editing in many places at once
@@ -103,10 +104,11 @@
        ;;debugger          ; FIXME stepping through code, to help you add bugs
        ;;direnv
        docker
-       ;;editorconfig      ; let someone else argue about tabs vs spaces
+       editorconfig        ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
+       llm                 ; when I said you needed friends, I didn't mean...
        lookup              ; navigate your code and its documentation
        lsp                 ; M-x vscode
        magit               ; a git porcelain for Emacs
@@ -118,6 +120,7 @@
        ;;taskrunner        ; taskrunner for all your projects
        ;;terraform         ; infrastructure as code
        tmux                ; an API for interacting with tmux
+       tree-sitter         ; syntax and parsing, sitting in a tree...
        ;;upload            ; map local to remote projects via ssh/ftp
 
        :os

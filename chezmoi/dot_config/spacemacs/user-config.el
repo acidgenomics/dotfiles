@@ -32,3 +32,5 @@
 ;; https://github.com/polymode/poly-R
 (add-to-list 'auto-mode-alist '("\\.Rmd$" . poly-markdown+R-mode))
 (add-to-list 'auto-mode-alist '("\\.ronn$" . poly-markdown-mode))
+
+(put 'lisp-indent-local-overrides 'safe-local-variable #'listp)

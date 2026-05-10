@@ -138,7 +138,7 @@ This function should only modify configuration layer settings."
      tramp-term
      )
    dotspacemacs-frozen-packages '()
-   dotspacemacs-excluded-packages '(compat hl-todo)
+   dotspacemacs-excluded-packages '(hl-todo)
    dotspacemacs-install-packages 'used-only))
 
 (defun dotspacemacs/init ()
@@ -258,8 +258,10 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Redirect auto-generated custom variables away from .spacemacs so the
   ;; tracked dotfile is never modified by Emacs itself.
   (setq custom-file "~/.config/spacemacs/custom.el")
-  ;; hl-todo is excluded (requires compat from blocked GNU ELPA) but
-  ;; spacemacs-visual layer calls global-hl-todo-mode in :init unconditionally.
+  ;; Store elpa packages outside the managed app tree so they survive reinstalls.
+  (setq configuration-layer--elpa-root-directory "~/.local/share/spacemacs/elpa/")
+  ;; hl-todo is excluded (spacemacs-visual layer calls global-hl-todo-mode in
+  ;; :init unconditionally even when the package is excluded).
   (unless (fboundp 'global-hl-todo-mode)
     (defalias 'global-hl-todo-mode #'ignore)))
 

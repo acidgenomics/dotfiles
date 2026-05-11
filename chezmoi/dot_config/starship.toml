@@ -1,5 +1,5 @@
 add_newline = true
-command_timeout = 1000
+command_timeout = 2000
 scan_timeout = 100
 
 [aws]
@@ -30,9 +30,6 @@ version_format = '$raw'
 
 [character]
 disabled = true
-error_symbol = '[❌](red)'
-format = '$symbol '
-success_symbol = '[❯](purple)'
 
 [cmake]
 disabled = false
@@ -131,7 +128,7 @@ style = 'green'
 commit_hash_length = 7
 disabled = false
 format = '[$hash]($style) '
-only_detached = false
+only_detached = true
 style = 'green'
 tag_disabled = true
 
@@ -273,7 +270,7 @@ disabled = true
 
 [rlang]
 detect_extensions = ['R', 'Rd', 'Rmd', 'Rproj']
-detect_files = ['']
+detect_files = []
 detect_folders = ['.Rproj.user']
 disabled = false
 format = '[<$symbol( $version)>]($style) '

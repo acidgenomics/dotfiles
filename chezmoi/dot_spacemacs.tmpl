@@ -81,7 +81,7 @@ This function should only modify configuration layer settings."
      ;; > ruby
      ;; > treemacs
      ;; > version-control
-     docker
+     ;; > docker (docker package needs compat via GNU ELPA)
      emacs-lisp
      emoji
      (ess :variables
@@ -94,7 +94,7 @@ This function should only modify configuration layer settings."
           ess-indent-with-fancy-comments nil
           ess-language "R"
           ess-nuke-trailing-whitespace-p t
-          ess-r-backend 'lsp
+          ess-r-backend 'ess
           ess-roxy-str "#'"
           ess-use-flymake t
 {{- if findExecutable "R" (list "/usr/local/bin" "/usr/bin" "/bin") }}
@@ -102,12 +102,12 @@ This function should only modify configuration layer settings."
 {{- end }}
           inferior-R-args "--no-restore --no-save")
      evil-commentary
-     git
+     ;; > git (magit, forge, orgit, git-modes, git-timemachine all need compat from GNU ELPA)
      helm
      json
      julia
      ;; > latex (needs auctex from GNU ELPA, blocked on corporate network)
-     lsp
+     ;; > lsp (lsp-mode gets HTTP 403 Forbidden on corporate network)
      markdown
      org
      osx
@@ -132,13 +132,14 @@ This function should only modify configuration layer settings."
      )
    dotspacemacs-additional-packages
    '(
+     (transient :location built-in)   ;; Emacs 29 built-in; avoids GNU ELPA compat dep
      polymode
      poly-R
      poly-markdown
      tramp-term
      )
    dotspacemacs-frozen-packages '()
-   dotspacemacs-excluded-packages '(auctex company-auctex evil-tex hl-todo org-contrib vundo)
+   dotspacemacs-excluded-packages '(auctex code-review company-auctex devdocs eat evil-tex gnuplot hl-todo org-contrib poetry python-pytest vundo)
    dotspacemacs-install-packages 'used-only))
 
 (defun dotspacemacs/init ()
@@ -258,6 +259,10 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Redirect auto-generated custom variables away from .spacemacs so the
   ;; tracked dotfile is never modified by Emacs itself.
   (setq custom-file "~/.config/spacemacs/custom.el")
+  ;; Corporate network blocks GNU ELPA; restrict to MELPA + NonGNU ELPA only.
+  (setq configuration-layer-elpa-archives
+        '(("melpa" . "https://melpa.org/packages/")
+          ("nongnu" . "https://elpa.nongnu.org/packages/")))
   ;; Store elpa packages outside the managed app tree so they survive reinstalls.
   (setq configuration-layer--elpa-root-directory
         (expand-file-name "spacemacs/elpa/"
@@ -283,4 +288,3 @@ before packages are loaded."
   (when (file-exists-p custom-file)
     (load custom-file))
   )
-

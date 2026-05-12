@@ -17,7 +17,6 @@ return {
     {
         'zbirenbaum/copilot.lua',
         cmd = 'Copilot',
-        event = 'InsertEnter',
         opts = {
             -- Disabled by default, matching the Vim 8 config.
             suggestion = { enabled = false, auto_trigger = false },

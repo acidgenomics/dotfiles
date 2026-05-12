@@ -10,8 +10,10 @@ return {
             end,
             keymap = {
                 preset = 'none',
-                ['<Tab>'] = { 'show', 'select_next', 'fallback' },
-                ['<S-Tab>'] = { 'select_prev', 'fallback' },
+                ['<Tab>'] = { 'snippet_forward', 'fallback' },
+                ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+                ['<C-n>'] = { 'show', 'select_next', 'fallback' },
+                ['<C-p>'] = { 'select_prev', 'fallback' },
                 ['<C-y>'] = { 'select_and_accept', 'fallback' },
                 ['<C-e>'] = { 'cancel', 'fallback' },
                 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },

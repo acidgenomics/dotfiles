@@ -2,6 +2,8 @@
 */*.md
 */*/*.md
 */*/*/*.md
+!.claude/*.md
+!.claude/rules/*.md
 {{- if ne .chezmoi.os "linux" }}
 .local/share/code-server-posit/
 .local/share/code-server/

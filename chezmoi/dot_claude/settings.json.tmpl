@@ -3,6 +3,9 @@
   "autoMemoryEnabled": false,
   "autoUpdatesChannel": "latest",
   "effortLevel": "max",
+  "enabledPlugins": {
+    "astral@astral-sh": true
+  },
   "env": {
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1",
@@ -30,6 +33,32 @@
   "extensions": {
     "anthropic.claude-code": {
       "autoUpdate": true
+    }
+  },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    },
+    "astral-sh": {
+      "source": {
+        "source": "github",
+        "repo": "astral-sh/claude-code-plugins"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "life-sciences": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/life-sciences"
+      }
     }
   },
   "model": "opusplan",

@@ -65,12 +65,13 @@
   "permissions": {
     "allow": [
       "Bash(*)",
-      "Edit",
+      "Edit(**)",
       "Grep",
       "ListMcpResourcesTool",
       "Python(*)",
-      "Read",
+      "Read(**)",
       "ReadMcpResourceTool",
+      "Write(**)",
       "mcp__ide__*",
       "mcp__mcp-atlassian__*",
       "mcp__read-website-fast__*",
@@ -84,7 +85,13 @@
       "Bash(git rebase*)",
       "Bash(git reset*)",
       "Bash(rm -rf *)",
-      "Read(./.env*)"
-    ]
+      "Edit(**/.env*)",
+      "Edit(.env*)",
+      "Read(**/.env*)",
+      "Read(.env*)",
+      "Write(**/.env*)"
+      "Write(.env*)",
+    ],
+    "disableBypassPermissionsMode": "disable"
   }
 }

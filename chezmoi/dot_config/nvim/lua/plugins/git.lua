@@ -13,14 +13,4 @@ return {
             },
         },
     },
-    -- Copilot (Lua native, integrates with blink.cmp)
-    {
-        'zbirenbaum/copilot.lua',
-        cmd = 'Copilot',
-        opts = {
-            -- Disabled by default, matching the Vim 8 config.
-            suggestion = { enabled = false, auto_trigger = false },
-            panel = { enabled = false },
-        },
-    },
 }

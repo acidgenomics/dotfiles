@@ -1,6 +1,7 @@
 #+TITLE: Dotfiles
 #+STARTUP: content
 * Development
+** TODO nvim color scheme is messed up on personal MBP.
 ** TODO Set Dracula Pro theme in Code based on whether the theme exists on disk, not the machine.
 ** TODO RStudio terminal file colors are too bright in light mode. Too much yellow.
 ** TODO Need to rethink how to handle overwrites of existing user dotfiles.

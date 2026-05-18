@@ -21,6 +21,21 @@ require('lazy').setup('plugins', {
     change_detection = { notify = false },
 })
 
+vim.api.nvim_create_autocmd('User', {
+    pattern = 'LazyDone',
+    once = true,
+    callback = function()
+        vim.defer_fn(function()
+            pcall(function()
+                local view = require('lazy.view')
+                if view.visible() then
+                    view.close()
+                end
+            end)
+        end, 500)
+    end,
+})
+
 -- LSP (Neovim 0.11+ native API)
 {{- if lookPath "bash-language-server" }}
 vim.lsp.enable('bashls')

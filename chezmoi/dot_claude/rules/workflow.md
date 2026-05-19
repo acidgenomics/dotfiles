@@ -53,6 +53,12 @@ Plan mode is a conversation, not a race to produce a plan document.
 - Zero context switching required from the user.
 - Go fix failing CI tests without being told how.
 
+## Plan Files
+
+- Save plan files to `.claude/plans/` within the current project directory.
+- Name with a date prefix: `YYYY-MM-DD-plan-name.md` (e.g.
+  `2026-05-19-m2a-assay-migration.md`).
+
 ## Task Management
 
 1. **Plan First**: Write plan to `.claude/todo.md` with checkable items.

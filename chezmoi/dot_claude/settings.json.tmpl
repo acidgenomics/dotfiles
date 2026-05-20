@@ -61,6 +61,19 @@
       }
     }
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json, sys, re, os\nfrom datetime import date\ndata = json.load(sys.stdin)\npath = data['tool_input'].get('file_path', '')\nbasename = os.path.basename(path)\nif '.claude/plans/' in path and not re.match(r'^\\\\d{4}-\\\\d{2}-\\\\d{2}-', basename):\n    new_path = os.path.join(os.path.dirname(path), date.today().strftime('%Y-%m-%d-') + basename)\n    print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'updatedInput': {**data['tool_input'], 'file_path': new_path}}}))\n\""
+          }
+        ]
+      }
+    ]
+  },
   "model": "opusplan",
   "plansDirectory": "./.claude/plans",
   "permissions": {

@@ -116,6 +116,7 @@
 ._*
 .apdisk/
 .cache
+.claude/plans/
 .claude/settings.local.json
 .coverage
 .coverage.*

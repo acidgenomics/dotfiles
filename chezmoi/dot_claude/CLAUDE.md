@@ -37,7 +37,7 @@
 
 ### 3. Self-Improvement Loop
 
-- After ANY correction from the user, update `.claude/lessons.md` with the
+- After ANY correction from the user, update `.claude/rules/lessons.md` with the
   observed pattern.
 - Write rules for yourself that prevent the same mistake.
 - Ruthlessly iterate on these lessons until mistake rate drops.
@@ -72,7 +72,7 @@
 3. **Track Progress**: Mark items complete as you go.
 4. **Explain Changes**: High-level summary at each step.
 5. **Document Results**: Add review section to `.claude/todo.md`.
-6. **Capture Lessons**: Update `.claude/lessons.md` after corrections.
+6. **Capture Lessons**: Update `.claude/rules/lessons.md` after corrections.
 
 ## Core Principles
 

@@ -5,6 +5,10 @@ RSTUDIO_THEME_LIGHT=Xcode
 ACIDGENOMICS_REPO={{ .chezmoi.homeDir }}/git/github/acidgenomics/r-acidgenomics-com
 {{- end }}
 
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "koopa" "bin" "python3") }}
+RETICULATE_PYTHON={{ .chezmoi.homeDir }}/.local/share/koopa/bin/python3
+{{- end }}
+
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
 AWS_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
 CURL_CA_BUNDLE={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem

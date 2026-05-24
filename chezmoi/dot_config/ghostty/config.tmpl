@@ -8,6 +8,17 @@ font-family = "JetBrainsMonoNL Nerd Font Mono"
 font-size = 16
 link-url = false
 macos-titlebar-style = tabs
-theme = "light:Atom One Light,dark:Dracula"
+{{- $ghosttyThemesDir := joinPath .chezmoi.homeDir ".config/ghostty/themes" -}}
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $darkTheme := "Dracula" -}}
+{{- $lightTheme := "Atom One Light" -}}
+{{- if stat (joinPath $ghosttyThemesDir "Dracula Pro") -}}
+{{-   $darkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $darkTheme = printf "Dracula Pro %s" (title $dpv) -}}
+{{-   end -}}
+{{-   $lightTheme = "Dracula Pro Alucard" -}}
+{{- end }}
+theme = "light:{{ $lightTheme }},dark:{{ $darkTheme }}"
 window-height = 30
 window-width = 100

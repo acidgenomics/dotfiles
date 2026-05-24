@@ -581,14 +581,22 @@ endif
 " Colorscheme is set here for Vim 8; Neovim sets it via lazy.nvim (ui.lua).
 if !g:is_nvim
     if g:koopa_color_mode == 'light' || has('gui_running')
-        if isdirectory(join([vim_plug_home, 'vim-one'], '/'))
+        if isdirectory(join([themes_home, 'dracula_pro'], '/'))
+            packadd! dracula_pro
+            colorscheme dracula_pro_alucard
+        elseif isdirectory(join([vim_plug_home, 'vim-one'], '/'))
             colorscheme one
             let g:airline_theme='one'
         endif
     else
         if isdirectory(join([themes_home, 'dracula_pro'], '/'))
             packadd! dracula_pro
-            colorscheme dracula_pro
+            let s:dracula_variant = $KOOPA_DRACULA_PRO_VARIANT
+            if s:dracula_variant == '' || s:dracula_variant == 'pro'
+                colorscheme dracula_pro
+            else
+                execute 'colorscheme dracula_pro_' .. substitute(s:dracula_variant, '-', '_', 'g')
+            endif
         elseif isdirectory(join([vim_plug_home, 'dracula'], '/'))
             colorscheme dracula
         endif

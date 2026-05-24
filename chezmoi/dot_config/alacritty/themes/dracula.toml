@@ -7,17 +7,17 @@
 # """
 
 [colors.bright]
-black = "#000000"
-blue = "#000000"
-cyan = "#000000"
-green = "#000000"
-magenta = "#000000"
-red = "#000000"
+black = "#6272a4"
+blue = "#d6acff"
+cyan = "#a4ffff"
+green = "#69ff94"
+magenta = "#ff92df"
+red = "#ff6e6e"
 white = "#ffffff"
-yellow = "#000000"
+yellow = "#ffffa5"
 
 [colors.cursor]
-cursor = "#746da1"
+cursor = "#f8f8f2"
 text = "CellForeground"
 
 [colors.footer_bar]
@@ -37,7 +37,7 @@ background = "None"
 foreground = "None"
 
 [colors.normal]
-black = "#000000"
+black = "#21222c"
 blue = "#bd93f9"
 cyan = "#8be9fd"
 green = "#50fa7b"

@@ -2,9 +2,12 @@
 
 """Install dotfiles."""
 
+import json
 import os
+import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 _PREFIX = Path(__file__).resolve().parent
@@ -19,6 +22,16 @@ from koopa.prefix import koopa_prefix
 from koopa.system import is_macos
 from koopa.xdg import xdg_config_home, xdg_data_home
 
+_DRACULA_VARIANT_NAMES = {
+    "pro": "Dracula Pro",
+    "blade": "Dracula Pro Blade",
+    "buffy": "Dracula Pro Buffy",
+    "lincoln": "Dracula Pro Lincoln",
+    "morbius": "Dracula Pro Morbius",
+    "van-helsing": "Dracula Pro Van Helsing",
+    "alucard": "Dracula Pro Alucard",
+}
+
 
 def _add_config_link(source: str, name: str) -> None:
     config_dir = os.path.join(xdg_config_home(), "koopa")
@@ -27,6 +40,424 @@ def _add_config_link(source: str, name: str) -> None:
     if os.path.islink(dest):
         return
     ln(source, dest)
+
+
+def _check_dracula_pro_version(home: str, dp_dir: str) -> None:
+    """Warn if installed VS Code extension is older than local source VSIX."""
+    vsix = os.path.join(
+        dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
+    )
+    if not os.path.isfile(vsix):
+        return
+    ext_dir = os.path.join(home, ".vscode", "extensions")
+    if not os.path.isdir(ext_dir):
+        return
+    with zipfile.ZipFile(vsix) as zf:
+        pkg = json.loads(zf.read("extension/package.json"))
+    source_version = pkg["version"]
+    prefix = "dracula-theme-pro.theme-dracula-pro-"
+    installed_version = None
+    for d in os.listdir(ext_dir):
+        if d.startswith(prefix):
+            installed_version = d[len(prefix):]
+            break
+    if installed_version and installed_version != source_version:
+        print(
+            f"⚠ Dracula Pro is outdated "
+            f"(VS Code extension: {installed_version}, "
+            f"local source: {source_version}).\n"
+            f"  Download the latest version from your Gumroad Library:\n"
+            f"  https://app.gumroad.com/library"
+        )
+
+
+def _configure_dracula_pro(home: str, xdg_data: str) -> None:
+    """Pre-chezmoi: vim pack, VS Code extension install."""
+    dp_dir = os.path.join(xdg_data, "dracula-pro")
+    if not os.path.isdir(dp_dir):
+        return
+    _check_dracula_pro_version(home, dp_dir)
+    # Vim/Neovim: symlink theme pack so nvim detects it at runtime.
+    vim_src = os.path.join(dp_dir, "themes", "vim")
+    vim_themes = os.path.join(home, ".vim", "pack", "theme", "start")
+    mkdir(vim_themes)
+    if os.path.isdir(vim_src):
+        ln(vim_src, os.path.join(vim_themes, "dracula_pro"))
+    # VS Code: install VSIX if not already present.
+    vsix = os.path.join(
+        dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
+    )
+    code = shutil.which("code")
+    if code and os.path.isfile(vsix):
+        ext_dir = os.path.join(home, ".vscode", "extensions")
+        prefix = "dracula-theme-pro.theme-dracula-pro-"
+        already_installed = os.path.isdir(ext_dir) and any(
+            d.startswith(prefix)
+            for d in os.listdir(ext_dir)
+        )
+        if not already_installed:
+            subprocess.run(
+                [code, "--install-extension", vsix],
+                capture_output=True,
+            )
+
+
+def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
+    """Post-chezmoi: all apps that need chezmoi-created dirs to exist first."""
+    dp_dir = os.path.join(xdg_data, "dracula-pro")
+    if not os.path.isdir(dp_dir):
+        return
+    variant = os.environ.get("KOOPA_DRACULA_PRO_VARIANT", "pro")
+    # Ghostty: symlink all variant theme files into ~/.config/ghostty/themes/.
+    ghostty_themes = os.path.join(home, ".config", "ghostty", "themes")
+    ghostty_src = os.path.join(dp_dir, "themes", "ghostty")
+    if os.path.isdir(ghostty_src):
+        mkdir(ghostty_themes)
+        for src_name, dest_name in _DRACULA_VARIANT_NAMES.items():
+            src = os.path.join(ghostty_src, src_name)
+            dest = os.path.join(ghostty_themes, dest_name)
+            if os.path.isfile(src):
+                ln(src, dest)
+    # Alacritty: symlink selected dark variant and alucard light variant.
+    alacritty_themes = os.path.join(home, ".config", "alacritty", "themes")
+    alacritty_src_dir = os.path.join(dp_dir, "themes", "alacritty", "themes")
+    if os.path.isdir(alacritty_themes) and os.path.isdir(alacritty_src_dir):
+        variant_file = (
+            "dracula-pro.toml"
+            if variant == "pro"
+            else f"dracula-pro-{variant}.toml"
+        )
+        dark_src = os.path.join(alacritty_src_dir, variant_file)
+        if os.path.isfile(dark_src):
+            ln(dark_src, os.path.join(alacritty_themes, "dracula.toml"))
+        alucard_src = os.path.join(alacritty_src_dir, "dracula-pro-alucard.toml")
+        if os.path.isfile(alucard_src):
+            ln(alucard_src, os.path.join(alacritty_themes, "one-light.toml"))
+    # Emacs/Doom: symlink all variant .el files into ~/.config/doom/themes/.
+    doom_themes = os.path.join(home, ".config", "doom", "themes")
+    emacs_src = os.path.join(dp_dir, "themes", "emacs")
+    if os.path.isdir(emacs_src):
+        mkdir(doom_themes)
+        for el_file in os.listdir(emacs_src):
+            if el_file.endswith(".el"):
+                ln(
+                    os.path.join(emacs_src, el_file),
+                    os.path.join(doom_themes, el_file),
+                )
+    # iTerm: symlink selected variant into etc/iterm/ staging location.
+    iterm_src_name = _dracula_iterm_name(variant)
+    iterm_src = os.path.join(dp_dir, "themes", "iterm", iterm_src_name)
+    if os.path.isfile(iterm_src):
+        iterm_dest = os.path.join(
+            str(_PREFIX), "etc", "iterm", "dracula-pro.itermcolors"
+        )
+        ln(iterm_src, iterm_dest)
+    # Terminal.app: symlink selected variant into etc/terminal/ staging location.
+    terminal_src_name = _dracula_terminal_name(variant)
+    terminal_src = os.path.join(
+        dp_dir, "themes", "terminal-app", terminal_src_name
+    )
+    if os.path.isfile(terminal_src):
+        terminal_dest = os.path.join(
+            str(_PREFIX), "etc", "terminal", "dracula-pro.terminal"
+        )
+        ln(terminal_src, terminal_dest)
+    # Xcode: symlink all variant .xccolortheme files into Xcode's theme dir.
+    if is_macos():
+        xcode_themes = os.path.join(
+            home, "Library", "Developer", "Xcode", "UserData", "FontAndColorThemes"
+        )
+        xcode_src = os.path.join(dp_dir, "themes", "xcode")
+        if os.path.isdir(xcode_src):
+            mkdir(xcode_themes)
+            for f in os.listdir(xcode_src):
+                if f.endswith(".xccolortheme"):
+                    ln(
+                        os.path.join(xcode_src, f),
+                        os.path.join(xcode_themes, f),
+                    )
+    # Zed: symlink theme JSON into ~/.config/zed/themes/.
+    zed_themes = os.path.join(home, ".config", "zed", "themes")
+    zed_src = os.path.join(dp_dir, "themes", "zed", "dracula_pro.json")
+    if os.path.isfile(zed_src):
+        mkdir(zed_themes)
+        ln(zed_src, os.path.join(zed_themes, "dracula_pro.json"))
+    # Firefox: symlink all variant .xpi dirs into ~/.config/koopa/firefox-themes/.
+    firefox_staging = os.path.join(xdg_config_home(), "koopa", "firefox-themes")
+    firefox_src = os.path.join(dp_dir, "themes", "firefox")
+    if os.path.isdir(firefox_src):
+        mkdir(firefox_staging)
+        for entry in os.listdir(firefox_src):
+            src = os.path.join(firefox_src, entry)
+            if os.path.isdir(src):
+                ln(src, os.path.join(firefox_staging, entry))
+    # Google Chrome: symlink variant dir into ~/.config/koopa/chrome-themes/.
+    chrome_staging = os.path.join(xdg_config_home(), "koopa", "chrome-themes")
+    chrome_src_dir = os.path.join(dp_dir, "themes", "google-chrome")
+    if os.path.isdir(chrome_src_dir):
+        mkdir(chrome_staging)
+        for entry in os.listdir(chrome_src_dir):
+            src = os.path.join(chrome_src_dir, entry)
+            if os.path.isdir(src):
+                ln(src, os.path.join(chrome_staging, entry))
+    # Hyper: symlink variant .js file into ~/.config/koopa/hyper-themes/.
+    hyper_staging = os.path.join(xdg_config_home(), "koopa", "hyper-themes")
+    hyper_variants = os.path.join(dp_dir, "themes", "hyper", "variants")
+    if os.path.isdir(hyper_variants):
+        mkdir(hyper_staging)
+        for f in os.listdir(hyper_variants):
+            if f.endswith(".js"):
+                ln(
+                    os.path.join(hyper_variants, f),
+                    os.path.join(hyper_staging, f),
+                )
+    # JetBrains: symlink plugin zip into ~/.config/koopa/jetbrains-theme/.
+    jetbrains_staging = os.path.join(
+        xdg_config_home(), "koopa", "jetbrains-theme"
+    )
+    jetbrains_src = os.path.join(
+        dp_dir, "themes", "jetbrains", "dracula-pro.zip"
+    )
+    if os.path.isfile(jetbrains_src):
+        mkdir(jetbrains_staging)
+        ln(
+            jetbrains_src,
+            os.path.join(jetbrains_staging, "dracula-pro.zip"),
+        )
+    # Windows Terminal: symlink all variant JSON files into staging dir.
+    wt_staging = os.path.join(
+        xdg_config_home(), "koopa", "windows-terminal-themes"
+    )
+    wt_src = os.path.join(dp_dir, "themes", "windows-terminal")
+    if os.path.isdir(wt_src):
+        mkdir(wt_staging)
+        for f in os.listdir(wt_src):
+            if f.endswith(".json"):
+                ln(
+                    os.path.join(wt_src, f),
+                    os.path.join(wt_staging, f),
+                )
+    # Tmux: generate a Pro dark.conf from Ghostty palette, override chezmoi file.
+    tmux_colors = os.path.join(home, ".config", "tmux", "colors")
+    if os.path.isdir(tmux_colors):
+        pro_conf = _generate_tmux_dracula_pro_conf(dp_dir, variant)
+        if pro_conf:
+            tmux_dest = os.path.join(tmux_colors, "dark.conf")
+            with open(tmux_dest, "w") as fh:
+                fh.write(pro_conf)
+    # Zsh: generate a palette file sourced at runtime by .zshrc.
+    zsh_config = os.path.join(home, ".config", "zsh")
+    if os.path.isdir(zsh_config):
+        zsh_palette = _generate_zsh_dracula_pro_palette(dp_dir, variant)
+        if zsh_palette:
+            with open(os.path.join(zsh_config, "dracula-pro-colors.zsh"), "w") as fh:
+                fh.write(zsh_palette)
+
+
+def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
+    """Parse hex colors from a Ghostty theme file. Returns dict of role->hex."""
+    theme_file = os.path.join(dp_dir, "themes", "ghostty", variant)
+    if not os.path.isfile(theme_file):
+        return None
+    ansi: dict[int, str] = {}
+    extras: dict[str, str] = {}
+    with open(theme_file) as fh:
+        for line in fh:
+            line = line.strip()
+            if line.startswith("palette = "):
+                _, rest = line.split("=", 1)
+                idx_str, color = rest.strip().split("=", 1)
+                ansi[int(idx_str.strip())] = color.strip()
+            elif "=" in line and not line.startswith("#"):
+                key, val = line.split("=", 1)
+                extras[key.strip()] = val.strip()
+    if not ansi:
+        return None
+    return {
+        "foreground": extras.get("foreground", ansi.get(7, "#F8F8F2")),
+        "red":        ansi.get(1, "#ff5555"),
+        "green":      ansi.get(2, "#50fa7b"),
+        "yellow":     ansi.get(3, "#f1fa8c"),
+        "blue":       ansi.get(4, "#bd93f9"),
+        "magenta":    ansi.get(5, "#ff79c6"),
+        "cyan":       ansi.get(6, "#8be9fd"),
+        "black":      ansi.get(0, "#282a36"),
+        "black_bright": ansi.get(8, "#000000"),
+        "red_bright":   ansi.get(9, "#000000"),
+        "green_bright": ansi.get(10, "#000000"),
+        "yellow_bright": ansi.get(11, "#000000"),
+        "blue_bright":  ansi.get(12, "#000000"),
+        "magenta_bright": ansi.get(13, "#000000"),
+        "cyan_bright":  ansi.get(14, "#000000"),
+        "comment":    ansi.get(8, "#000000"),
+    }
+
+
+def _generate_tmux_dracula_pro_conf(dp_dir: str, variant: str) -> str | None:
+    """Generate a tmux dark.conf with Dracula Pro colors for the given variant."""
+    p = _parse_ghostty_palette(dp_dir, variant)
+    if not p:
+        return None
+    return f"""\
+# Dracula Pro color palette ({variant}).
+# Auto-generated by koopa dotfiles install from local Dracula Pro source.
+
+# Standard ANSI colors.
+%hidden black='{p["black"]}'
+%hidden black_bright='{p["black_bright"]}'
+%hidden red='{p["red"]}'
+%hidden red_bright='{p["red_bright"]}'
+%hidden green='{p["green"]}'
+%hidden green_bright='{p["green_bright"]}'
+%hidden yellow='{p["yellow"]}'
+%hidden yellow_bright='{p["yellow_bright"]}'
+%hidden blue='{p["blue"]}'
+%hidden blue_bright='{p["blue_bright"]}'
+%hidden magenta='{p["magenta"]}'
+%hidden magenta_bright='{p["magenta_bright"]}'
+%hidden cyan='{p["cyan"]}'
+%hidden cyan_bright='{p["cyan_bright"]}'
+%hidden white='{p["foreground"]}'
+%hidden white_bright='#ffffff'
+
+# Additional accent colors.
+%hidden bright_purple='{p["blue"]}'
+%hidden dark_purple='{p["black"]}'
+%hidden muted_purple='{p["comment"]}'
+
+set-option -g message-style "bg=${{dark_purple}},fg=${{white}}"
+set-option -g pane-active-border-style "fg=${{bright_purple}}"
+set-option -g pane-border-style "fg=${{dark_purple}}"
+set-option -g status-left "#[bg=#{{bright_purple}},fg=${{black}}]#{{?client_prefix,#[bg=${{green}}],}} #S "
+set-option -g status-right "#[fg=${{white}}] #h %I:%M %p "
+set-option -g status-style "bg=${{dark_purple}},fg=${{white}}"
+set-window-option -g window-status-current-format "#[fg=${{white}},bg=${{muted_purple}}] #I #W "
+set-window-option -g window-status-format "#[fg=${{white}}] #I #W "
+"""
+
+
+_ZSH_HIGHLIGHT_ROLES = [
+    ("alias",                                   "green"),
+    ("arg0",                                    "foreground"),
+    ("assign",                                  "foreground"),
+    ("autodirectory",                           "yellow"),
+    ("back-dollar-quoted-argument",             "magenta"),
+    ("back-double-quoted-argument",             "magenta"),
+    ("back-quoted-argument-delimiter",          "magenta"),
+    ("back-quoted-argument-unclosed",           "red"),
+    ("back-quoted-argument",                    "blue"),
+    ("builtin",                                 "cyan"),
+    ("command-substitution-delimiter-quoted",   "yellow"),
+    ("command-substitution-delimiter-unquoted", "foreground"),
+    ("command-substitution-delimiter",          "foreground"),
+    ("command-substitution-quoted",             "yellow"),
+    ("command",                                 "green"),
+    ("commandseparator",                        "magenta"),
+    ("comment",                                 "comment"),
+    ("cursor",                                  None),
+    ("default",                                 "foreground"),
+    ("dollar-double-quoted-argument",           "foreground"),
+    ("dollar-quoted-argument-unclosed",         "red"),
+    ("dollar-quoted-argument",                  "foreground"),
+    ("double-hyphen-option",                    "yellow"),
+    ("double-quoted-argument-unclosed",         "red"),
+    ("double-quoted-argument",                  "yellow"),
+    ("function",                                "green"),
+    ("global-alias",                            "green"),
+    ("globbing",                                "foreground"),
+    ("hashed-command",                          "cyan"),
+    ("history-expansion",                       "blue"),
+    ("named-fd",                                "foreground"),
+    ("numeric-fd",                              "foreground"),
+    ("path",                                    "foreground"),
+    ("path_pathseparator",                      "magenta"),
+    ("path_prefix",                             "foreground"),
+    ("path_prefix_pathseparator",               "magenta"),
+    ("precommand",                              "green_italic"),
+    ("process-substitution-delimiter",          "foreground"),
+    ("rc-quote",                                "yellow"),
+    ("redirection",                             "foreground"),
+    ("reserved-word",                           "cyan"),
+    ("single-hyphen-option",                    "yellow"),
+    ("single-quoted-argument-unclosed",         "red"),
+    ("single-quoted-argument",                  "yellow"),
+    ("suffix-alias",                            "green"),
+    ("unknown-token",                           "red"),
+]
+
+
+def _generate_zsh_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
+    """Generate ~/.config/zsh/dracula-pro-colors.zsh from local Dracula Pro source."""
+    p = _parse_ghostty_palette(dp_dir, variant)
+    if not p:
+        return None
+    autosuggest_ansi = {
+        "pro": "fg=103",
+        "blade": "fg=109",
+        "buffy": "fg=139",
+        "lincoln": "fg=144",
+        "morbius": "fg=138",
+        "van-helsing": "fg=109",
+        "alucard": "fg=103",
+    }.get(variant, "fg=103")
+    lines = [
+        f"# Dracula Pro zsh syntax-highlighting palette ({variant}).",
+        "# Auto-generated by koopa dotfiles install from local Dracula Pro source.",
+        f"export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='{autosuggest_ansi}'",
+        "ZSH_HIGHLIGHT_HIGHLIGHTERS=('main' 'cursor')",
+        "typeset -gA ZSH_HIGHLIGHT_STYLES",
+    ]
+    color_map = {
+        "foreground":   p["foreground"],
+        "red":          p["red"],
+        "green":        p["green"],
+        "yellow":       p["yellow"],
+        "blue":         p["blue"],
+        "magenta":      p["magenta"],
+        "cyan":         p["cyan"],
+        "comment":      p["comment"],
+    }
+    for role, color_key in _ZSH_HIGHLIGHT_ROLES:
+        if color_key is None:
+            lines.append(f"ZSH_HIGHLIGHT_STYLES['{role}']='standout'")
+        elif color_key == "green_italic":
+            lines.append(
+                f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={color_map['green']},italic'"
+            )
+        elif color_key == "yellow_italic":
+            lines.append(
+                f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={color_map['yellow']},italic'"
+            )
+        else:
+            hex_val = color_map.get(color_key, p.get(color_key, "#F8F8F2"))
+            lines.append(f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={hex_val}'")
+    return "\n".join(lines) + "\n"
+
+
+def _dracula_iterm_name(variant: str) -> str:
+    names = {
+        "pro": "Dracula Pro.itermcolors",
+        "blade": "Dracula Pro (Blade).itermcolors",
+        "buffy": "Dracula Pro (Buffy).itermcolors",
+        "lincoln": "Dracula Pro (Lincoln).itermcolors",
+        "morbius": "Dracula Pro (Morbius).itermcolors",
+        "van-helsing": "Dracula Pro (Van Helsing).itermcolors",
+        "alucard": "Dracula Pro (Alucard).itermcolors",
+    }
+    return names.get(variant, "Dracula Pro.itermcolors")
+
+
+def _dracula_terminal_name(variant: str) -> str:
+    names = {
+        "pro": "Dracula Pro.terminal",
+        "blade": "Dracula Pro (Blade).terminal",
+        "buffy": "Dracula Pro (Buffy).terminal",
+        "lincoln": "Dracula Pro (Lincoln).terminal",
+        "morbius": "Dracula Pro (Morbius).terminal",
+        "van-helsing": "Dracula Pro (Van Helsing).terminal",
+        "alucard": "Dracula Pro (Alucard).terminal",
+    }
+    return names.get(variant, "Dracula Pro.terminal")
 
 
 def main() -> None:
@@ -46,6 +477,7 @@ def main() -> None:
     if os.path.islink(old_activate):
         os.unlink(old_activate)
     _add_config_link(prefix, "dotfiles")
+    _configure_dracula_pro(home, xdg_data)
     ssh_dir = os.path.join(home, ".ssh")
     if os.path.isdir(ssh_dir):
         chmod(ssh_dir, "0700")
@@ -65,6 +497,7 @@ def main() -> None:
         chezmoi_args.append("--verbose")
     chezmoi_args.append("apply")
     subprocess.run(chezmoi_args, cwd=chezmoi_prefix, check=True)
+    _configure_dracula_pro_post(home, xdg_data)
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
     zprofile_dest = os.path.join(home, ".zprofile")
     if not os.path.islink(zprofile_dest):

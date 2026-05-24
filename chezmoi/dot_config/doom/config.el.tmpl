@@ -1,7 +1,16 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 (setq doom-font (font-spec :family "JetBrainsMono NF" :size 16))
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpvNorm := $dpv -}}
+{{- if or (not $dpv) (eq $dpv "pro") -}}{{- $dpvNorm = "pro" -}}{{- end -}}
+{{- $dpThemeEl := printf "dracula-pro-%s-theme.el" $dpvNorm -}}
+{{- if stat (joinPath .chezmoi.homeDir ".config/doom/themes" $dpThemeEl) }}
+(add-to-list 'custom-theme-load-path "~/.config/doom/themes")
+(setq doom-theme 'dracula-pro-{{ $dpvNorm }})
+{{- else }}
 (setq doom-theme 'doom-dracula)
+{{- end }}
 ;; Light theme alternative:
 ;; > (setq doom-theme 'doom-one-light)
 

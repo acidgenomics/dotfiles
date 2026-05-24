@@ -317,14 +317,21 @@
     "activityBarBadge.background": "#0000",
     "activityBarBadge.foreground": "#0000"
   },
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpProInstalled := glob (joinPath .chezmoi.homeDir ".vscode/extensions/dracula-theme-pro.theme-dracula-pro-*") -}}
+{{- $dpDarkTheme := "Dracula Theme" -}}
+{{- $dpLightTheme := "Atom One Light" -}}
+{{- if $dpProInstalled -}}
+{{-   $dpDarkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-   end -}}
+{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
+{{- end -}}
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-  "workbench.colorTheme": "Atom One Light",
+  "workbench.colorTheme": "{{ $dpLightTheme }}",
 {{- else }}
-{{- if stat (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-1.1.0") }}
-  "workbench.colorTheme": "Dracula Pro",
-{{- else }}
-  "workbench.colorTheme": "Dracula Theme",
-{{- end }}
+  "workbench.colorTheme": "{{ $dpDarkTheme }}",
 {{- end }}
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook"
@@ -336,12 +343,8 @@
   "workbench.editor.languageDetection": false,
   "workbench.iconTheme": "vscode-icons",
   "workbench.panel.defaultLocation": "bottom",
-{{- if stat (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-1.1.0") }}
-  "workbench.preferredDarkColorTheme": "Dracula Pro",
-{{- else }}
-  "workbench.preferredDarkColorTheme": "Dracula Theme",
-{{- end }}
-  "workbench.preferredLightColorTheme": "Atom One Light",
+  "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
+  "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",
   "workbench.startupEditor": "newUntitledFile",
   "workbench.tree.renderIndentGuides": "always"
 }

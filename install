@@ -237,6 +237,63 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                     os.path.join(wt_src, f),
                     os.path.join(wt_staging, f),
                 )
+    # Insomnia: symlink plugin dir if Insomnia is installed.
+    insomnia_plugins = os.path.join(
+        home, "Library", "Application Support", "Insomnia", "plugins"
+    )
+    insomnia_src = os.path.join(dp_dir, "themes", "insomnia", "dracula-pro")
+    if os.path.isdir(insomnia_src) and os.path.isdir(insomnia_plugins):
+        ln(insomnia_src, os.path.join(insomnia_plugins, "dracula-pro"))
+    # Sublime Text: symlink themes dir as a Packages entry.
+    sublime_packages = os.path.join(
+        home, "Library", "Application Support", "Sublime Text", "Packages"
+    )
+    sublime_src = os.path.join(dp_dir, "themes", "sublime")
+    if os.path.isdir(sublime_src) and os.path.isdir(sublime_packages):
+        ln(sublime_src, os.path.join(sublime_packages, "Dracula Pro"))
+    # JetBrains Fleet: symlink JSON themes dir if Fleet is installed.
+    fleet_themes = os.path.join(home, ".fleet", "themes")
+    fleet_src = os.path.join(dp_dir, "themes", "jetbrains", "experimental")
+    if os.path.isdir(fleet_src) and os.path.isdir(os.path.join(home, ".fleet")):
+        mkdir(fleet_themes)
+        for f in os.listdir(fleet_src):
+            if f.endswith(".json"):
+                ln(
+                    os.path.join(fleet_src, f),
+                    os.path.join(fleet_themes, f),
+                )
+    # gnome-terminal: run variant install.sh non-interactively (Linux only).
+    if not is_macos():
+        gnome_install_sh = os.path.join(
+            dp_dir, "themes", "gnome-terminal", variant, "install.sh"
+        )
+        if os.path.isfile(gnome_install_sh):
+            subprocess.run(
+                ["bash", gnome_install_sh],
+                capture_output=True,
+            )
+    # Notepad++: stage XML files for manual install.
+    notepad_staging = os.path.join(xdg_config_home(), "koopa", "notepad-themes")
+    notepad_src = os.path.join(dp_dir, "themes", "notepad-plus-plus")
+    if os.path.isdir(notepad_src):
+        mkdir(notepad_staging)
+        for f in os.listdir(notepad_src):
+            if f.endswith(".xml"):
+                ln(
+                    os.path.join(notepad_src, f),
+                    os.path.join(notepad_staging, f),
+                )
+    # Raycast: stage JSON files for manual import.
+    raycast_staging = os.path.join(xdg_config_home(), "koopa", "raycast-themes")
+    raycast_src = os.path.join(dp_dir, "themes", "raycast", "json-files")
+    if os.path.isdir(raycast_src):
+        mkdir(raycast_staging)
+        for f in os.listdir(raycast_src):
+            if f.endswith(".json"):
+                ln(
+                    os.path.join(raycast_src, f),
+                    os.path.join(raycast_staging, f),
+                )
     # Tmux: generate a Pro dark.conf from Ghostty palette, override chezmoi file.
     tmux_colors = os.path.join(home, ".config", "tmux", "colors")
     if os.path.isdir(tmux_colors):

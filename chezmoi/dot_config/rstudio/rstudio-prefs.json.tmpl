@@ -20,10 +20,20 @@
     "default_encoding": "UTF-8",
     "diagnostics_on_save": false,
     "doc_outline_show": "sections_and_chunks",
+{{- $dpDark := stat (joinPath .chezmoi.homeDir ".config/rstudio/themes/dracula-pro.rstheme") -}}
+{{- $dpAlucard := stat (joinPath .chezmoi.homeDir ".config/rstudio/themes/dracula-pro-alucard.rstheme") -}}
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+{{-   if $dpAlucard }}
+    "editor_theme": "Dracula Pro Alucard",
+{{-   else }}
     "editor_theme": "Xcode",
+{{-   end }}
 {{- else }}
+{{-   if $dpDark }}
+    "editor_theme": "Dracula Pro",
+{{-   else }}
     "editor_theme": "Dracula",
+{{-   end }}
 {{- end }}
     "enable_snippets": false,
     "focus_console_after_exec": true,

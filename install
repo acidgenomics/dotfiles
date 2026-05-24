@@ -4,6 +4,8 @@
 
 import json
 import os
+import plistlib
+import re
 import shutil
 import subprocess
 import sys
@@ -309,6 +311,24 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
         if zsh_palette:
             with open(os.path.join(zsh_config, "dracula-pro-colors.zsh"), "w") as fh:
                 fh.write(zsh_palette)
+    # RStudio: generate .rstheme from .tmTheme source (no Pro colors in repo).
+    rstudio_themes = os.path.join(home, ".config", "rstudio", "themes")
+    template_rstheme = os.path.join(
+        str(_PREFIX), "chezmoi", "dot_config", "rstudio", "themes", "dracula.rstheme"
+    )
+    if os.path.isdir(rstudio_themes) and os.path.isfile(template_rstheme):
+        # Generate the selected dark variant.
+        dark_css = _generate_rstudio_rstheme(dp_dir, variant, template_rstheme)
+        if dark_css:
+            with open(os.path.join(rstudio_themes, "dracula-pro.rstheme"), "w") as fh:
+                fh.write(dark_css)
+        # Always generate Alucard (light) variant as well.
+        alucard_css = _generate_rstudio_rstheme(dp_dir, "alucard", template_rstheme)
+        if alucard_css:
+            with open(
+                os.path.join(rstudio_themes, "dracula-pro-alucard.rstheme"), "w"
+            ) as fh:
+                fh.write(alucard_css)
 
 
 def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
@@ -489,6 +509,112 @@ def _generate_zsh_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
             hex_val = color_map.get(color_key, p.get(color_key, "#F8F8F2"))
             lines.append(f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={hex_val}'")
     return "\n".join(lines) + "\n"
+
+
+def _tmtheme_colors(dp_dir: str, variant: str) -> dict[str, str] | None:
+    """Parse key colors from a Dracula Pro .tmTheme for the given variant."""
+    name_map = {
+        "pro": "Dracula Pro.tmTheme",
+        "blade": "Dracula Pro (Blade).tmTheme",
+        "buffy": "Dracula Pro (Buffy).tmTheme",
+        "lincoln": "Dracula Pro (Lincoln).tmTheme",
+        "morbius": "Dracula Pro (Morbius).tmTheme",
+        "van-helsing": "Dracula Pro (Van Helsing).tmTheme",
+        "alucard": "Dracula Pro (Alucard).tmTheme",
+    }
+    fname = name_map.get(variant, "Dracula Pro.tmTheme")
+    path = os.path.join(dp_dir, "themes", "sublime", fname)
+    if not os.path.isfile(path):
+        return None
+    with open(path, "rb") as fh:
+        data = plistlib.load(fh)
+    global_s = data["settings"][0]["settings"]
+    scope_map: dict[str, str] = {}
+    for item in data["settings"][1:]:
+        fg = item.get("settings", {}).get("foreground", "")
+        if not fg:
+            continue
+        for scope in item.get("scope", "").split(","):
+            scope_map[scope.strip()] = fg
+    return {
+        "background":    global_s.get("background", "#282a36"),
+        "foreground":    global_s.get("foreground", "#f8f8f2"),
+        "selection":     global_s.get("selection", "#44475a"),
+        "line_highlight": global_s.get("lineHighlight", "#44475a"),
+        "comment":       scope_map.get("comment", "#000000"),
+        "string":        scope_map.get("string", "#f1fa8c"),
+        "number":        scope_map.get("constant.numeric", "#bd93f9"),
+        "keyword":       scope_map.get("keyword", "#ff79c6"),
+        "function":      scope_map.get("entity.name.function", "#50fa7b"),
+        "type":          scope_map.get("storage.type", "#8be9fd"),
+        "variable":      scope_map.get("variable.parameter", "#ffb86c"),
+        "is_dark":       global_s.get("background", "#282a36")[1:3].lower() < "80",
+    }
+
+
+# Free Dracula color → CSS property role mapping used for substitution.
+# Each entry is (free_hex, role_key) in lowercase for case-insensitive matching.
+_FREE_DRACULA_COLOR_MAP = [
+    ("#282a36", "background"),
+    ("#21222c", "background"),    # slightly darker bg variant
+    ("#6272a4", "comment"),
+    ("#50fa7b", "function"),
+    ("#f1fa8c", "string"),
+    ("#ff79c6", "keyword"),
+    ("#bd93f9", "number"),
+    ("#8be9fd", "type"),
+    ("#ffb86c", "variable"),
+]
+
+
+def _generate_rstudio_rstheme(
+    dp_dir: str,
+    variant: str,
+    template_path: str,
+) -> str | None:
+    """Generate an .rstheme CSS by replacing free Dracula colors with Pro colors."""
+    colors = _tmtheme_colors(dp_dir, variant)
+    if not colors:
+        return None
+    with open(template_path) as fh:
+        css = fh.read()
+    # Strip the old theme name header and replace with Pro name.
+    variant_display_map = {
+        "pro": "Dracula Pro",
+        "blade": "Dracula Pro Blade",
+        "buffy": "Dracula Pro Buffy",
+        "lincoln": "Dracula Pro Lincoln",
+        "morbius": "Dracula Pro Morbius",
+        "van-helsing": "Dracula Pro Van Helsing",
+        "alucard": "Dracula Pro Alucard",
+    }
+    display_name = variant_display_map.get(variant, "Dracula Pro")
+    is_dark = "TRUE" if colors["is_dark"] else "FALSE"
+    css = re.sub(
+        r'/\* rs-theme-name:.*?\*/',
+        f'/* rs-theme-name: {display_name} */',
+        css,
+    )
+    css = re.sub(
+        r'/\* rs-theme-is-dark:.*?\*/',
+        f'/* rs-theme-is-dark: {is_dark} */',
+        css,
+    )
+    # Substitute each free Dracula color with the Pro equivalent.
+    role_to_pro = {
+        "background": colors["background"],
+        "comment":    colors["comment"],
+        "function":   colors["function"],
+        "string":     colors["string"],
+        "keyword":    colors["keyword"],
+        "number":     colors["number"],
+        "type":       colors["type"],
+        "variable":   colors["variable"],
+    }
+    for free_hex, role in _FREE_DRACULA_COLOR_MAP:
+        pro_hex = role_to_pro.get(role, free_hex)
+        css = re.sub(re.escape(free_hex), pro_hex, css, flags=re.IGNORECASE)
+    return css
 
 
 def _dracula_iterm_name(variant: str) -> str:

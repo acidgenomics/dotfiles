@@ -18,18 +18,22 @@ return {
             vim.cmd.colorscheme('dracula')
         end,
     },
-    -- Dark colorscheme (Dracula Pro, loaded from local directory)
+    -- Dracula Pro (loaded from local directory, handles dark + light)
     {
         'dracula_pro',
         dir = dracula_pro,
         lazy = false,
         priority = 1000,
-        cond = not is_light and has_dracula_pro,
+        cond = has_dracula_pro,
         config = function()
-            vim.cmd.colorscheme(dracula_pro_scheme)
+            if is_light then
+                vim.cmd.colorscheme('dracula_pro_alucard')
+            else
+                vim.cmd.colorscheme(dracula_pro_scheme)
+            end
         end,
     },
-    -- Light colorscheme (Dracula Pro Alucard when available, else vim-one)
+    -- Light colorscheme fallback (vim-one when Dracula Pro not installed)
     {
         'rakr/vim-one',
         lazy = false,
@@ -37,16 +41,6 @@ return {
         cond = is_light and not has_dracula_pro,
         config = function()
             vim.cmd.colorscheme('one')
-        end,
-    },
-    {
-        'dracula_pro_alucard',
-        dir = dracula_pro,
-        lazy = false,
-        priority = 1000,
-        cond = is_light and has_dracula_pro,
-        config = function()
-            vim.cmd.colorscheme('dracula_pro_alucard')
         end,
     },
     -- Auto dark/light mode on macOS

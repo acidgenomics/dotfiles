@@ -20,16 +20,15 @@
     "default_encoding": "UTF-8",
     "diagnostics_on_save": false,
     "doc_outline_show": "sections_and_chunks",
-{{- $dpDark := stat (joinPath .chezmoi.homeDir ".config/rstudio/themes/dracula-pro.rstheme") -}}
-{{- $dpAlucard := stat (joinPath .chezmoi.homeDir ".config/rstudio/themes/dracula-pro-alucard.rstheme") -}}
+{{- $dpSrc := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro/themes/sublime/Dracula Pro.tmTheme") -}}
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-{{-   if $dpAlucard }}
+{{-   if $dpSrc }}
     "editor_theme": "Dracula Pro Alucard",
 {{-   else }}
     "editor_theme": "Xcode",
 {{-   end }}
 {{- else }}
-{{-   if $dpDark }}
+{{-   if $dpSrc }}
     "editor_theme": "Dracula Pro",
 {{-   else }}
     "editor_theme": "Dracula",

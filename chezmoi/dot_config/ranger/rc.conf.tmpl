@@ -13,7 +13,11 @@
 # variable RANGER_LOAD_DEFAULT_RC to FALSE to avoid loading it twice.
 # """
 
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 set colorscheme dracula
+{{- else }}
+set colorscheme default
+{{- end }}
 
 set column_ratios 1,2,3
 set confirm_on_delete always

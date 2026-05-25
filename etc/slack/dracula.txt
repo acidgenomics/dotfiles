@@ -1,0 +1,21 @@
+Dracula theme for Slack
+=======================
+
+Slack themes cannot be set automatically. To apply the Dracula theme:
+
+1. Open Slack
+2. Go to Preferences → Themes → Custom Theme
+3. Paste the following color value string:
+
+#282A36,#3B3D51,#6272A4,#F8F8F2,#44475A,#F8F8F2,#50FA7B,#FF79C6
+
+Sidebar background:     #282A36
+Active item background: #44475A
+Active item text:       #F8F8F2
+Hover item background:  #3B3D51
+Text color:             #F8F8F2
+Active presence:        #50FA7B
+Mention badge:          #FF79C6
+Top navigation bg:      #6272A4
+
+Source: https://github.com/dracula/slack

@@ -18,4 +18,8 @@ cheatpaths:
 colorize: true
 formatter: terminal256
 pager: less -FRX
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 style: dracula
+{{- else -}}
+style: github
+{{- end }}

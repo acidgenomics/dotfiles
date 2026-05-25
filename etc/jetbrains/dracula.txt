@@ -1,0 +1,22 @@
+Dracula theme for JetBrains IDEs
+=================================
+
+The free Dracula theme is available from the JetBrains Marketplace and must be
+installed from within the IDE (it cannot be automated via file deployment).
+
+To install:
+1. Open any JetBrains IDE (IntelliJ IDEA, PyCharm, etc.)
+2. Go to Settings → Plugins → Marketplace
+3. Search for "Dracula Theme"
+4. Install the plugin by Dracula Theme
+5. Go to Settings → Appearance & Behavior → Appearance
+6. Set Theme to "Dracula"
+
+Alternatively, install via the JetBrains Toolbox or CLI if available.
+
+Source: https://github.com/dracula/jetbrains
+Marketplace: https://plugins.jetbrains.com/plugin/12275-dracula-theme
+
+Note: If you have Dracula Pro installed, the Pro zip is staged at:
+~/.config/koopa/jetbrains-theme/dracula-pro.zip
+Install via Settings → Plugins → Install Plugin from Disk.

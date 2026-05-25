@@ -1,6 +1,10 @@
 add_newline = true
 command_timeout = 2000
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 palette = "dracula"
+{{- else }}
+palette = "one_light"
+{{- end }}
 scan_timeout = 100
 
 [aws]
@@ -347,6 +351,7 @@ disabled = true
 [zig]
 disabled = true
 
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 [palettes.dracula]
 blue = "#8be9fd"
 cyan = "#8be9fd"
@@ -354,3 +359,12 @@ green = "#50fa7b"
 purple = "#bd93f9"
 red = "#ff5555"
 yellow = "#f1fa8c"
+{{- else }}
+[palettes.one_light]
+blue = "#4078f2"
+cyan = "#0184bc"
+green = "#50a14f"
+purple = "#a626a4"
+red = "#e45649"
+yellow = "#986801"
+{{- end }}

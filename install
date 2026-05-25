@@ -343,7 +343,8 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     }
     bat_themes = os.path.join(home, ".config", "bat", "themes")
     sublime_src = os.path.join(dp_dir, "themes", "sublime")
-    if os.path.isdir(bat_themes) and os.path.isdir(sublime_src):
+    if os.path.isdir(sublime_src):
+        os.makedirs(bat_themes, exist_ok=True)
         dark_fname = _tmtheme_name_map.get(variant, "Dracula Pro.tmTheme")
         dark_tmtheme = os.path.join(sublime_src, dark_fname)
         if os.path.isfile(dark_tmtheme):

@@ -329,6 +329,39 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(rstudio_themes, "dracula-pro-alucard.rstheme"), "w"
             ) as fh:
                 fh.write(alucard_css)
+    # BBEdit: generate .bbColorScheme from .tmTheme source (no Pro colors in repo).
+    if is_macos():
+        bbedit_schemes = os.path.join(
+            home, "Library", "Application Support", "BBEdit", "Color Schemes"
+        )
+        if os.path.isdir(bbedit_schemes):
+            dark_scheme = _generate_bbedit_dracula_pro(dp_dir, variant)
+            if dark_scheme:
+                with open(
+                    os.path.join(bbedit_schemes, "Dracula Pro.bbColorScheme"), "w"
+                ) as fh:
+                    fh.write(dark_scheme)
+            alucard_scheme = _generate_bbedit_dracula_pro(dp_dir, "alucard")
+            if alucard_scheme:
+                with open(
+                    os.path.join(bbedit_schemes, "Dracula Pro Alucard.bbColorScheme"), "w"
+                ) as fh:
+                    fh.write(alucard_scheme)
+            dark_name = _DRACULA_VARIANT_NAMES.get(variant, "Dracula Pro")
+            subprocess.run(
+                [
+                    "/usr/bin/defaults", "write", "com.barebones.bbedit",
+                    "SelectedColorSchemeName", "-string", "Dracula Pro Alucard",
+                ],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "/usr/bin/defaults", "write", "com.barebones.bbedit",
+                    "SelectedColorSchemeNameDarkMode", "-string", dark_name,
+                ],
+                check=True,
+            )
 
 
 def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
@@ -549,6 +582,7 @@ def _tmtheme_colors(dp_dir: str, variant: str) -> dict[str, str] | None:
         "type":          scope_map.get("storage.type", "#8be9fd"),
         "variable":      scope_map.get("variable.parameter", "#ffb86c"),
         "is_dark":       global_s.get("background", "#282a36")[1:3].lower() < "80",
+        "red":           scope_map.get("message.error", "#F83333"),
     }
 
 
@@ -615,6 +649,197 @@ def _generate_rstudio_rstheme(
         pro_hex = role_to_pro.get(role, free_hex)
         css = re.sub(re.escape(free_hex), pro_hex, css, flags=re.IGNORECASE)
     return css
+
+
+def _generate_bbedit_dracula_pro(dp_dir: str, variant: str) -> str | None:
+    """Generate a .bbColorScheme plist XML for a Dracula Pro variant."""
+    colors = _tmtheme_colors(dp_dir, variant)
+    if not colors:
+        return None
+    bg = colors["background"]
+    fg = colors["foreground"]
+    sel = colors["selection"]
+    line_hl = colors["line_highlight"]
+    comment = colors["comment"]
+    string = colors["string"]
+    number = colors["number"]
+    keyword = colors["keyword"]
+    func = colors["function"]
+    typ = colors["type"]
+    variable = colors["variable"]
+    red = colors.get("red", "#F83333")
+    variant_display_map = {
+        "pro": "Dracula Pro",
+        "blade": "Dracula Pro Blade",
+        "buffy": "Dracula Pro Buffy",
+        "lincoln": "Dracula Pro Lincoln",
+        "morbius": "Dracula Pro Morbius",
+        "van-helsing": "Dracula Pro Van Helsing",
+        "alucard": "Dracula Pro Alucard",
+    }
+    display_name = variant_display_map.get(variant, "Dracula Pro")
+    return f"""\
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+\t<key>BBEditDocumentType</key>
+\t<string>ColorScheme</string>
+\t<key>BackgroundColor</key>
+\t<string>{bg}</string>
+\t<key>ColorSchemeFormatVersion</key>
+\t<integer>3</integer>
+\t<key>DifferenceHighlightColor</key>
+\t<string>{func}</string>
+\t<key>HighlightInsertionPoint</key>
+\t<false/>
+\t<key>InsertionPointLineHighlightColor</key>
+\t<string>{line_hl}</string>
+\t<key>InvisibleOthersColor</key>
+\t<string>{comment}</string>
+\t<key>InvisibleSpacesColor</key>
+\t<string>{comment}</string>
+\t<key>PrimaryHighlightColor</key>
+\t<string>{sel}</string>
+\t<key>SecondaryHighlightColor</key>
+\t<string>{sel}</string>
+\t<key>SpellingColor</key>
+\t<string>{red}</string>
+\t<key>UseCustomHighlightColor</key>
+\t<true/>
+\t<key>com.barebones.bblm.JavaScript.regexp</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.Pyth.decorator</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.Pyth.triple-string</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.TeX.math-string</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.TeX.param-content</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.TeX.verbatim</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.code</key>
+\t<string>{fg}</string>
+\t<key>com.barebones.bblm.comment</key>
+\t<string>{comment}</string>
+\t<key>com.barebones.bblm.css.color-spec</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.file-include</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.grep.charclass</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.grep.escape-sequence</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.grep.metachar</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.grep.metasequence</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.grep.posix-name</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.grep.repeat</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.grep.repeat-data</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.heredoc-string</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.html.anchor</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.html.attribute-name</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.html.attribute-value</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.html.image</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.indexed-symbol</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.keyword</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.markdown.Emph</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.markdown.HorizontalRule</key>
+\t<string>{comment}</string>
+\t<key>com.barebones.bblm.markdown.ImageAltText</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.markdown.ImageId</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.markdown.InlineCode</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.markdown.InlineLinkText</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.markdown.Keyword</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.markdown.LinkDefId</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.markdown.LinkDefTitle</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.markdown.LinkDefUrl</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.markdown.ListItemMarker</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.markdown.Pre</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.markdown.QuoteMarker</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.markdown.QuotedContent</key>
+\t<string>{comment}</string>
+\t<key>com.barebones.bblm.number</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.perl.generic-string</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.perl.outer-pod</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.perl.pre-generic-string</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.predefined-symbol</key>
+\t<string>{number}</string>
+\t<key>com.barebones.bblm.preprocessor</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.ruby.regexp</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.ruby.symbol</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.sgml-cdata</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.sgml-decl</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.sgml-entity</key>
+\t<string>{variable}</string>
+\t<key>com.barebones.bblm.sgml-tag</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.string</key>
+\t<string>{string}</string>
+\t<key>com.barebones.bblm.syntax-error</key>
+\t<string>{red}</string>
+\t<key>com.barebones.bblm.variable</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.verilog-hdl.comment-1</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.verilog-hdl.comment-2</key>
+\t<string>{comment}</string>
+\t<key>com.barebones.bblm.verilog-hdl.comment-3</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.verilog-hdl.input-type</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.verilog-hdl.output-type</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.verilog-hdl.register-type</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.verilog-hdl.wire-type</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.vhdl.comment-1</key>
+\t<string>{keyword}</string>
+\t<key>com.barebones.bblm.vhdl.comment-2</key>
+\t<string>{comment}</string>
+\t<key>com.barebones.bblm.vhdl.comment-3</key>
+\t<string>{typ}</string>
+\t<key>com.barebones.bblm.xml-empty</key>
+\t<string>{func}</string>
+\t<key>com.barebones.bblm.xml-pi</key>
+\t<string>{comment}</string>
+</dict>
+</plist>
+"""
 
 
 def _dracula_iterm_name(variant: str) -> str:

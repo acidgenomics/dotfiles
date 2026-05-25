@@ -27,7 +27,11 @@ show_cpu_usage=1
 show_cpu_frequency=0
 update_process_names=0
 account_guest_in_cpu_meter=0
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 color_scheme=6
+{{- else -}}
+color_scheme=0
+{{- end }}
 enable_mouse=1
 delay=15
 hide_function_bar=0

@@ -20,10 +20,12 @@
 
 --case-sensitive
 --color=always
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 --colors=match:fg:magenta
 --colors=match:style:bold
 --colors=line:fg:green
 --colors=path:fg:cyan
+{{ end -}}
 --fixed-strings
 --max-columns-preview
 --max-columns=150

@@ -1,1 +1,54 @@
-dark_colors.yaml
+# """
+# ANSI color theme for colorls — light mode.
+# @note Updated 2026-05-25.
+#
+# @seealso
+# - https://github.com/athityakumar/colorls/issues/165
+# """
+
+# Main Colors
+unrecognized_file: default
+recognized_file: default
+executable_file: dark_green
+dir: dark_cyan
+
+# Link
+dead_link: red
+link: dark_magenta
+
+# Special Files
+socket: dark_green
+blockdev: dark_green
+chardev: dark_green
+
+# Access Modes
+write: default
+read: default
+exec: dark_green
+no_access: red
+
+# Age
+day_old: default
+hour_old: default
+no_modifier: default
+
+# File Size
+file_large: default
+file_medium: default
+file_small: default
+
+# Random
+report: default
+user: default
+tree: default
+empty: default
+error: red
+normal: default
+inode: default
+
+# Git
+addition: dark_green
+deletion: red
+modification: dark_yellow
+unchanged: default
+untracked: dark_yellow

@@ -472,7 +472,11 @@ mpc_args=()
 # Example:
 # colors=(distro)      - Text is colored based on Distro colors.
 # colors=(4 6 1 8 8 6) - Text is colored in the order above.
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 colors=(5 6 4 5 6 7)
+{{- else -}}
+colors=(distro)
+{{- end }}
 
 
 # Text Options

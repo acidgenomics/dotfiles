@@ -1,5 +1,6 @@
 // Hyper configuration — https://hyper.is
-// Dracula theme: https://github.com/dracula/hyper
+// Dark: Dracula theme (https://github.com/dracula/hyper)
+// Light: Atom One Light theme (https://github.com/andrepolischuk/hyper-atom-one-light-theme)
 module.exports = {
   config: {
     fontSize: 13,
@@ -37,7 +38,7 @@ module.exports = {
       lightWhite: '#FFFFFF',
     },
   },
-  plugins: ['hyper-dracula'],
+  plugins: [{{ if eq (env "KOOPA_COLOR_MODE") "dark" }}'hyper-dracula'{{ else }}'hyper-atom-one-light-theme'{{ end }}],
   localPlugins: [],
   keymaps: {},
 };

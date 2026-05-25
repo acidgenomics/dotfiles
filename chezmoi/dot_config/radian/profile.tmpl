@@ -12,7 +12,7 @@ options(
     radian.auto_match = FALSE,
     radian.auto_suggest = FALSE,
     radian.auto_width = TRUE,
-    radian.color_scheme = "dracula",
+    radian.color_scheme = "{{ if eq (env "KOOPA_COLOR_MODE") "dark" }}dracula{{ else }}friendly{{ end }}",
     radian.complete_while_typing = FALSE,
     radian.editing_mode = "vi",
     radian.enable_reticulate_prompt = FALSE,

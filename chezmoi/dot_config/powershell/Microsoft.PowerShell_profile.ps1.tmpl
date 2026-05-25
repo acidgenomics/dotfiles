@@ -1,0 +1,51 @@
+# Koopa activation for PowerShell.
+$koopaDataHome = if ($env:XDG_DATA_HOME) { $env:XDG_DATA_HOME } else { Join-Path $HOME '.local/share' }
+$koopaActivate = Join-Path $koopaDataHome 'koopa/activate.ps1'
+if (Test-Path $koopaActivate) {
+    . $koopaActivate
+}
+Remove-Variable koopaDataHome, koopaActivate -ErrorAction SilentlyContinue
+
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
+if (Get-Module -ListAvailable -Name PSReadLine) {
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
+    Set-PSReadLineOption -Colors @{
+        Command   = '#50fa7b'
+        Parameter = '#ffb86c'
+        String    = '#f1fa8c'
+        Operator  = '#ff79c6'
+        Variable  = '#bd93f9'
+        Comment   = '#6272a4'
+        Keyword   = '#8be9fd'
+        Error     = '#ff5555'
+        Type      = '#8be9fd'
+        Number    = '#bd93f9'
+    }
+{{- else if $dpProInstalled }}
+    Set-PSReadLineOption -Colors @{
+        Command   = '#50fa7b'
+        Parameter = '#ffb86c'
+        String    = '#f1fa8c'
+        Operator  = '#ff79c6'
+        Variable  = '#bd93f9'
+        Comment   = '#6272a4'
+        Keyword   = '#8be9fd'
+        Error     = '#ff5555'
+        Type      = '#8be9fd'
+        Number    = '#bd93f9'
+    }
+{{- else }}
+    Set-PSReadLineOption -Colors @{
+        Command   = '#50a14f'
+        Parameter = '#986801'
+        String    = '#50a14f'
+        Operator  = '#a626a4'
+        Variable  = '#4078f2'
+        Comment   = '#a0a1a7'
+        Keyword   = '#a626a4'
+        Error     = '#e45649'
+        Type      = '#0184bc'
+        Number    = '#986801'
+    }
+{{- end }}
+}

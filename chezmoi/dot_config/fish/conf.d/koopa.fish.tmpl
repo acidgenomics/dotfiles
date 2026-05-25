@@ -1,0 +1,21 @@
+# Koopa activation for fish shell.
+set -l __koopa_data_home
+if set -q XDG_DATA_HOME
+    set __koopa_data_home $XDG_DATA_HOME
+else
+    set __koopa_data_home "$HOME/.local/share"
+end
+set -l __koopa_activate "$__koopa_data_home/koopa/activate.fish"
+if test -r "$__koopa_activate"
+    source "$__koopa_activate"
+end
+
+# FZF color scheme — set after activation so we override koopa's generic dark/light.
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") }}
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
+set -gx FZF_DEFAULT_OPTS '--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
+{{- else if $dpProInstalled -}}
+set -gx FZF_DEFAULT_OPTS '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#e45649 --color=marker:#e45649,spinner:#986801,header:#a0a1a7'
+{{- else -}}
+set -gx FZF_DEFAULT_OPTS '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#a626a4 --color=marker:#a626a4,spinner:#986801,header:#a0a1a7'
+{{- end }}

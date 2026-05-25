@@ -1,0 +1,14 @@
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
+{{-   if $dpProInstalled -}}
+--theme="Dracula Pro"
+{{-   else -}}
+--theme="Dracula"
+{{-   end -}}
+{{- else -}}
+{{-   if $dpProInstalled -}}
+--theme="Dracula Pro (Alucard)"
+{{-   else -}}
+--theme="OneHalfLight"
+{{-   end -}}
+{{- end }}

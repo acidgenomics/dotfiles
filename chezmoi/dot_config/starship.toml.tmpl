@@ -1,7 +1,10 @@
 add_newline = true
 command_timeout = 2000
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") }}
 {{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 palette = "dracula"
+{{- else if $dpProInstalled }}
+palette = "dracula_pro_alucard"
 {{- else }}
 palette = "one_light"
 {{- end }}
@@ -359,6 +362,14 @@ green = "#50fa7b"
 purple = "#bd93f9"
 red = "#ff5555"
 yellow = "#f1fa8c"
+{{- else if $dpProInstalled }}
+[palettes.dracula_pro_alucard]
+blue = "#a626a4"
+cyan = "#0184bc"
+green = "#50a14f"
+purple = "#e45649"
+red = "#e45649"
+yellow = "#986801"
 {{- else }}
 [palettes.one_light]
 blue = "#4078f2"

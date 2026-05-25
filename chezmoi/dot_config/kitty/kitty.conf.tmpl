@@ -11,7 +11,8 @@
 #     linux-toggle-dark-mode.html#kittys-built-in-solution-easy
 # """
 
-include current-theme.conf
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
+include themes/{{ if eq (env "KOOPA_COLOR_MODE") "dark" }}dracula{{ else if $dpProInstalled }}dracula-pro-alucard{{ else }}atom-one-light{{ end }}.conf
 
 bold_font auto
 bold_italic_font auto

@@ -1,0 +1,17 @@
+# Koopa activation for Elvish.
+use path
+
+var data-home = (or (get-env XDG_DATA_HOME) (path:join (get-env HOME) '.local' 'share'))
+var koopa-prefix = (path:join $data-home 'koopa')
+var koopa-activate = (path:join $koopa-prefix 'activate.elv')
+
+if (path:is-regular $koopa-activate) {
+    set-env KOOPA_PREFIX $koopa-prefix
+    eval (slurp < $koopa-activate)
+}
+
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
+set-env FZF_DEFAULT_OPTS '--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
+{{- else -}}
+set-env FZF_DEFAULT_OPTS '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#a626a4 --color=marker:#a626a4,spinner:#986801,header:#a0a1a7'
+{{- end }}

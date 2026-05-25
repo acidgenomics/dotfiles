@@ -15,6 +15,9 @@
     "editor.inlineSuggest.enabled": true
   },
   "[r]": {
+{{- if lookPath "air" }}
+    "editor.defaultFormatter": "posit-dev.air-vscode",
+{{- end }}
     "editor.formatOnSave": true
   },
   "[toml]": {
@@ -23,6 +26,7 @@
 {{- if lookPath "air" }}
   "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
+  "r.lsp.formatter": false,
 {{- end }}
   "breadcrumbs.enabled": true,
   "chat.agent.maxRequests": 200,
@@ -187,14 +191,11 @@
   "python.useEnvironmentsExtension": true,
   "r.alwaysUseActiveTerminal": true,
   "r.bracketedPaste": true,
-  "r.helpPanel.enableHoverLinks": false,
   "r.liveShare.defaults.shareWorkspace": false,
-  "r.lsp.diagnostics": false,
+  "r.lsp.diagnostics": true,
   "r.lsp.promptToInstall": false,
   "r.plot.defaults.fullWindowMode": true,
   "r.plot.useHttpgd": true,
-  "r.removeLeadingComments": true,
-  "r.rmarkdown.chunkBackgroundColor": "",
   "r.rpath.linux": "/usr/bin/R",
 {{- if eq .chezmoi.os "darwin" }}
   "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
@@ -212,7 +213,7 @@
   ],
   "r.rtermSendDelay": 0,
   "r.session.data.rowLimit": 100,
-  "r.session.levelOfObjectDetail": "Normal",
+  "r.session.levelOfObjectDetail": "Detailed",
   "r.workspaceViewer.removeHiddenItems": true,
   "r.workspaceViewer.showObjectSize": true,
   "redhat.telemetry.enabled": false,

@@ -1,5 +1,6 @@
 add_newline = true
 command_timeout = 2000
+palette = "dracula"
 scan_timeout = 100
 
 [aws]
@@ -345,3 +346,11 @@ disabled = true
 
 [zig]
 disabled = true
+
+[palettes.dracula]
+blue = "#8be9fd"
+cyan = "#8be9fd"
+green = "#50fa7b"
+purple = "#bd93f9"
+red = "#ff5555"
+yellow = "#f1fa8c"

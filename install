@@ -905,6 +905,30 @@ def main() -> None:
         chezmoi_args.append("--verbose")
     chezmoi_args.append("apply")
     subprocess.run(chezmoi_args, cwd=chezmoi_prefix, check=True)
+    # Xcode: deploy free Dracula theme (Pro block in _configure_dracula_pro_post handles Pro variants).
+    if is_macos():
+        xcode_themes = os.path.join(
+            home, "Library", "Developer", "Xcode", "UserData", "FontAndColorThemes"
+        )
+        xcode_free_src = os.path.join(prefix, "etc", "xcode", "Dracula.xccolortheme")
+        if os.path.isfile(xcode_free_src):
+            mkdir(xcode_themes)
+            xcode_free_dest = os.path.join(xcode_themes, "Dracula.xccolortheme")
+            if not os.path.islink(xcode_free_dest) and not os.path.isfile(xcode_free_dest):
+                ln(xcode_free_src, xcode_free_dest)
+    # BBEdit: set free Dracula as dark mode baseline (overridden below if Pro is installed).
+    if is_macos():
+        bbedit_schemes = os.path.join(
+            home, "Library", "Application Support", "BBEdit", "Color Schemes"
+        )
+        if os.path.isdir(bbedit_schemes):
+            subprocess.run(
+                [
+                    "/usr/bin/defaults", "write", "com.barebones.bbedit",
+                    "SelectedColorSchemeNameDarkMode", "-string", "Dracula",
+                ],
+                check=True,
+            )
     _configure_dracula_pro_post(home, xdg_data)
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
     zprofile_dest = os.path.join(home, ".zprofile")
@@ -923,6 +947,13 @@ def main() -> None:
             dest = os.path.join(code_dir, f)
             if not os.path.islink(dest):
                 ln(os.path.join(xdg_config, "Code", "User", f), dest)
+        # Cursor.
+        cursor_dir = os.path.join(app_support, "Cursor", "User")
+        if os.path.isdir(os.path.join(app_support, "Cursor")):
+            mkdir(cursor_dir)
+            cursor_dest = os.path.join(cursor_dir, "settings.json")
+            if not os.path.islink(cursor_dest):
+                ln(os.path.join(xdg_config, "Cursor", "User", "settings.json"), cursor_dest)
         # McFly.
         mcfly_dir = os.path.join(app_support, "McFly")
         mkdir(mcfly_dir)

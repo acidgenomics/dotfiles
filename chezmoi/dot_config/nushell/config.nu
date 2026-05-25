@@ -8,14 +8,14 @@
 # https://github.com/nushell/nu_scripts/tree/main/themes
 let dark_theme = {
     # color for nushell primitives
-    separator: white
+    separator: "#f8f8f2"
     leading_trailing_space_bg: { attr: n } # no fg, no bg, attr none effectively turns this off
-    header: green_bold
+    header: { fg: "#50fa7b" attr: b }
     empty: blue
     # Closures can be used to choose colors for specific values.
     # The value (in this case, a bool) is piped into the closure.
-    bool: {|| if $in { 'light_cyan' } else { 'light_gray' } }
-    int: white
+    bool: "#ff79c6"
+    int: "#bd93f9"
     filesize: {|e|
       if $e == 0b {
         'white'
@@ -40,10 +40,10 @@ let dark_theme = {
       } else if $in < 52wk {
         'deepskyblue3b'
       } else { 'dark_gray' }
-    }    
+    }
     range: white
     float: white
-    string: white
+    string: "#f1fa8c"
     nothing: white
     binary: white
     cellpath: white
@@ -51,41 +51,41 @@ let dark_theme = {
     record: white
     list: white
     block: white
-    hints: dark_gray
+    hints: "#6272a4"
 
     shape_and: purple_bold
     shape_binary: purple_bold
     shape_block: blue_bold
-    shape_bool: light_cyan
+    shape_bool: "#ff79c6"
     shape_custom: green
     shape_datetime: cyan_bold
     shape_directory: cyan
-    shape_external: cyan
+    shape_external: "#50fa7b"
     shape_externalarg: green_bold
-    shape_filepath: cyan
-    shape_flag: blue_bold
+    shape_filepath: "#8be9fd"
+    shape_flag: "#ffb86c"
     shape_float: purple_bold
     # shapes are used to change the cli syntax highlighting
     shape_garbage: { fg: "#FFFFFF" bg: "#FF0000" attr: b}
     shape_globpattern: cyan_bold
-    shape_int: purple_bold
-    shape_internalcall: cyan_bold
+    shape_int: "#bd93f9"
+    shape_internalcall: "#8be9fd"
     shape_list: cyan_bold
     shape_literal: blue
     shape_match_pattern: green
     shape_matching_brackets: { attr: u }
     shape_nothing: light_cyan
-    shape_operator: yellow
+    shape_operator: "#ff79c6"
     shape_or: purple_bold
     shape_pipe: purple_bold
     shape_range: yellow_bold
     shape_record: cyan_bold
     shape_redirection: purple_bold
     shape_signature: green_bold
-    shape_string: green
+    shape_string: "#f1fa8c"
     shape_string_interpolation: cyan_bold
     shape_table: blue_bold
-    shape_variable: purple
+    shape_variable: "#bd93f9"
 }
 
 let light_theme = {

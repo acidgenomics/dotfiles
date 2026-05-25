@@ -10,5 +10,5 @@
 
 classic: false
 color:
-  when: "never"
-  theme: "no-color"
+  when: "auto"
+  theme: "default"

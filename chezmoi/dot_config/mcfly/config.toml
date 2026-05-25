@@ -31,14 +31,14 @@ bg = "blue"
 fg = "white"
 
 [colors.darkmode]
-prompt = "white"
-timing = "blue"
+prompt = "green"
+timing = "cyan"
 results_fg = "white"
 results_bg = "black"
-results_hl = "blue"
+results_hl = "magenta"
 results_selection_fg = "black"
 results_selection_bg = "white"
-results_selection_hl = "dark_green"
+results_selection_hl = "cyan"
 
 [colors.lightmode]
 prompt = "black"

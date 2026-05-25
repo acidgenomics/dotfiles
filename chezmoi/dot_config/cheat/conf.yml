@@ -15,7 +15,7 @@ cheatpaths:
     path: ~/.config/cheat/cheatsheets/personal
     tags: [ personal ]
     readonly: false
-colorize: false
+colorize: true
 formatter: terminal256
 pager: less -FRX
-# > style: dracula
+style: dracula

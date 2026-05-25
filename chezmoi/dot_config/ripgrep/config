@@ -20,6 +20,10 @@
 
 --case-sensitive
 --color=always
+--colors=match:fg:magenta
+--colors=match:style:bold
+--colors=line:fg:green
+--colors=path:fg:cyan
 --fixed-strings
 --max-columns-preview
 --max-columns=150

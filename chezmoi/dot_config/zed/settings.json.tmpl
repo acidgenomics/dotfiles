@@ -1,0 +1,19 @@
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpProThemeFile := joinPath .chezmoi.homeDir ".config/zed/themes/dracula_pro.json" -}}
+{{- $dpProInstalled := stat $dpProThemeFile -}}
+{{- $dpDarkTheme := "Dracula" -}}
+{{- $dpLightTheme := "One Light" -}}
+{{- if $dpProInstalled -}}
+{{-   $dpDarkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-   end -}}
+{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
+{{- end -}}
+{
+  "theme": {
+    "mode": "system",
+    "dark": "{{ $dpDarkTheme }}",
+    "light": "{{ $dpLightTheme }}"
+  }
+}

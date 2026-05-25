@@ -35,13 +35,13 @@ use_pager = true
 
 [style.command_name]
 bold = false
-foreground = "blue"
+foreground = "cyan"
 
 [style.example_code]
-foreground = "blue"
+foreground = "green"
 
 [style.example_variable]
-foreground = "blue"
+foreground = "magenta"
 underline = true
 
 [updates]

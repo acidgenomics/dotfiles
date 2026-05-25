@@ -1,3 +1,14 @@
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpProInstalled := glob (joinPath .chezmoi.homeDir ".vscode/extensions/dracula-theme-pro.theme-dracula-pro-*") -}}
+{{- $dpDarkTheme := "Dracula Theme" -}}
+{{- $dpLightTheme := "Atom One Light" -}}
+{{- if $dpProInstalled -}}
+{{-   $dpDarkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-   end -}}
+{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
+{{- end -}}
 {
   "[python]": {
     "editor.formatOnSave": true
@@ -42,5 +53,12 @@
   "window.autoDetectColorScheme": true,
   "workbench.editor.empty.hint": "hidden",
   "workbench.keybindings.rstudioKeybindings": true,
+{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+  "workbench.colorTheme": "{{ $dpLightTheme }}",
+{{- else }}
+  "workbench.colorTheme": "{{ $dpDarkTheme }}",
+{{- end }}
+  "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
+  "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",
   "workbench.startupEditor": "newUntitledFile"
 }

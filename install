@@ -392,20 +392,6 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 ) as fh:
                     fh.write(alucard_scheme)
             dark_name = _DRACULA_VARIANT_NAMES.get(variant, "Dracula Pro")
-            subprocess.run(
-                [
-                    "/usr/bin/defaults", "write", "com.barebones.bbedit",
-                    "SelectedColorSchemeName", "-string", "Dracula Pro Alucard",
-                ],
-                check=True,
-            )
-            subprocess.run(
-                [
-                    "/usr/bin/defaults", "write", "com.barebones.bbedit",
-                    "SelectedColorSchemeNameDarkMode", "-string", dark_name,
-                ],
-                check=True,
-            )
 
 
 def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
@@ -1058,19 +1044,6 @@ def main() -> None:
             xcode_free_dest = os.path.join(xcode_themes, "Dracula.xccolortheme")
             if not os.path.islink(xcode_free_dest) and not os.path.isfile(xcode_free_dest):
                 ln(xcode_free_src, xcode_free_dest)
-    # BBEdit: set free Dracula as dark mode baseline (overridden below if Pro is installed).
-    if is_macos():
-        bbedit_schemes = os.path.join(
-            home, "Library", "Application Support", "BBEdit", "Color Schemes"
-        )
-        if os.path.isdir(bbedit_schemes):
-            subprocess.run(
-                [
-                    "/usr/bin/defaults", "write", "com.barebones.bbedit",
-                    "SelectedColorSchemeNameDarkMode", "-string", "Dracula",
-                ],
-                check=True,
-            )
     _configure_dracula_pro_post(home, xdg_data)
     if is_macos():
         _sync_launchd_agent(home, "com.koopa.color-mode-sync")

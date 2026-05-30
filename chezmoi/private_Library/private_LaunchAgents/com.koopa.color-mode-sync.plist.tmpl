@@ -21,6 +21,7 @@
       cached_mode="$(cat "$cache_file" 2>/dev/null || true)"
       [ "$cached_mode" = "$new_mode" ] &amp;&amp; exit 0
       export KOOPA_COLOR_MODE="$new_mode"
+      export KOOPA_DOTFILES_SKIP_PULL=1
       koopa configure user dotfiles
       mkdir -p "$(dirname "$cache_file")"
       printf '%s\n' "$new_mode" > "$cache_file"

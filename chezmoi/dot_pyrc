@@ -12,5 +12,5 @@ See Also
 import sys
 
 if sys.version_info >= (3, 13): # noqa UP036
-    sys.ps1 = '\x1b[1;49;35m>>>\x1b[0m '
-    sys.ps2 = '\x1b[1;49;31m...\x1b[0m '
+    sys.ps1 = '\x1b[1;49;34m>>>\x1b[0m '
+    sys.ps2 = '\x1b[1;49;36m...\x1b[0m '

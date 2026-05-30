@@ -972,6 +972,18 @@ def _generate_bbedit_dracula_pro(dp_dir: str, variant: str) -> str | None:
 """
 
 
+def _sync_launchd_agent(home: str, label: str) -> None:
+    """Load (or reload) a user LaunchAgent by label."""
+    plist = os.path.join(home, "Library", "LaunchAgents", f"{label}.plist")
+    if not os.path.isfile(plist):
+        return
+    uid = str(os.getuid())
+    domain = f"gui/{uid}"
+    launchctl = "/bin/launchctl"
+    subprocess.run([launchctl, "bootout", domain, plist], capture_output=True)
+    subprocess.run([launchctl, "bootstrap", domain, plist], check=True)
+
+
 def _dracula_iterm_name(variant: str) -> str:
     names = {
         "pro": "Dracula Pro.itermcolors",
@@ -1060,6 +1072,8 @@ def main() -> None:
                 check=True,
             )
     _configure_dracula_pro_post(home, xdg_data)
+    if is_macos():
+        _sync_launchd_agent(home, "com.koopa.color-mode-sync")
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
     zprofile_dest = os.path.join(home, ".zprofile")
     if not os.path.islink(zprofile_dest):

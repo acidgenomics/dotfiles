@@ -375,7 +375,20 @@ let-env config = {
 
   hooks: {
     pre_prompt: [{||
-      null  # replace with source code to run before the prompt is shown
+{{- if eq .chezmoi.os "darwin" }}
+      let new_mode = (
+        let style = (try { ^/usr/bin/defaults read -g AppleInterfaceStyle } catch { "" })
+        if $style == "Dark" { "dark" } else { "light" }
+      )
+      if $new_mode != $env.KOOPA_COLOR_MODE {
+        $env.KOOPA_COLOR_MODE = $new_mode
+        print --stderr $"macOS appearance changed to ($new_mode) mode. Updating shell colors."
+        hide-env FZF_DEFAULT_OPTS
+        _koopa_activate_fzf
+      }
+{{- else }}
+      null
+{{- end }}
     }]
     pre_execution: [{||
       null  # replace with source code to run before the repl input is run

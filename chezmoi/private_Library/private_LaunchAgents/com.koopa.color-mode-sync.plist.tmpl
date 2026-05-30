@@ -1,0 +1,43 @@
+{{- if eq .chezmoi.os "darwin" -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.koopa.color-mode-sync</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>
+      style="$(/usr/bin/defaults read -g AppleInterfaceStyle 2>/dev/null || true)"
+      if [ "$style" = "Dark" ]; then
+        new_mode="dark"
+      else
+        new_mode="light"
+      fi
+      cache_file="${HOME}/.cache/koopa/color-mode"
+      cached_mode="$(cat "$cache_file" 2>/dev/null || true)"
+      [ "$cached_mode" = "$new_mode" ] &amp;&amp; exit 0
+      export KOOPA_COLOR_MODE="$new_mode"
+      koopa configure user dotfiles
+      mkdir -p "$(dirname "$cache_file")"
+      printf '%s\n' "$new_mode" > "$cache_file"
+    </string>
+  </array>
+  <key>WatchPaths</key>
+  <array>
+    <string>{{ .chezmoi.homeDir }}/Library/Preferences/.GlobalPreferences.plist</string>
+  </array>
+  <key>ThrottleInterval</key>
+  <integer>5</integer>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa-color-mode-sync.log</string>
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa-color-mode-sync.log</string>
+</dict>
+</plist>
+{{- end }}

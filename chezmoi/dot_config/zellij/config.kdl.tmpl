@@ -1,0 +1,55 @@
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
+// zellij configuration.
+// Updated 2023-05-23.
+
+copy_on_select true
+mouse_mode true
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
+theme "dracula"
+themes {
+    dracula {
+{{- if $dpProInstalled }}
+        fg 248 248 242
+        bg 34 33 44
+        black 0 0 0
+        red 255 149 128
+        green 138 255 128
+        yellow 255 255 128
+        blue 149 128 255
+        magenta 255 128 191
+        cyan 128 255 234
+        white 255 255 255
+        orange 255 202 128
+{{- else }}
+        fg 248 248 242
+        bg 40 42 54
+        black 0 0 0
+        red 255 85 85
+        green 80 250 123
+        yellow 241 250 140
+        blue 98 114 164
+        magenta 255 121 198
+        cyan 139 233 253
+        white 255 255 255
+        orange 255 184 108
+{{- end }}
+    }
+}
+{{- else }}
+theme "alucard"
+themes {
+    alucard {
+        fg 31 31 31
+        bg 245 245 245
+        black 207 207 222
+        red 163 20 77
+        green 20 113 10
+        yellow 132 110 21
+        blue 100 74 201
+        magenta 163 20 77
+        cyan 20 113 114
+        white 31 31 31
+        orange 132 110 21
+    }
+}
+{{- end }}

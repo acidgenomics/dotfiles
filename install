@@ -331,6 +331,19 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
         if alucard_kitty_conf:
             with open(os.path.join(kitty_themes, "dracula-pro-alucard.conf"), "w") as fh:
                 fh.write(alucard_kitty_conf)
+    # WezTerm: generate Dracula Pro TOML color scheme files in ~/.config/wezterm/colors/.
+    wezterm_config = os.path.join(home, ".config", "wezterm")
+    if os.path.isdir(wezterm_config):
+        wezterm_colors = os.path.join(wezterm_config, "colors")
+        mkdir(wezterm_colors)
+        dark_wez = _generate_wezterm_dracula_pro_toml(dp_dir, variant)
+        if dark_wez:
+            with open(os.path.join(wezterm_colors, "Dracula Pro.toml"), "w") as fh:
+                fh.write(dark_wez)
+        alucard_wez = _generate_wezterm_dracula_pro_toml(dp_dir, "alucard")
+        if alucard_wez:
+            with open(os.path.join(wezterm_colors, "Dracula Pro Alucard.toml"), "w") as fh:
+                fh.write(alucard_wez)
     # Bat: symlink Pro .tmTheme files into ~/.config/bat/themes/ and rebuild cache.
     _tmtheme_name_map = {
         "pro": "Dracula Pro.tmTheme",
@@ -414,14 +427,15 @@ def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
     if not ansi:
         return None
     return {
-        "foreground": extras.get("foreground", ansi.get(7, "#F8F8F2")),
-        "red":        ansi.get(1, "#ff5555"),
-        "green":      ansi.get(2, "#50fa7b"),
-        "yellow":     ansi.get(3, "#f1fa8c"),
-        "blue":       ansi.get(4, "#bd93f9"),
-        "magenta":    ansi.get(5, "#ff79c6"),
-        "cyan":       ansi.get(6, "#8be9fd"),
-        "black":      ansi.get(0, "#282a36"),
+        "foreground":   extras.get("foreground", ansi.get(7, "#F8F8F2")),
+        "selection_bg": extras.get("selection-background", ansi.get(8, "#44475a")),
+        "red":          ansi.get(1, "#ff5555"),
+        "green":        ansi.get(2, "#50fa7b"),
+        "yellow":       ansi.get(3, "#f1fa8c"),
+        "blue":         ansi.get(4, "#bd93f9"),
+        "magenta":      ansi.get(5, "#ff79c6"),
+        "cyan":         ansi.get(6, "#8be9fd"),
+        "black":        ansi.get(0, "#282a36"),
         "black_bright": ansi.get(8, "#000000"),
         "red_bright":   ansi.get(9, "#000000"),
         "green_bright": ansi.get(10, "#000000"),
@@ -429,7 +443,7 @@ def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
         "blue_bright":  ansi.get(12, "#000000"),
         "magenta_bright": ansi.get(13, "#000000"),
         "cyan_bright":  ansi.get(14, "#000000"),
-        "comment":    ansi.get(8, "#000000"),
+        "comment":      ansi.get(8, "#000000"),
     }
 
 
@@ -562,6 +576,58 @@ color15 {"#FFFFFF" if is_light else "#FFFFFF"}
 """
 
 
+def _generate_wezterm_dracula_pro_toml(dp_dir: str, variant: str) -> str | None:
+    """Generate a WezTerm TOML color scheme for a Dracula Pro variant."""
+    p = _parse_ghostty_palette(dp_dir, variant)
+    if not p:
+        return None
+    is_light = variant == "alucard"
+    bg = "#fafafa" if is_light else p["black"]
+    fg = p["foreground"]
+    if variant == "alucard":
+        name = "Dracula Pro Alucard"
+    elif variant == "pro":
+        name = "Dracula Pro"
+    else:
+        name = f"Dracula Pro ({variant.capitalize()})"
+    return f"""\
+[metadata]
+name = "{name}"
+
+[colors]
+foreground = "{fg}"
+background = "{bg}"
+cursor_fg = "{bg}"
+cursor_bg = "{fg}"
+selection_fg = "{fg}"
+selection_bg = "{p['selection_bg']}"
+
+ansi = [
+  "{p['black']}", "{p['red']}", "{p['green']}", "{p['yellow']}",
+  "{p['blue']}", "{p['magenta']}", "{p['cyan']}", "{fg}",
+]
+brights = [
+  "{p['black_bright']}", "{p['red_bright']}", "{p['green_bright']}", "{p['yellow_bright']}",
+  "{p['blue_bright']}", "{p['magenta_bright']}", "{p['cyan_bright']}", "#FFFFFF",
+]
+
+[colors.tab_bar]
+background = "{bg}"
+
+[colors.tab_bar.active_tab]
+bg_color = "{p['blue']}"
+fg_color = "{fg}"
+
+[colors.tab_bar.inactive_tab]
+bg_color = "{p['black_bright']}"
+fg_color = "{p['comment']}"
+
+[colors.tab_bar.new_tab]
+bg_color = "{bg}"
+fg_color = "{p['comment']}"
+"""
+
+
 _ZSH_HIGHLIGHT_ROLES = [
     ("alias",                                   "green"),
     ("arg0",                                    "foreground"),
@@ -657,6 +723,17 @@ def _generate_zsh_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
         else:
             hex_val = color_map.get(color_key, p.get(color_key, "#F8F8F2"))
             lines.append(f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={hex_val}'")
+    fg = p["foreground"]
+    bg = "#fafafa" if variant == "alucard" else p["black"]
+    hl = p["blue"]
+    sel_bg = p["selection_bg"]
+    lines.append(
+        f"export FZF_DEFAULT_OPTS='"
+        f"--color=fg:{fg},bg:{bg},hl:{hl} "
+        f"--color=fg+:{fg},bg+:{sel_bg},hl+:{hl} "
+        f"--color=info:{p['yellow']},prompt:{p['green']},pointer:{p['magenta']} "
+        f"--color=marker:{p['magenta']},spinner:{p['yellow']},header:{p['comment']}'"
+    )
     return "\n".join(lines) + "\n"
 
 

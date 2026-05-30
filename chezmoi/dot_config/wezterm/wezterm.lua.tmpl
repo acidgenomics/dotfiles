@@ -46,9 +46,17 @@ config.initial_rows = 30
 config.tab_bar_at_bottom = false
 config.use_fancy_tab_bar = false
 
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
 if get_appearance():find "Dark" then
+{{- if $dpProInstalled }}
+  config.color_scheme = "Dracula Pro"
+{{- else }}
   config.color_scheme = "Dracula (Official)"
+{{- end }}
 else
+{{- if $dpProInstalled }}
+  config.color_scheme = "Dracula Pro Alucard"
+{{- else }}
   config.color_scheme = "AtomOneLight"
   config.colors = {
     tab_bar = {
@@ -75,6 +83,7 @@ else
       },
     },
   }
+{{- end }}
 end
 
 config.mouse_bindings = {

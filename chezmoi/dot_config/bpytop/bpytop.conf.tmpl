@@ -2,7 +2,7 @@
 
 background_update=True
 check_temp=True
-color_theme="dracula"
+color_theme="{{ if eq (env "KOOPA_COLOR_MODE") "dark" }}dracula{{ else }}default{{ end }}"
 cpu_graph_lower="total"
 cpu_graph_upper="total"
 cpu_invert_lower=True

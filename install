@@ -70,8 +70,15 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
         if os.path.isdir(ext_dir):
             for d in os.listdir(ext_dir):
                 if d.startswith(prefix):
-                    installed_version = d[len(prefix):]
-                    break
+                    ver = d[len(prefix):]
+                    try:
+                        ver_tuple = tuple(int(x) for x in ver.split("."))
+                    except ValueError:
+                        continue
+                    if installed_version is None or ver_tuple > tuple(
+                        int(x) for x in installed_version.split(".")
+                    ):
+                        installed_version = ver
         if installed_version != source_version:
             if installed_version is not None:
                 print(
@@ -83,6 +90,14 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
                 capture_output=True,
                 check=True,
             )
+        if os.path.isdir(ext_dir):
+            for d in os.listdir(ext_dir):
+                if d.startswith(prefix) and d != prefix + source_version:
+                    stale = os.path.join(ext_dir, d)
+                    try:
+                        rm(stale)
+                    except OSError as exc:
+                        print(f"Warning: could not remove stale extension directory: {stale} ({exc})")
 
 
 def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:

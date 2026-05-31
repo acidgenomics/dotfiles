@@ -139,12 +139,14 @@ set-option -g status-right-length 200
 # Color palette
 # ------------------------------------------------------------------------------
 
-# Initial palette: applied at tmux start based on KOOPA_COLOR_MODE (set via
-# SSH SendEnv or detected at activation). Mode 2031 hooks below handle live
-# switching after the session is already running.
+# Initial palette: applied at tmux start. Checks KOOPA_COLOR_MODE (available
+# when set via SSH SendEnv) and falls back to reading the cache file directly
+# (set by shell activation). Mode 2031 hooks handle live switching thereafter.
 
 %hidden colors_dir="~/.config/tmux/colors"
-if-shell -b '[ "${KOOPA_COLOR_MODE:-}" = "light" ]' \
+%hidden color_cache="~/.cache/koopa/color-mode"
+if-shell -b \
+    '[ "${KOOPA_COLOR_MODE:-$(cat "${HOME}/.cache/koopa/color-mode" 2>/dev/null)}" = "light" ]' \
     "source-file \"${colors_dir}/light.conf\"" \
     "source-file \"${colors_dir}/dark.conf\""
 
@@ -154,10 +156,12 @@ if-shell -b '[ "${KOOPA_COLOR_MODE:-}" = "light" ]' \
 # See: https://github.com/tmux/tmux/pull/4353
 set-hook -g client-dark-theme \
     "set-environment -g KOOPA_COLOR_MODE dark ; \
+     set-environment KOOPA_COLOR_MODE dark ; \
      run-shell 'printf dark > \${HOME}/.cache/koopa/color-mode' ; \
      source-file \"${colors_dir}/dark.conf\""
 set-hook -g client-light-theme \
     "set-environment -g KOOPA_COLOR_MODE light ; \
+     set-environment KOOPA_COLOR_MODE light ; \
      run-shell 'printf light > \${HOME}/.cache/koopa/color-mode' ; \
      source-file \"${colors_dir}/light.conf\""
 

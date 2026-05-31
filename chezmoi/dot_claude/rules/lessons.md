@@ -16,3 +16,11 @@ The `YYYY-MM-DD-` date prefix convention applies only to manually created plan/r
   tsconfig, etc.
 - When writing or reformatting JSON, use `json.dumps(obj, indent=2)` or
   `JSON.stringify(obj, null, 2)`.
+
+## Deep Research Should Always Include GitHub Code Search
+
+When running deep-research workflows on technical/protocol questions, always include a second parallel workflow specifically targeting GitHub code and repository implementations. The canonical workflow is two parallel runs:
+1. Web/protocol research (standards docs, blog posts, issue trackers)
+2. GitHub code search (real implementations, usage patterns, adoption evidence)
+
+GitHub code search routinely surfaces implementation details (exact escape sequences, version numbers, adoption tables) that are absent from web sources. This pattern found the definitive mode 2031 solution that was missed by web search alone.

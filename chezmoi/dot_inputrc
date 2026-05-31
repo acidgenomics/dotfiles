@@ -1,6 +1,6 @@
 # """
 # Readline input configuration for Bash.
-# @note Updated 2025-04-25.
+# @note Updated 2026-05-31.
 #
 # @seealso
 # - http://ss64.com/bash/syntax-inputrc.html
@@ -26,6 +26,9 @@ set output-meta on
 
 # Use the 'vi' set of key bindings (default is 'emacs').
 set editing-mode vi
+
+# Show vi mode indicator (cmd/ins) in the prompt.
+set show-mode-in-prompt on
 
 # Enable trailing slash '/' on tab auto-completion of directory names.
 # See also:

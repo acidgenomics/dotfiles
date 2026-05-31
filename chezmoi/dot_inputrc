@@ -27,8 +27,8 @@ set output-meta on
 # Use the 'vi' set of key bindings (default is 'emacs').
 set editing-mode vi
 
-# Show vi mode indicator (cmd/ins) in the prompt.
-set show-mode-in-prompt on
+# Disable vi mode indicator (cmd/ins) — conflicts with starship prompt.
+set show-mode-in-prompt off
 
 # Enable trailing slash '/' on tab auto-completion of directory names.
 # See also:

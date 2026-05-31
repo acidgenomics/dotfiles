@@ -12,11 +12,9 @@ return {
                 R_args = {},
                 R_cmd = 'R',
                 bracketed_paste = true,
-                assignment_keymap = '',
                 min_editor_width = 80,
                 rconsole_width = 80,
                 rconsole_height = 20,
-                syntax_folding = true,
             })
         end,
     },

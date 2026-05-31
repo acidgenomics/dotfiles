@@ -44,63 +44,44 @@ def _add_config_link(source: str, name: str) -> None:
     ln(source, dest)
 
 
-def _check_dracula_pro_version(home: str, dp_dir: str) -> None:
-    """Warn if installed VS Code extension is older than local source VSIX."""
-    vsix = os.path.join(
-        dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
-    )
-    if not os.path.isfile(vsix):
-        return
-    ext_dir = os.path.join(home, ".vscode", "extensions")
-    if not os.path.isdir(ext_dir):
-        return
-    with zipfile.ZipFile(vsix) as zf:
-        pkg = json.loads(zf.read("extension/package.json"))
-    source_version = pkg["version"]
-    prefix = "dracula-theme-pro.theme-dracula-pro-"
-    installed_version = None
-    for d in os.listdir(ext_dir):
-        if d.startswith(prefix):
-            installed_version = d[len(prefix):]
-            break
-    if installed_version and installed_version != source_version:
-        print(
-            f"⚠ Dracula Pro is outdated "
-            f"(VS Code extension: {installed_version}, "
-            f"local source: {source_version}).\n"
-            f"  Download the latest version from your Gumroad Library:\n"
-            f"  https://app.gumroad.com/library"
-        )
-
-
 def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     """Pre-chezmoi: vim pack, VS Code extension install."""
     dp_dir = os.path.join(xdg_data, "dracula-pro")
     if not os.path.isdir(dp_dir):
         return
-    _check_dracula_pro_version(home, dp_dir)
     # Vim/Neovim: symlink theme pack so nvim detects it at runtime.
     vim_src = os.path.join(dp_dir, "themes", "vim")
     vim_themes = os.path.join(home, ".vim", "pack", "theme", "start")
     mkdir(vim_themes)
     if os.path.isdir(vim_src):
         ln(vim_src, os.path.join(vim_themes, "dracula_pro"))
-    # VS Code: install VSIX if not already present.
+    # VS Code: install VSIX if missing or version doesn't match local source.
     vsix = os.path.join(
         dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
     )
     code = shutil.which("code")
     if code and os.path.isfile(vsix):
+        with zipfile.ZipFile(vsix) as zf:
+            pkg = json.loads(zf.read("extension/package.json"))
+        source_version = pkg["version"]
         ext_dir = os.path.join(home, ".vscode", "extensions")
         prefix = "dracula-theme-pro.theme-dracula-pro-"
-        already_installed = os.path.isdir(ext_dir) and any(
-            d.startswith(prefix)
-            for d in os.listdir(ext_dir)
-        )
-        if not already_installed:
+        installed_version = None
+        if os.path.isdir(ext_dir):
+            for d in os.listdir(ext_dir):
+                if d.startswith(prefix):
+                    installed_version = d[len(prefix):]
+                    break
+        if installed_version != source_version:
+            if installed_version is not None:
+                print(
+                    f"Upgrading Dracula Pro VS Code extension: "
+                    f"{installed_version} → {source_version}"
+                )
             subprocess.run(
                 [code, "--install-extension", vsix],
                 capture_output=True,
+                check=True,
             )
 
 

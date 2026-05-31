@@ -6,7 +6,12 @@
     c = commit
     ca = !git add --all && git commit
     catchup = !git fetch upstream && git rebase upstream/main
-    cleanup = !git remote prune origin \
+    coi = "!f() { \
+        git checkout \"$@\" 2>/dev/null && return; \
+        git checkout \"$@\" 2>&1 | grep '^\t' | xargs rm -f; \
+        git checkout \"$@\"; \
+    }; f"
+    cleanup =!git remote prune origin \
         && git gc \
         && git clean -dfx \
         && git stash clear

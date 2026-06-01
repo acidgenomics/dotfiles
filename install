@@ -1105,6 +1105,9 @@ def main() -> None:
     old_activate = os.path.join(xdg_config, "koopa", "activate")
     if os.path.islink(old_activate):
         os.unlink(old_activate)
+    stale_chezmoi_src = os.path.join(xdg_data, "chezmoi")
+    if os.path.islink(stale_chezmoi_src):
+        os.unlink(stale_chezmoi_src)
     _add_config_link(prefix, "dotfiles")
     _configure_dracula_pro(home, xdg_data)
     ssh_dir = os.path.join(home, ".ssh")

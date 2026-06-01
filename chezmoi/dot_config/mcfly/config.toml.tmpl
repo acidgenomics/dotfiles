@@ -1,7 +1,8 @@
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
 # """
 # McFly configuration
 #
-# @note Updated 2025-01-04.
+# @note Updated 2026-06-01.
 #
 # The following colors are supported, according to README:
 #
@@ -40,6 +41,7 @@ results_selection_fg = "black"
 results_selection_bg = "white"
 results_selection_hl = "cyan"
 
+{{ if $dpProInstalled -}}
 [colors.lightmode]
 prompt = "dark_green"
 timing = "dark_cyan"
@@ -49,3 +51,14 @@ results_hl = "dark_blue"
 results_selection_fg = "dark_grey"
 results_selection_bg = "dark_blue"
 results_selection_hl = "dark_grey"
+{{- else -}}
+[colors.lightmode]
+prompt = "dark_green"
+timing = "dark_cyan"
+results_fg = "dark_grey"
+results_bg = "white"
+results_hl = "dark_blue"
+results_selection_fg = "white"
+results_selection_bg = "dark_blue"
+results_selection_hl = "dark_grey"
+{{- end }}

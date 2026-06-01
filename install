@@ -382,25 +382,41 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(rstudio_themes, "dracula-pro-alucard.rstheme"), "w"
             ) as fh:
                 fh.write(alucard_css)
-    # BBEdit: generate .bbColorScheme from .tmTheme source (no Pro colors in repo).
+    # BBEdit 16 is sandboxed — TCC blocks writes to ~/Library/Application Support/BBEdit/.
+    # Generate .bbColorScheme files into the source dir; user opens them in BBEdit to install.
+    # If BBEdit iCloud sync is enabled, also write directly into that Color Schemes folder.
     if is_macos():
-        bbedit_schemes = os.path.join(
-            home, "Library", "Application Support", "BBEdit", "Color Schemes"
+        bbedit_out = os.path.join(dp_dir, "themes", "bbedit")
+        os.makedirs(bbedit_out, exist_ok=True)
+        dark_scheme = _generate_bbedit_dracula_pro(dp_dir, variant)
+        alucard_scheme = _generate_bbedit_dracula_pro(dp_dir, "alucard")
+        bbedit_icloud = os.path.join(
+            home,
+            "Library",
+            "Mobile Documents",
+            "iCloud~com~barebones~bbedit",
+            "Documents",
+            "Application Support",
+            "Color Schemes",
         )
-        if os.path.isdir(bbedit_schemes):
-            dark_scheme = _generate_bbedit_dracula_pro(dp_dir, variant)
-            if dark_scheme:
-                with open(
-                    os.path.join(bbedit_schemes, "Dracula Pro.bbColorScheme"), "w"
-                ) as fh:
-                    fh.write(dark_scheme)
-            alucard_scheme = _generate_bbedit_dracula_pro(dp_dir, "alucard")
-            if alucard_scheme:
-                with open(
-                    os.path.join(bbedit_schemes, "Dracula Pro Alucard.bbColorScheme"), "w"
-                ) as fh:
-                    fh.write(alucard_scheme)
-            dark_name = _DRACULA_VARIANT_NAMES.get(variant, "Dracula Pro")
+        for scheme, name in (
+            (dark_scheme, "Dracula Pro.bbColorScheme"),
+            (alucard_scheme, "Dracula Pro Alucard.bbColorScheme"),
+        ):
+            if not scheme:
+                continue
+            with open(os.path.join(bbedit_out, name), "w") as fh:
+                fh.write(scheme)
+            if os.path.isdir(bbedit_icloud):
+                with open(os.path.join(bbedit_icloud, name), "w") as fh:
+                    fh.write(scheme)
+        if dark_scheme or alucard_scheme:
+            if os.path.isdir(bbedit_icloud):
+                print("BBEdit: color schemes installed via iCloud sync.")
+            else:
+                print(
+                    f"BBEdit: open .bbColorScheme files from {bbedit_out} in BBEdit to install."
+                )
 
 
 def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:

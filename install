@@ -399,18 +399,22 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
             "Application Support",
             "Color Schemes",
         )
+        newly_created = False
         for scheme, name in (
             (dark_scheme, "Dracula Pro.bbColorScheme"),
             (alucard_scheme, "Dracula Pro Alucard.bbColorScheme"),
         ):
             if not scheme:
                 continue
-            with open(os.path.join(bbedit_out, name), "w") as fh:
+            dest = os.path.join(bbedit_out, name)
+            if not os.path.isfile(dest):
+                newly_created = True
+            with open(dest, "w") as fh:
                 fh.write(scheme)
             if os.path.isdir(bbedit_icloud):
                 with open(os.path.join(bbedit_icloud, name), "w") as fh:
                     fh.write(scheme)
-        if dark_scheme or alucard_scheme:
+        if newly_created:
             if os.path.isdir(bbedit_icloud):
                 print("BBEdit: color schemes installed via iCloud sync.")
             else:

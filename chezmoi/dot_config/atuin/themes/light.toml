@@ -1,6 +1,9 @@
 # Atuin light theme (standard light terminal, e.g. Atom One Light).
 # Updated 2026-06-01.
 
+[theme]
+name = "light"
+
 [colors]
 Important = "#383941"
 Title = "#383941"

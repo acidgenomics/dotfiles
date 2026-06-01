@@ -1,6 +1,9 @@
 # Atuin dark theme (standard terminal defaults).
 # Updated 2026-06-01.
 
+[theme]
+name = "dark"
+
 [colors]
 Important = "#F8F8F2"
 Title = "#F8F8F2"

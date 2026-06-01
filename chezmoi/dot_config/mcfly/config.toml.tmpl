@@ -41,7 +41,7 @@ results_selection_fg = "black"
 results_selection_bg = "white"
 results_selection_hl = "cyan"
 
-{{ if $dpProInstalled -}}
+{{- if $dpProInstalled }}
 [colors.lightmode]
 prompt = "dark_green"
 timing = "dark_cyan"
@@ -51,14 +51,4 @@ results_hl = "dark_blue"
 results_selection_fg = "dark_grey"
 results_selection_bg = "dark_blue"
 results_selection_hl = "dark_grey"
-{{- else -}}
-[colors.lightmode]
-prompt = "dark_green"
-timing = "dark_cyan"
-results_fg = "grey"
-results_bg = "white"
-results_hl = "dark_blue"
-results_selection_fg = "white"
-results_selection_bg = "blue"
-results_selection_hl = "white"
 {{- end }}

@@ -1,0 +1,12 @@
+# Atuin dark theme (standard terminal defaults).
+# Updated 2026-06-01.
+
+[colors]
+Important = "#F8F8F2"
+Title = "#F8F8F2"
+Annotation = "#6272A4"
+Guidance = "#8BE9FD"
+AlertInfo = "#50FA7B"
+AlertWarn = "#FFB86C"
+AlertError = "#FF5555"
+Muted = "#6272A4"

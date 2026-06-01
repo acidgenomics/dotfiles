@@ -1,0 +1,12 @@
+# Atuin light theme (standard light terminal, e.g. Atom One Light).
+# Updated 2026-06-01.
+
+[colors]
+Important = "#383941"
+Title = "#383941"
+Annotation = "#A0A1A7"
+Guidance = "#4078F2"
+AlertInfo = "#50A14F"
+AlertWarn = "#C18401"
+AlertError = "#E45649"
+Muted = "#A0A1A7"

@@ -1,0 +1,26 @@
+{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
+{{- $colorMode := env "KOOPA_COLOR_MODE" -}}
+# """
+# Atuin configuration.
+# @note Updated 2026-06-01.
+# @seealso https://docs.atuin.sh/configuration/config/
+# """
+
+search_mode = "fuzzy"
+filter_mode = "global"
+style = "compact"
+inline_height = 40
+show_preview = true
+show_help = false
+invert = true
+
+[theme]
+{{ if and $dpProInstalled (eq $colorMode "dark") -}}
+name = "dracula-pro"
+{{- else if $dpProInstalled -}}
+name = "dracula-pro-alucard"
+{{- else if eq $colorMode "dark" -}}
+name = "dark"
+{{- else -}}
+name = "light"
+{{- end }}

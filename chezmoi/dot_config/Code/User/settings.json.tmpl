@@ -267,8 +267,7 @@
   "terminal.integrated.enableMultiLinePasteWarning": "never",
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.env.osx": {
-    "PYTHONPATH": "${workspaceFolder}",
-    "R_HOME": "/Library/Frameworks/R.framework/Resources"
+    "PYTHONPATH": "${workspaceFolder}"
   },
 {{- end }}
   "terminal.integrated.enableFileLinks": "off",

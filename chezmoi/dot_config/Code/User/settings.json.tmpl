@@ -47,6 +47,7 @@
   "claudeCode.preferredLocation": "panel",
   "debug.terminal.clearBeforeReusing": true,
   "diffEditor.ignoreTrimWhitespace": false,
+  "editor.acceptSuggestionOnCommitCharacter": false,
   "editor.acceptSuggestionOnEnter": "off",
   "editor.accessibilitySupport": "off",
   "editor.autoClosingBrackets": "never",
@@ -56,7 +57,7 @@
   "editor.fontFamily": "'JetBrains Mono', monospace",
   "editor.fontLigatures": true,
   "editor.fontSize": 16,
-  "editor.formatOnPaste": true,
+  "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": "active",
   "editor.guides.indentation": false,
@@ -101,7 +102,7 @@
   "github.copilot.enable": {
     "*": false
   },
-  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.nextEditSuggestions.enabled": false,
   "githubPullRequests.defaultMergeMethod": "squash",
   "githubPullRequests.fileListLayout": "tree",
   "githubPullRequests.pullBranch": "never",
@@ -315,7 +316,9 @@
   "window.zoomLevel": 0,
   "workbench.colorCustomizations": {
     "activityBarBadge.background": "#0000",
-    "activityBarBadge.foreground": "#0000"
+    "activityBarBadge.foreground": "#0000",
+    "editor.selectionBackground": "#5B557566",
+    "editor.selectionHighlightBackground": "#5B557533"
   },
 {{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
 {{- $dpProInstalled := glob (joinPath .chezmoi.homeDir ".vscode/extensions/dracula-theme-pro.theme-dracula-pro-*") -}}

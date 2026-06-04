@@ -20,5 +20,8 @@ macos-titlebar-style = tabs
 {{-   $lightTheme = "Dracula Pro Alucard" -}}
 {{- end }}
 theme = "light:{{ $lightTheme }},dark:{{ $darkTheme }}"
+{{- if stat (joinPath $ghosttyThemesDir "Dracula Pro") }}
+selection-background = #5B5575
+{{- end }}
 window-height = 30
 window-width = 100

@@ -22,7 +22,7 @@ if _PYTHON_SRC not in sys.path:
 from koopa.build import locate
 from koopa.file_ops import chmod, ln, mkdir, rm
 from koopa.prefix import koopa_prefix
-from koopa.system import is_macos
+from koopa.system import is_linux, is_macos, os_appearance_mode
 from koopa.xdg import xdg_config_home, xdg_data_home
 
 _DRACULA_VARIANT_NAMES = {
@@ -1600,6 +1600,31 @@ def _sync_launchd_agent(home: str, label: str) -> None:
     subprocess.run([launchctl, "bootstrap", domain, plist], check=True)
 
 
+def _sync_systemd_user_agent(unit: str) -> None:
+    """Enable and start a systemd user unit.
+
+    Skips silently when systemctl is absent (headless/CI hosts lack a user bus).
+    A non-zero exit from systemctl --user is also treated as a soft skip rather
+    than a hard failure, since many minimal Linux installations have systemd
+    installed but no running user session bus.
+    """
+    systemctl = shutil.which("systemctl")
+    if not systemctl:
+        return
+    # daemon-reload picks up the newly deployed unit file.
+    subprocess.run([systemctl, "--user", "daemon-reload"], capture_output=True)
+    result = subprocess.run(
+        [systemctl, "--user", "enable", "--now", unit],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        # Non-zero is expected on headless hosts; log but do not abort.
+        print(
+            f"Note: 'systemctl --user enable --now {unit}' exited"
+            f" {result.returncode} (no user session bus? skipping)."
+        )
+
+
 def _dracula_iterm_name(variant: str) -> str:
     names = {
         "pro": "Dracula Pro.itermcolors",
@@ -1698,6 +1723,10 @@ def main() -> None:
         home, "Library", "LaunchAgents", "com.koopa.color-mode-sync.plist"
     )
     _color_sync_is_new = is_macos() and not os.path.isfile(_color_sync_plist)
+    # Always derive color mode from the OS before rendering templates.
+    # Never trust inherited env — stale KOOPA_COLOR_MODE from a long-running
+    # caller would silently render the wrong palette.
+    os.environ["KOOPA_COLOR_MODE"] = os_appearance_mode()
     chezmoi_args = [
         chezmoi,
         "--force",
@@ -1733,6 +1762,8 @@ def main() -> None:
                 "  Note: macOS may show a notification that 'sh' is running\n"
                 "        in the background. This is expected and safe."
             )
+    elif is_linux():
+        _sync_systemd_user_agent("koopa-color-mode-sync.service")
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
     zprofile_dest = os.path.join(home, ".zprofile")
     if not os.path.islink(zprofile_dest):

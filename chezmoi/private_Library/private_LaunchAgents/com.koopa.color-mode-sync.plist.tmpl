@@ -10,22 +10,7 @@
   <array>
     <string>/bin/sh</string>
     <string>-c</string>
-    <string>
-      style="$(/usr/bin/defaults read -g AppleInterfaceStyle 2>/dev/null || true)"
-      if [ "$style" = "Dark" ]; then
-        new_mode="dark"
-      else
-        new_mode="light"
-      fi
-      cache_file="${HOME}/.cache/koopa/color-mode"
-      cached_mode="$(cat "$cache_file" 2>/dev/null || true)"
-      [ "$cached_mode" = "$new_mode" ] &amp;&amp; exit 0
-      export KOOPA_COLOR_MODE="$new_mode"
-      export KOOPA_DOTFILES_SKIP_PULL=1
-      {{ .chezmoi.homeDir }}/.local/share/koopa/bin/koopa configure user dotfiles
-      mkdir -p "$(dirname "$cache_file")"
-      printf '%s\n' "$new_mode" > "$cache_file"
-    </string>
+    <string>{{ .chezmoi.homeDir }}/.local/share/koopa/bin/koopa configure user color-mode</string>
   </array>
   <key>WatchPaths</key>
   <array>

@@ -1,0 +1,40 @@
+{{- if eq .chezmoi.os "linux" -}}
+[Unit]
+Description=Koopa dark/light color-mode sync
+# Subscribes to the XDG desktop portal SettingChanged signal and re-renders
+# mode-dependent dotfiles via `koopa configure user color-mode` on each change.
+# Primary mechanism: org.freedesktop.portal.Desktop (GNOME and KDE).
+# Fallback: gsettings monitor org.gnome.desktop.interface (GNOME only).
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# The watcher loop:
+#   1. gdbus monitor on the XDG portal SettingChanged signal.
+#   2. On each matching line, call `koopa configure user color-mode`.
+#   3. If the portal is unavailable, fall back to gsettings monitor (GNOME).
+ExecStart=/bin/sh -c '\
+  koopa="{{ .chezmoi.homeDir }}/.local/share/koopa/bin/koopa"; \
+  if command -v gdbus >/dev/null 2>&1; then \
+    gdbus monitor \
+      --session \
+      --dest org.freedesktop.portal.Desktop \
+      --object-path /org/freedesktop/portal/desktop \
+    | grep --line-buffered "org.freedesktop.appearance.*color-scheme" \
+    | while IFS= read -r _line; do \
+        "$koopa" configure user color-mode; \
+      done; \
+  elif command -v gsettings >/dev/null 2>&1; then \
+    gsettings monitor org.gnome.desktop.interface color-scheme \
+    | while IFS= read -r _line; do \
+        "$koopa" configure user color-mode; \
+      done; \
+  fi \
+'
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
+{{- end }}

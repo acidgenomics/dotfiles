@@ -1678,6 +1678,8 @@ def _configure_age(xdg_config: str) -> None:
     os.makedirs(chezmoi_config_dir, mode=0o700, exist_ok=True)
     chezmoi_toml = os.path.join(chezmoi_config_dir, "chezmoi.toml")
     toml_content = (
+        'encryption = "age"\n'
+        "\n"
         "[age]\n"
         f'    identity = "{key_file}"\n'
         f'    recipient = "{recipient}"\n'

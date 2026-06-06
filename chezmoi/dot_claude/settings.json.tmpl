@@ -8,14 +8,11 @@
     "claude-code-setup@claude-plugins-official": true
   },
   "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1[1m]",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-6[1m]",
-    "AWS_PROFILE": "cline",
-    "AWS_REGION": "us-east-1",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_USE_BEDROCK": "1",
     "ENABLE_LSP_TOOL": "1",
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
     "AWS_CA_BUNDLE": "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",

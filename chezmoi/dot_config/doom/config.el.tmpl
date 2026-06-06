@@ -22,6 +22,24 @@
 {{-   end }}
 {{- end }}
 
+(use-package! auto-dark
+  :when (featurep :system 'macos)
+  :config
+  (setq auto-dark-polling-interval-seconds 2)
+  (setq auto-dark-dark-theme
+{{- if stat (joinPath .chezmoi.homeDir ".config/doom/themes" $dpThemeEl) }}
+        'dracula-pro-{{ $dpvNorm }}
+{{- else }}
+        'doom-dracula
+{{- end }})
+  (setq auto-dark-light-theme
+{{- if $dpAlucard }}
+        'dracula-pro-alucard
+{{- else }}
+        'doom-one-light
+{{- end }})
+  (auto-dark-mode t))
+
 (setq display-line-numbers-type t)
 (setq make-backup-files nil)
 (setq org-directory "~/org/")

@@ -602,3 +602,48 @@ if !g:is_nvim
         endif
     endif
 endif
+
+" Live dark/light switching on macOS (Vim 8 only; Neovim uses auto-dark-mode.nvim).
+if !g:is_nvim && has('macunix')
+    let s:koopa_color_mode_cache = expand('~/.cache/koopa/color-mode')
+
+    function! s:KoopaApplyColorMode(mode) abort
+        let g:koopa_color_mode = a:mode
+        if a:mode ==# 'light' || has('gui_running')
+            set background=light
+            if isdirectory(join([g:themes_home, 'dracula_pro'], '/'))
+                colorscheme dracula_pro_alucard
+            elseif isdirectory(join([g:vim_plug_home, 'vim-one'], '/'))
+                colorscheme one
+            endif
+        else
+            set background=dark
+            if isdirectory(join([g:themes_home, 'dracula_pro'], '/'))
+                let s:v = $KOOPA_DRACULA_PRO_VARIANT
+                if s:v ==# '' || s:v ==# 'pro'
+                    colorscheme dracula_pro
+                else
+                    execute 'colorscheme dracula_pro_' .. substitute(s:v, '-', '_', 'g')
+                endif
+            elseif isdirectory(join([g:vim_plug_home, 'dracula'], '/'))
+                colorscheme dracula
+            endif
+        endif
+    endfunction
+
+    function! s:KoopaCheckColorMode() abort
+        if !filereadable(s:koopa_color_mode_cache)
+            return
+        endif
+        let l:new_mode = trim(readfile(s:koopa_color_mode_cache)[0])
+        if l:new_mode !=# g:koopa_color_mode
+            call s:KoopaApplyColorMode(l:new_mode)
+        endif
+    endfunction
+
+    augroup KoopaColorModeSync
+        autocmd!
+        autocmd FocusGained * call s:KoopaCheckColorMode()
+        autocmd CursorHold  * call s:KoopaCheckColorMode()
+    augroup END
+endif

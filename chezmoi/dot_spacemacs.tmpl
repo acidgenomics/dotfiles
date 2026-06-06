@@ -1,3 +1,13 @@
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpvNorm := $dpv -}}
+{{- if or (not $dpv) (eq $dpv "pro") -}}{{- $dpvNorm = "pro" -}}{{- end -}}
+{{- $dpSrc := stat (joinPath .chezmoi.homeDir ".config" "doom" "themes" "dracula-pro-alucard-theme.el") -}}
+{{- $dpDark := "dracula" -}}
+{{- $dpLight := "spacemacs-light" -}}
+{{- if $dpSrc -}}
+{{-   $dpDark = printf "dracula-pro-%s" $dpvNorm -}}
+{{-   $dpLight = "dracula-pro-alucard" -}}
+{{- end -}}
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;;
 ;; Spacemacs configuration.
@@ -134,6 +144,7 @@ This function should only modify configuration layer settings."
    '(
      (org :location built-in)         ;; use Emacs built-in org; NonGNU ELPA blocked
      (transient :location built-in)   ;; Emacs 29 built-in; avoids GNU ELPA compat dep
+     auto-dark
      polymode
      poly-R
      poly-markdown
@@ -175,11 +186,11 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-themes
    '(
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-     spacemacs-light
-     dracula
+     {{ $dpLight }}
+     {{ $dpDark }}
 {{- else }}
-     dracula
-     spacemacs-light
+     {{ $dpDark }}
+     {{ $dpLight }}
 {{- end }}
      spacemacs-dark
      )

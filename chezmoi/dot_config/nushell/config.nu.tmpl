@@ -170,79 +170,6 @@ let light_theme = {
     shape_variable: purple
 }
 
-{{ $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
-{{ if $dpProInstalled -}}
-let alucard_theme = {
-    separator: "#383a42"
-    leading_trailing_space_bg: { attr: n }
-    header: { fg: "#50a14f" attr: b }
-    empty: "#a626a4"
-    bool: {|| if $in { '#0184bc' } else { '#a0a1a7' } }
-    int: "#383a42"
-    filesize: {|e|
-      if $e == 0b {
-        '#a0a1a7'
-      } else if $e < 1mb {
-        '#0184bc'
-      } else { '#a626a4' }
-    }
-    duration: "#986801"
-    date: {|| (date now) - $in |
-      if $in < 1hr { '#e45649' }
-      else if $in < 6hr { '#986801' }
-      else if $in < 1day { '#986801' }
-      else if $in < 3day { '#50a14f' }
-      else if $in < 1wk { '#50a14f' }
-      else if $in < 6wk { '#0184bc' }
-      else if $in < 52wk { '#a626a4' }
-      else { '#a0a1a7' }
-    }
-    range: "#383a42"
-    float: "#383a42"
-    string: "#383a42"
-    nothing: "#a0a1a7"
-    binary: "#a626a4"
-    cellpath: "#383a42"
-    row_index: { fg: "#50a14f" attr: b }
-    record: "#383a42"
-    list: "#383a42"
-    block: "#383a42"
-    hints: "#a0a1a7"
-
-    shape_and: { fg: "#e45649" attr: b }
-    shape_binary: { fg: "#a626a4" attr: b }
-    shape_block: { fg: "#a626a4" attr: b }
-    shape_bool: "#0184bc"
-    shape_custom: "#50a14f"
-    shape_datetime: { fg: "#0184bc" attr: b }
-    shape_directory: "#0184bc"
-    shape_external: "#0184bc"
-    shape_externalarg: { fg: "#50a14f" attr: b }
-    shape_filepath: "#0184bc"
-    shape_flag: { fg: "#a626a4" attr: b }
-    shape_float: { fg: "#e45649" attr: b }
-    shape_garbage: { fg: "#fafafa" bg: "#e45649" attr: b }
-    shape_globpattern: { fg: "#0184bc" attr: b }
-    shape_int: { fg: "#a626a4" attr: b }
-    shape_internalcall: { fg: "#0184bc" attr: b }
-    shape_list: { fg: "#0184bc" attr: b }
-    shape_literal: "#a626a4"
-    shape_match_pattern: "#50a14f"
-    shape_matching_brackets: { attr: u }
-    shape_nothing: "#0184bc"
-    shape_operator: "#986801"
-    shape_or: { fg: "#e45649" attr: b }
-    shape_pipe: { fg: "#e45649" attr: b }
-    shape_range: { fg: "#986801" attr: b }
-    shape_record: { fg: "#0184bc" attr: b }
-    shape_redirection: { fg: "#e45649" attr: b }
-    shape_signature: { fg: "#50a14f" attr: b }
-    shape_string: "#50a14f"
-    shape_string_interpolation: { fg: "#0184bc" attr: b }
-    shape_table: { fg: "#a626a4" attr: b }
-    shape_variable: "#e45649"
-}
-{{ end -}}
 
 # External completer example
 # let carapace_completer = {|spans|
@@ -359,8 +286,6 @@ let-env config = {
   }
 {{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
   color_config: $dark_theme
-{{- else if $dpProInstalled -}}
-  color_config: $alucard_theme
 {{- else -}}
   color_config: $light_theme
 {{- end }}
@@ -622,11 +547,8 @@ let-env config = {
 }
 
 # FZF color scheme — overrides koopa's generic dark/light default.
-{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") }}
 {{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 $env.FZF_DEFAULT_OPTS = '--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
-{{- else if $dpProInstalled -}}
-$env.FZF_DEFAULT_OPTS = '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#e45649 --color=marker:#e45649,spinner:#986801,header:#a0a1a7'
 {{- else -}}
 $env.FZF_DEFAULT_OPTS = '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#a626a4 --color=marker:#a626a4,spinner:#986801,header:#a0a1a7'
 {{- end }}

@@ -6,7 +6,6 @@ if (Test-Path $koopaActivate) {
 }
 Remove-Variable koopaDataHome, koopaActivate -ErrorAction SilentlyContinue
 
-{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
 if (Get-Module -ListAvailable -Name PSReadLine) {
 {{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
     Set-PSReadLineOption -Colors @{
@@ -20,19 +19,6 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
         Error     = '#ff5555'
         Type      = '#8be9fd'
         Number    = '#bd93f9'
-    }
-{{- else if $dpProInstalled }}
-    Set-PSReadLineOption -Colors @{
-        Command   = '#50a14f'
-        Parameter = '#986801'
-        String    = '#50a14f'
-        Operator  = '#e45649'
-        Variable  = '#a626a4'
-        Comment   = '#a0a1a7'
-        Keyword   = '#0184bc'
-        Error     = '#e45649'
-        Type      = '#0184bc'
-        Number    = '#a626a4'
     }
 {{- else }}
     Set-PSReadLineOption -Colors @{
@@ -53,8 +39,6 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
 # FZF color scheme — overrides koopa's generic dark/light default.
 {{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 $env:FZF_DEFAULT_OPTS = '--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
-{{- else if $dpProInstalled -}}
-$env:FZF_DEFAULT_OPTS = '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#e45649 --color=marker:#e45649,spinner:#986801,header:#a0a1a7'
 {{- else -}}
 $env:FZF_DEFAULT_OPTS = '--color=fg:#383a42,bg:#fafafa,hl:#a626a4 --color=fg+:#383a42,bg+:#e8e8e8,hl+:#a626a4 --color=info:#986801,prompt:#50a14f,pointer:#a626a4 --color=marker:#a626a4,spinner:#986801,header:#a0a1a7'
 {{- end }}

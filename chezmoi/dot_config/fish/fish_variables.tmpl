@@ -1,39 +1,6 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
-{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
-{{- if or (eq (env "KOOPA_COLOR_MODE") "dark") $dpProInstalled }}
-SETUVAR __fish_initialized:3400
-SETUVAR fish_color_autosuggestion:6272A4
-SETUVAR fish_color_cancel:FF5555
-SETUVAR fish_color_command:50FA7B
-SETUVAR fish_color_comment:6272A4
-SETUVAR fish_color_cwd:8BE9FD
-SETUVAR fish_color_cwd_root:FF5555
-SETUVAR fish_color_end:50FA7B
-SETUVAR fish_color_error:FF5555
-SETUVAR fish_color_escape:BD93F9
-SETUVAR fish_color_history_current:\x2d\x2dbold
-SETUVAR fish_color_host:F8F8F2
-SETUVAR fish_color_host_remote:FFB86C
-SETUVAR fish_color_match:\x2d\x2dbackground\x3d44475A
-SETUVAR fish_color_normal:F8F8F2
-SETUVAR fish_color_operator:FF79C6
-SETUVAR fish_color_param:FFB86C
-SETUVAR fish_color_quote:F1FA8C
-SETUVAR fish_color_redirection:8BE9FD\x1e\x2d\x2dbold
-SETUVAR fish_color_search_match:F1FA8C\x1e\x2d\x2dbackground\x3d44475A
-SETUVAR fish_color_selection:F8F8F2\x1e\x2d\x2dbold\x1e\x2d\x2dbackground\x3d44475A
-SETUVAR fish_color_status:FF5555
-SETUVAR fish_color_user:50FA7B
-SETUVAR fish_color_valid_path:\x2d\x2dunderline
-SETUVAR fish_greeting:Welcome\x20to\x20fish\x2c\x20the\x20friendly\x20interactive\x20shell\x0aType\x20\x60help\x60\x20for\x20instructions\x20on\x20how\x20to\x20use\x20fish
-SETUVAR fish_key_bindings:fish_default_key_bindings
-SETUVAR fish_pager_color_completion:F8F8F2
-SETUVAR fish_pager_color_description:6272A4\x1eyellow
-SETUVAR fish_pager_color_prefix:F8F8F2\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
-SETUVAR fish_pager_color_progress:F8F8F2\x1e\x2d\x2dbackground\x3d6272A4
-SETUVAR fish_pager_color_selected_background:\x2d\x2dbackground\x3d44475A
-{{- else }}
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 SETUVAR __fish_initialized:3400
 SETUVAR fish_color_autosuggestion:A0A1A7
 SETUVAR fish_color_cancel:E45649

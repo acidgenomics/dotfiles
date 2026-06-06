@@ -922,7 +922,8 @@ def _generate_bbedit_dracula_pro(dp_dir: str, variant: str) -> str | None:
     line_hl = colors["line_highlight"]
     if colors["is_dark"] and sel.lower() == line_hl.lower():
         line_hl = _hex_lerp(bg, sel, 0.40)
-        secondary_sel = _hex_lerp(bg, sel, 0.67)
+        secondary_sel = sel
+        sel = _hex_lerp(bg, sel, 1.70)
         highlight_insertion_point = True
     else:
         secondary_sel = sel

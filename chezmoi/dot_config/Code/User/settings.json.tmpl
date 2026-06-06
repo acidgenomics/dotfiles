@@ -16,7 +16,7 @@
   },
   "[r]": {
 {{- if lookPath "air" }}
-    "editor.defaultFormatter": "posit-dev.air-vscode",
+    "editor.defaultFormatter": "Posit.air-vscode",
 {{- end }}
     "editor.formatOnSave": true
   },
@@ -26,7 +26,6 @@
 {{- if lookPath "air" }}
   "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
-  "r.lsp.formatter": false,
 {{- end }}
   "breadcrumbs.enabled": true,
   "chat.agent.maxRequests": 200,
@@ -114,7 +113,6 @@
   "gitlens.heatmap.toggleMode": "window",
   "gitlens.hovers.enabled": false,
   "gitlens.integrations.enabled": false,
-  "gitlens.liveshare.allowGuestAccess": false,
   "gitlens.plusFeatures.enabled": false,
   "gitlens.showWhatsNewAfterUpgrades": false,
   "gitlens.statusBar.pullRequests.enabled": false,
@@ -122,26 +120,10 @@
   "gitlens.virtualRepositories.enabled": false,
 {{- if lookPath "hadolint" }}
   "hadolint.cliOptions": [],
-  "hadolint.hadolintPath": "{{ lookPath "hadolint" }},
+  "hadolint.hadolintPath": "{{ lookPath "hadolint" }}",
 {{- end }}
   "html.format.wrapLineLength": 0,
   "http.systemCertificatesNode": true,
-{{- if lookPath "isort" }}
-  "isort.args": [
-    "--profile",
-    "black"
-  ],
-  "isort.check": true,
-{{- if stat (joinPath (env "KOOPA_PREFIX") "opt" "isort") }}
-  "isort.interpreter": [
-    "{{ env "KOOPA_PREFIX" }}/opt/isort/libexec/bin/python3"
-  ],
-{{- end }}
-  "isort.path": [
-    "{{ lookPath "isort" }}"
-  ],
-  "isort.serverEnabled": false,
-{{- end }}
   "js/ts.suggest.enabled": false,
   "jupyter.askForKernelRestart": false,
   "jupyter.kernels.trusted": [
@@ -153,8 +135,6 @@
     "{{ env "KOOPA_PREFIX" }}/opt/jupyterlab/libexec/share/jupyter/kernels/python3/kernel.json"
 {{- end }}
   ],
-  "liveshare.accessibility.soundsEnabled": false,
-  "liveshare.accessibility.voiceEnabled": false,
 {{- if lookPath "marimo" }}
   "marimo.marimoPath": "{{ lookPath "marimo" }}",
 {{- end }}
@@ -192,7 +172,6 @@
   "python.useEnvironmentsExtension": true,
   "r.alwaysUseActiveTerminal": true,
   "r.bracketedPaste": true,
-  "r.liveShare.defaults.shareWorkspace": false,
   "r.lsp.diagnostics": true,
   "r.lsp.promptToInstall": false,
   "r.plot.defaults.fullWindowMode": true,
@@ -252,7 +231,6 @@
     "3043"
   ],
   "shellcheck.run": "onSave",
-  "telemetry.editStats.enabled": false,
   "telemetry.feedback.enabled": false,
   "telemetry.telemetryLevel": "off",
 {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/Ghostty.app") }}
@@ -307,9 +285,6 @@
   "terminal.integrated.stickyScroll.enabled": false,
   "update.mode": "none",
   "update.showReleaseNotes": false,
-  "vim.easymotionDimBackground": false,
-  "vim.mouseSelectionGoesIntoVisualMode": false,
-  "vim.useSystemClipboard": true,
   "vsicons.dontShowNewVersionMessage": true,
   "window.autoDetectColorScheme": true,
   "window.commandCenter": true,

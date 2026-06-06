@@ -174,8 +174,13 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-initial-scratch-message nil
    dotspacemacs-themes
    '(
+{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+     spacemacs-light
+     dracula
+{{- else }}
      dracula
      spacemacs-light
+{{- end }}
      spacemacs-dark
      )
    dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)

@@ -2,6 +2,7 @@
 
 """Install dotfiles."""
 
+import io
 import json
 import os
 import plistlib
@@ -44,6 +45,506 @@ def _add_config_link(source: str, name: str) -> None:
     ln(source, dest)
 
 
+def _install_vscode_extension(
+    vsix: str,
+    prefix: str,
+    ext_dir: str,
+    code: str,
+    label: str,
+) -> None:
+    """Install a VSIX extension if not already at the current version."""
+    with zipfile.ZipFile(vsix) as zf:
+        pkg = json.loads(zf.read("extension/package.json"))
+    source_version = pkg["version"]
+    installed_version = None
+    if os.path.isdir(ext_dir):
+        for d in os.listdir(ext_dir):
+            if d.startswith(prefix):
+                ver = d[len(prefix):]
+                try:
+                    ver_tuple = tuple(int(x) for x in ver.split("."))
+                except ValueError:
+                    continue
+                if installed_version is None or ver_tuple > tuple(
+                    int(x) for x in installed_version.split(".")
+                ):
+                    installed_version = ver
+    if installed_version != source_version:
+        if installed_version is not None:
+            print(f"Upgrading {label}: {installed_version} → {source_version}")
+        subprocess.run(
+            [code, "--install-extension", vsix],
+            capture_output=True,
+            check=True,
+        )
+    if os.path.isdir(ext_dir):
+        for d in os.listdir(ext_dir):
+            if d.startswith(prefix) and d != prefix + source_version:
+                stale = os.path.join(ext_dir, d)
+                try:
+                    rm(stale)
+                except OSError as exc:
+                    print(
+                        f"Warning: could not remove stale extension "
+                        f"directory: {stale} ({exc})"
+                    )
+
+
+def _positron_cli(home: str) -> str | None:
+    """Return path to Positron CLI binary, or None if not installed."""
+    candidates = [
+        os.path.join(
+            home, "Applications", "Positron.app",
+            "Contents", "Resources", "app", "bin", "code",
+        ),
+        "/Applications/Positron.app/Contents/Resources/app/bin/code",
+    ]
+    for path in candidates:
+        if os.path.isfile(path) and os.access(path, os.X_OK):
+            return path
+    return None
+
+
+def _positron_ext_dir(home: str) -> str:
+    """Return Positron's extension directory path."""
+    return os.path.join(home, ".positron", "extensions")
+
+
+def _generate_pycharm_alucard_theme(
+    dp_dir: str,
+) -> tuple[str, str] | None:
+    """Generate a Dracula Pro Alucard .theme.json and editor scheme .xml for JetBrains."""
+    p = _parse_ghostty_palette(dp_dir, "alucard")
+    if not p:
+        return None
+    vsix_path = os.path.join(
+        os.path.expanduser("~"), ".config", "koopa", "jetbrains-theme", "dracula-pro.zip"
+    )
+    if not os.path.isfile(vsix_path):
+        return None
+    with zipfile.ZipFile(vsix_path) as zf:
+        jar_data = zf.read("dracula-pro/lib/dracula-pro-1.4.0.jar")
+    with zipfile.ZipFile(io.BytesIO(jar_data)) as jar:
+        dark_theme = json.loads(jar.read("themes/DraculaPro.theme.json"))
+        dark_xml = jar.read("themes/DraculaPro.xml").decode()
+
+    # Alucard palette
+    bg        = "#fafafa"
+    bg2       = "#EBEBEB"
+    bg3       = "#DDDDE8"
+    fg        = p["foreground"]       # #383a42
+    selection = "#e8e8e8"
+    selection2 = "#DDDDE8"
+    purple    = p["blue"]             # #a626a4
+    purple2   = p["blue_bright"]      # #7c6f9e
+    pink      = p["magenta"]          # #e45649
+    green     = p["green"]            # #50a14f
+    yellow    = p["yellow"]           # #986801
+    red       = p["red"]              # #e45649
+    cyan      = p["cyan"]             # #0184bc
+    comment   = "#a0a1a7"
+    caret     = "#a0a1a7"
+
+    # Build Alucard .theme.json by adapting the dark theme structure
+    theme = {
+        "name": "Dracula Pro Alucard",
+        "dark": False,
+        "author": "Zeno Rocha (light adaptation by koopa)",
+        "editorScheme": "/colors/Dracula Pro Alucard.xml",
+        "ui": {
+            "*": {
+                "arc": "5",
+                "background": bg,
+                "selectionBackground": selection,
+                "selectionInactiveBackground": selection2,
+                "inactiveBackground": bg,
+                "borderColor": bg3,
+                "underlineColor": purple,
+            },
+            "Borders": {"color": bg3, "ContrastBorderColor": bg3},
+            "ActionButton": {
+                "hoverBackground": bg2,
+                "hoverBorderColor": bg2,
+                "pressedBackground": bg2,
+                "pressedBorderColor": bg2,
+            },
+            "Button": {
+                "foreground": fg,
+                "startBorderColor": purple,
+                "endBorderColor": purple,
+                "startBackground": purple,
+                "endBackground": purple,
+                "focusedBorderColor": purple,
+                "default": {
+                    "foreground": "#fafafa",
+                    "startBackground": purple,
+                    "endBackground": purple,
+                    "startBorderColor": purple,
+                    "endBorderColor": purple,
+                    "focusColor": purple,
+                    "focusedBorderColor": purple,
+                },
+            },
+            "Counter": {"foreground": bg, "background": green},
+            "CheckBoxMenuItem": {"acceleratorSelectionForeground": pink},
+            "ComboBox": {
+                "modifiedItemForeground": pink,
+                "ArrowButton": {
+                    "background": bg2,
+                    "nonEditableBackground": bg2,
+                    "iconColor": purple,
+                },
+                "selectionBackground": selection,
+                "nonEditableBackground": bg2,
+            },
+            "CompletionPopup": {
+                "selectionBackground": selection,
+                "selectionInactiveBackground": selection2,
+                "matchForeground": pink,
+            },
+            "Component": {
+                "focusColor": purple2,
+                "borderColor": purple,
+                "focusedBorderColor": purple,
+                "errorFocusColor": red,
+                "inactiveErrorFocusColor": red,
+                "warningFocusColor": yellow,
+                "inactiveWarningFocusColor": yellow,
+            },
+            "DragAndDrop": {"areaBorderColor": purple},
+            "Editor": {"background": bg, "shortcutForeground": pink},
+            "EditorTabs": {
+                "background": bg2,
+                "underlinedTabBackground": bg,
+                "underlineColor": pink,
+                "underlineHeight": 2,
+            },
+            "FileColor": {
+                "Blue": "#D6E4F7",
+                "Green": "#D6EDD6",
+                "Orange": "#F7E8D6",
+                "Yellow": "#F7F5D6",
+                "Rose": "#F0D6F0",
+                "Violet": "#E8E8F5",
+            },
+            "Label": {"foreground": fg, "errorForeground": red},
+            "Link": {
+                "activeForeground": pink,
+                "hoverForeground": pink,
+                "visitedForeground": purple2,
+                "pressedForeground": purple2,
+            },
+            "Notification": {
+                "borderColor": purple,
+                "errorBorderColor": red,
+                "errorBackground": bg,
+                "errorForeground": fg,
+                "ToolWindow": {
+                    "warningForeground": fg,
+                    "warningBackground": bg,
+                    "warningBorderColor": yellow,
+                    "errorForeground": fg,
+                    "errorBorderColor": red,
+                    "errorBackground": bg,
+                    "informativeForeground": fg,
+                    "informativeBackground": bg,
+                    "informativeBorderColor": green,
+                },
+            },
+            "Plugins": {
+                "SearchField": {"background": bg2},
+                "SectionHeader": {"foreground": fg},
+                "lightSelectionBackground": bg2,
+                "Button": {
+                    "installBorderColor": purple,
+                    "installForeground": purple,
+                    "installBackground": bg,
+                    "installFillForeground": bg,
+                    "installFillBackground": purple,
+                    "installFocusedBackground": bg,
+                    "updateBorderColor": cyan,
+                    "updateForeground": fg,
+                    "updateBackground": cyan,
+                },
+                "Tab": {
+                    "selectedBackground": bg2,
+                    "selectedForeground": fg,
+                    "hoverBackground": bg2,
+                },
+            },
+            "ProgressBar": {
+                "failedColor": red,
+                "failedEndColor": red,
+                "trackColor": selection,
+                "progressColor": pink,
+                "indeterminateStartColor": purple2,
+                "indeterminateEndColor": purple2,
+                "passedColor": green,
+                "passedEndColor": green,
+            },
+            "Popup": {
+                "Header": {
+                    "activeBackground": bg2,
+                    "inactiveBackground": bg2,
+                }
+            },
+            "SearchEverywhere": {
+                "SearchField": {"background": bg2},
+                "Tab": {
+                    "selectedBackground": selection,
+                    "selectedForeground": fg,
+                },
+            },
+            "SearchMatch": {"startBackground": pink, "endBackground": pink},
+            "Separator.separatorColor": bg2,
+            "TabbedPane": {
+                "tabSelectionHeight": 2,
+                "focusColor": bg2,
+                "hoverColor": bg2,
+                "underlineColor": purple2,
+                "contentAreaColor": bg2,
+            },
+            "ToggleButton": {
+                "onBackground": green,
+                "onForeground": bg,
+                "offBackground": selection,
+                "offForeground": bg,
+                "buttonColor": fg,
+            },
+            "ToolWindow": {
+                "Button": {"hoverBackground": bg2},
+                "Header": {"background": bg2, "inactiveBackground": bg2},
+                "HeaderTab": {
+                    "underlineColor": purple2,
+                    "underlineHeight": 2,
+                    "underlinedTabBackground": selection,
+                    "underlinedTabInactiveBackground": selection,
+                },
+            },
+            "Tree": {
+                "modifiedItemForeground": pink,
+                "selectionBackground": selection,
+                "selectionInactiveBackground": selection2,
+            },
+            "ValidationTooltip": {
+                "errorBackground": red,
+                "errorBorderColor": red,
+                "warningBorderColor": yellow,
+                "warningBackground": yellow,
+            },
+            "VersionControl": {
+                "FileHistory": {
+                    "Commit": {"selectedBranchBackground": bg2}
+                },
+                "GitLog": {
+                    "headIconColor": yellow,
+                    "localBranchIconColor": green,
+                    "remoteBranchIconColor": purple2,
+                    "tagIconColor": pink,
+                    "otherIconColor": cyan,
+                },
+                "Log": {"Commit": {"currentBranchBackground": bg2}},
+            },
+            "WelcomeScreen": {
+                "separatorColor": bg3,
+                "Projects": {
+                    "background": bg2,
+                    "selectionBackground": selection,
+                    "selectionInactiveBackground": selection2,
+                },
+            },
+        },
+        "icons": {
+            "ColorPalette": {
+                "Actions.Blue": cyan,
+                "Actions.Green": green,
+                "Actions.Grey": comment,
+                "Actions.GreyInline.Dark": comment,
+                "Actions.GreyInline": comment,
+                "Actions.Red": red,
+                "Actions.Yellow": yellow,
+                "Objects.Blue": cyan,
+                "Objects.Green": green,
+                "Objects.GreenAndroid": green,
+                "Objects.Grey": comment,
+                "Objects.Pink": pink,
+                "Objects.Purple": purple2,
+                "Objects.Red": red,
+                "Objects.RedStatus": red,
+                "Objects.Yellow": yellow,
+                "Objects.YellowDark": yellow,
+                "Objects.BlackText": fg,
+                "Checkbox.Border.Default.Dark": purple,
+                "Checkbox.Border.Selected.Dark": purple,
+                "Checkbox.Background.Default.Dark": bg,
+                "Checkbox.Foreground.Selected.Dark": fg,
+                "Checkbox.Focus.Wide.Dark": purple,
+                "Checkbox.Focus.Thin.Selected.Dark": purple,
+                "Checkbox.Focus.Thin.Default.Dark": purple,
+            }
+        },
+    }
+
+    # Build Alucard editor scheme XML by substituting colors in the dark XML
+    # Map: dark hex (lowercase) -> alucard hex
+    color_map = {
+        "282a36": bg[1:].lower(),           # editor bg
+        "000000": bg2[1:].lower(),          # window bg
+        "000000": bg3[1:].lower(),          # border/darkest
+        "000000": selection2[1:].lower(),   # inactive selection
+        "44475a": selection[1:].lower(),    # selection / indent guides
+        "000000": purple[1:].lower(),       # mid-purple accent
+        "bd93f9": purple2[1:].lower(),      # bright purple
+        "f8f8f2": fg[1:].lower(),           # foreground
+        "ff79c6": pink[1:].lower(),         # pink
+        "50fa7b": green[1:].lower(),        # green
+        "f1fa8c": yellow[1:].lower(),       # yellow
+        "ff5555": red[1:].lower(),          # red
+        "8be9fd": cyan[1:].lower(),         # cyan
+        "ffffff": caret[1:].lower(),        # caret / pure white
+        "282a35": bg[1:].lower(),           # annotations bg (dark)
+        "ffb86c": yellow[1:].lower(),       # orange-ish -> yellow
+    }
+    xml = dark_xml
+    xml = xml.replace('name="Dracula Pro"', 'name="Dracula Pro Alucard"')
+    xml = xml.replace('parent_scheme="Darcula"', 'parent_scheme="Default"')
+    for dark_hex, light_hex in color_map.items():
+        xml = re.sub(
+            re.escape(dark_hex),
+            light_hex,
+            xml,
+            flags=re.IGNORECASE,
+        )
+    return json.dumps(theme, indent=2), xml
+
+
+def _configure_jetbrains(home: str) -> None:
+    """Configure JetBrains IDEs with Dracula Pro theme and Sync with OS."""
+    import glob as _glob
+    if not is_macos():
+        return
+    dp_dir = os.path.join(os.path.expanduser("~"), ".local", "share", "dracula-pro")
+    has_dracula_pro = os.path.isdir(dp_dir)
+    jetbrains_base = os.path.join(home, "Library", "Application Support", "JetBrains")
+    if not os.path.isdir(jetbrains_base):
+        return
+    # Find all JetBrains IDE settings directories
+    ide_dirs = sorted(
+        _glob.glob(os.path.join(jetbrains_base, "PyCharm*"))
+        + _glob.glob(os.path.join(jetbrains_base, "IntelliJIdea*"))
+        + _glob.glob(os.path.join(jetbrains_base, "DataGrip*"))
+        + _glob.glob(os.path.join(jetbrains_base, "WebStorm*"))
+        + _glob.glob(os.path.join(jetbrains_base, "GoLand*"))
+        + _glob.glob(os.path.join(jetbrains_base, "RustRover*"))
+    )
+    if not ide_dirs:
+        return
+
+    # Generate Alucard theme if Dracula Pro is available
+    alucard_theme_json: str | None = None
+    alucard_xml: str | None = None
+    if has_dracula_pro:
+        result = _generate_pycharm_alucard_theme(dp_dir)
+        if result:
+            alucard_theme_json, alucard_xml = result
+
+    # Dracula Pro dark themeId (from plugin.xml)
+    _DP_DARK_THEME_ID = "171dce76-a3c5-4429-91af-41cf86094740"
+    # Free Dracula themeId — using Darcula (built-in) as dark fallback
+    _DARCULA_THEME_ID = "com.intellij.ide.ui.laf.darcula.DarculaLookAndFeel"
+
+    for ide_dir in ide_dirs:
+        options_dir = os.path.join(ide_dir, "options")
+        os.makedirs(options_dir, exist_ok=True)
+
+        # Deploy Alucard theme files if generated
+        if alucard_theme_json and alucard_xml:
+            themes_dir = os.path.join(ide_dir, "themes")
+            colors_dir = os.path.join(ide_dir, "colors")
+            os.makedirs(themes_dir, exist_ok=True)
+            os.makedirs(colors_dir, exist_ok=True)
+            with open(os.path.join(themes_dir, "Dracula Pro Alucard.theme.json"), "w") as fh:
+                fh.write(alucard_theme_json)
+            with open(os.path.join(colors_dir, "Dracula Pro Alucard.xml"), "w") as fh:
+                fh.write(alucard_xml)
+
+        # Write laf.xml — skip if already exists (preserve user customizations)
+        laf_path = os.path.join(options_dir, "laf.xml")
+        if not os.path.isfile(laf_path):
+            if has_dracula_pro and alucard_theme_json:
+                dark_id = _DP_DARK_THEME_ID
+                light_id = "Dracula Pro Alucard"
+            else:
+                dark_id = _DARCULA_THEME_ID
+                light_id = "JetBrainsLightTheme"
+            laf_content = (
+                '<application>\n'
+                '  <component name="LafManager" autodetect="true">\n'
+                '    <laf class-name="com.intellij.ide.ui.laf.IntelliJLookAndFeel"'
+                ' themeId="JetBrainsLightTheme" />\n'
+                f'    <preferredDarkLaf themeId="{dark_id}" />\n'
+                f'    <preferredLightLaf themeId="{light_id}" />\n'
+                '  </component>\n'
+                '</application>\n'
+            )
+            with open(laf_path, "w") as fh:
+                fh.write(laf_content)
+
+        # Merge ide.mac.appearance.mode=system into ide.general.xml
+        general_xml_path = os.path.join(options_dir, "ide.general.xml")
+        if os.path.isfile(general_xml_path):
+            with open(general_xml_path) as fh:
+                content = fh.read()
+            if "ide.mac.appearance.mode" not in content:
+                content = content.replace(
+                    '  <component name="Registry">',
+                    '  <component name="Registry">\n'
+                    '    <entry key="ide.mac.appearance.mode" value="system" />',
+                )
+                with open(general_xml_path, "w") as fh:
+                    fh.write(content)
+        else:
+            with open(general_xml_path, "w") as fh:
+                fh.write(
+                    '<application>\n'
+                    '  <component name="Registry">\n'
+                    '    <entry key="ide.mac.appearance.mode" value="system" />\n'
+                    '  </component>\n'
+                    '</application>\n'
+                )
+
+
+def _configure_koopa_color_mode_sync(home: str) -> None:
+    """Install the koopa-color-mode-sync VS Code extension."""
+    ext_src_dir = os.path.join(str(_PREFIX), "etc", "vscode", "koopa-color-mode-sync")
+    vsix = os.path.join(ext_src_dir, "koopa-color-mode-sync-0.1.0.vsix")
+    if not os.path.isfile(vsix):
+        return
+    with zipfile.ZipFile(vsix) as zf:
+        pkg = json.loads(zf.read("extension/package.json"))
+    publisher = pkg["publisher"]
+    ext_name = pkg["name"]
+    dir_prefix = f"{publisher}.{ext_name}-"
+    targets: list[tuple[str, str]] = []
+    code = shutil.which("code")
+    if code:
+        targets.append((code, os.path.join(home, ".vscode", "extensions")))
+    code_server = shutil.which("code-server")
+    if code_server:
+        targets.append((
+            code_server,
+            os.path.join(home, ".local", "share", "code-server", "extensions"),
+        ))
+    positron = _positron_cli(home)
+    if positron:
+        targets.append((positron, _positron_ext_dir(home)))
+    for binary, ext_dir in targets:
+        _install_vscode_extension(
+            vsix, dir_prefix, ext_dir, binary,
+            "koopa-color-mode-sync extension",
+        )
+
+
 def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     """Pre-chezmoi: vim pack, VS Code extension install."""
     dp_dir = os.path.join(xdg_data, "dracula-pro")
@@ -55,49 +556,26 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     mkdir(vim_themes)
     if os.path.isdir(vim_src):
         ln(vim_src, os.path.join(vim_themes, "dracula_pro"))
-    # VS Code: install VSIX if missing or version doesn't match local source.
+    # VS Code / Positron: install VSIX if missing or version doesn't match.
     vsix = os.path.join(
         dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
     )
-    code = shutil.which("code")
-    if code and os.path.isfile(vsix):
-        with zipfile.ZipFile(vsix) as zf:
-            pkg = json.loads(zf.read("extension/package.json"))
-        source_version = pkg["version"]
-        ext_dir = os.path.join(home, ".vscode", "extensions")
-        prefix = "dracula-theme-pro.theme-dracula-pro-"
-        installed_version = None
-        if os.path.isdir(ext_dir):
-            for d in os.listdir(ext_dir):
-                if d.startswith(prefix):
-                    ver = d[len(prefix):]
-                    try:
-                        ver_tuple = tuple(int(x) for x in ver.split("."))
-                    except ValueError:
-                        continue
-                    if installed_version is None or ver_tuple > tuple(
-                        int(x) for x in installed_version.split(".")
-                    ):
-                        installed_version = ver
-        if installed_version != source_version:
-            if installed_version is not None:
-                print(
-                    f"Upgrading Dracula Pro VS Code extension: "
-                    f"{installed_version} → {source_version}"
-                )
-            subprocess.run(
-                [code, "--install-extension", vsix],
-                capture_output=True,
-                check=True,
+    if os.path.isfile(vsix):
+        dp_prefix = "dracula-theme-pro.theme-dracula-pro-"
+        code = shutil.which("code")
+        if code:
+            _install_vscode_extension(
+                vsix, dp_prefix,
+                os.path.join(home, ".vscode", "extensions"),
+                code, "Dracula Pro VS Code extension",
             )
-        if os.path.isdir(ext_dir):
-            for d in os.listdir(ext_dir):
-                if d.startswith(prefix) and d != prefix + source_version:
-                    stale = os.path.join(ext_dir, d)
-                    try:
-                        rm(stale)
-                    except OSError as exc:
-                        print(f"Warning: could not remove stale extension directory: {stale} ({exc})")
+        positron = _positron_cli(home)
+        if positron:
+            _install_vscode_extension(
+                vsix, dp_prefix,
+                _positron_ext_dir(home),
+                positron, "Dracula Pro Positron extension",
+            )
 
 
 def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
@@ -1206,6 +1684,7 @@ def main() -> None:
     _add_config_link(prefix, "dotfiles")
     _configure_age(xdg_config)
     _configure_dracula_pro(home, xdg_data)
+    _configure_koopa_color_mode_sync(home)
     ssh_dir = os.path.join(home, ".ssh")
     if os.path.isdir(ssh_dir):
         chmod(ssh_dir, "0700")
@@ -1241,6 +1720,7 @@ def main() -> None:
             if not os.path.islink(xcode_free_dest) and not os.path.isfile(xcode_free_dest):
                 ln(xcode_free_src, xcode_free_dest)
     _configure_dracula_pro_post(home, xdg_data)
+    _configure_jetbrains(home)
     if is_macos():
         _sync_launchd_agent(home, "com.koopa.color-mode-sync")
         if _color_sync_is_new:

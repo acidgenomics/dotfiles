@@ -20,3 +20,13 @@ Marketplace: https://plugins.jetbrains.com/plugin/12275-dracula-theme
 Note: If you have Dracula Pro installed, the Pro zip is staged at:
 ~/.config/koopa/jetbrains-theme/dracula-pro.zip
 Install via Settings → Plugins → Install Plugin from Disk.
+
+Automatic dark/light mode switching
+------------------------------------
+JetBrains IDEs have built-in OS appearance sync since 2020.3. After installing
+the Dracula Pro theme, enable it via:
+Settings → Appearance & Behavior → Appearance → "Sync with OS"
+
+Configure preferred themes:
+- Dark theme: Dracula Pro (or variant)
+- Light theme: Dracula Pro Alucard (select "Get more..." if not listed)

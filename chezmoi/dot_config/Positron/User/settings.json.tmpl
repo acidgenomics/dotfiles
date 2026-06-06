@@ -1,5 +1,8 @@
 {{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
-{{- $dpProInstalled := glob (joinPath .chezmoi.homeDir ".vscode/extensions/dracula-theme-pro.theme-dracula-pro-*") -}}
+{{- $dpProInstalled := or
+    (glob (joinPath .chezmoi.homeDir ".positron" "extensions" "dracula-theme-pro.theme-dracula-pro-*"))
+    (glob (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*"))
+-}}
 {{- $dpDarkTheme := "Dracula Theme" -}}
 {{- $dpLightTheme := "Atom One Light" -}}
 {{- if $dpProInstalled -}}
@@ -25,6 +28,7 @@
   "editor.autoSurround": "never",
   "editor.codeLens": false,
   "editor.fontFamily": "'JetBrains Mono', monospace",
+  "editor.fontLigatures": true,
   "editor.fontSize": 16,
   "editor.pasteAs.enabled": false,
   "files.associations": {
@@ -34,6 +38,7 @@
   "git.path": "{{ lookPath "git" }}",
 {{- end }}
   "python.analysis.autoSearchPaths": false,
+  "python.analysis.diagnosticsSource": "Pyright",
 {{- if lookPath "conda" }}
   "python.condaPath": "{{ lookPath "conda" }}",
 {{- end }}
@@ -49,6 +54,37 @@
 {{- if lookPath "quarto" }}
   "quarto.path": "{{ lookPath "quarto" }}",
 {{- end }}
+  "terminal.integrated.defaultProfile.linux": "bash",
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.defaultProfile.osx": "bash",
+{{- end }}
+  "terminal.integrated.fontFamily": "'JetBrains Mono'",
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.fontWeight": "normal",
+  "terminal.integrated.fontWeightBold": "bold",
+  "terminal.integrated.inheritEnv": true,
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.profiles.osx": {
+    "bash": {
+      "args": [
+        "-il"
+      ],
+      "icon": "terminal-bash",
+      "path": "{{ lookPath "bash" }}"
+    },
+    "zsh": {
+      "args": [
+        "-il"
+      ],
+      "env": {
+        "ZDOTDIR": "${env:HOME}/.config/zsh"
+      },
+      "icon": "terminal-bash",
+      "path": "/bin/zsh"
+    }
+  },
+{{- end }}
+  "terminal.integrated.stickyScroll.enabled": false,
   "update.mode": "none",
   "update.showReleaseNotes": false,
   "window.autoDetectColorScheme": true,

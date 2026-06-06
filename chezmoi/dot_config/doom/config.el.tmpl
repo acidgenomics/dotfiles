@@ -5,14 +5,22 @@
 {{- $dpvNorm := $dpv -}}
 {{- if or (not $dpv) (eq $dpv "pro") -}}{{- $dpvNorm = "pro" -}}{{- end -}}
 {{- $dpThemeEl := printf "dracula-pro-%s-theme.el" $dpvNorm -}}
-{{- if stat (joinPath .chezmoi.homeDir ".config/doom/themes" $dpThemeEl) }}
+{{- $dpAlucard := stat (joinPath .chezmoi.homeDir ".config/doom/themes" "dracula-pro-alucard-theme.el") -}}
+{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+{{-   if $dpAlucard }}
+(add-to-list 'custom-theme-load-path "~/.config/doom/themes")
+(setq doom-theme 'dracula-pro-alucard)
+{{-   else }}
+(setq doom-theme 'doom-one-light)
+{{-   end }}
+{{- else }}
+{{-   if stat (joinPath .chezmoi.homeDir ".config/doom/themes" $dpThemeEl) }}
 (add-to-list 'custom-theme-load-path "~/.config/doom/themes")
 (setq doom-theme 'dracula-pro-{{ $dpvNorm }})
-{{- else }}
+{{-   else }}
 (setq doom-theme 'doom-dracula)
+{{-   end }}
 {{- end }}
-;; Light theme alternative:
-;; > (setq doom-theme 'doom-one-light)
 
 (setq display-line-numbers-type t)
 (setq make-backup-files nil)

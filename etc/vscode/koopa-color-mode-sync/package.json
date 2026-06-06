@@ -1,0 +1,25 @@
+{
+  "name": "koopa-color-mode-sync",
+  "displayName": "Koopa Color Mode Sync",
+  "description": "Writes VS Code theme kind (light/dark) to ~/.cache/koopa/color-mode for shell integration",
+  "version": "0.1.0",
+  "publisher": "acidgenomics",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {},
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.74.0",
+    "@vscode/vsce": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}

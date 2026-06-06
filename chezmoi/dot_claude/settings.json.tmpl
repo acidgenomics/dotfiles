@@ -2,10 +2,12 @@
   "alwaysThinkingEnabled": true,
   "autoMemoryEnabled": false,
   "autoUpdatesChannel": "latest",
-  "effortLevel": "max",
+  "effortLevel": "xhigh",
   "enabledPlugins": {
     "astral@astral-sh": true,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true
   },
   "env": {
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
@@ -13,7 +15,6 @@
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "ENABLE_LSP_TOOL": "1",
 {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
     "AWS_CA_BUNDLE": "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",
     "CURL_CA_BUNDLE": "{{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem",
@@ -60,7 +61,6 @@
     }
   },
   "model": "opusplan",
-  "plansDirectory": "./.claude/plans",
   "permissions": {
     "allow": [
       "Bash(*)",
@@ -91,7 +91,7 @@
       "Read(.env*)",
       "Write(**/.env*)",
       "Write(.env*)"
-    ],
-    "disableBypassPermissionsMode": "disable"
-  }
+    ]
+  },
+  "plansDirectory": "./.claude/plans"
 }

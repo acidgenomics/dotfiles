@@ -14,3 +14,7 @@
 .terminfo/
 Library/
 {{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
+.config/pip/pip.conf
+.npmrc
+{{- end }}

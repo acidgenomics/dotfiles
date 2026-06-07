@@ -43,6 +43,13 @@ set -g default-shell "{{ lookPath "bash" }}"
 # https://github.com/microsoft/vscode/issues/207545
 set-option -sg escape-time 100
 
+# Disable the assume-paste-time heuristic. The default 1ms is too short over
+# SSH: tmux misidentifies fast key sequences as a paste, bypasses key decoding,
+# and can inject raw bytes into the pane — producing duplicate lines in Neovim
+# insert mode. Real bracketed-paste (wrapped in \e[200~/\e[201~) is unaffected.
+# https://github.com/tmux/tmux/issues/5031
+set-option -g assume-paste-time 0
+
 # Session options
 # ==============================================================================
 

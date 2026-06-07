@@ -1,4 +1,4 @@
-{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") -}}
+{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") -}}
 {{- $colorMode := env "KOOPA_COLOR_MODE" -}}
 # """
 # Atuin configuration.

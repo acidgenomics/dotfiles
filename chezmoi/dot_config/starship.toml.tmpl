@@ -1,6 +1,6 @@
 add_newline = true
 command_timeout = 2000
-{{- $dpProInstalled := stat (joinPath .chezmoi.homeDir ".local/share/dracula-pro") }}
+{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") }}
 {{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
 palette = "dracula"
 {{- else }}

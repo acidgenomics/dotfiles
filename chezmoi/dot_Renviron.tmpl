@@ -1,4 +1,4 @@
-{{- $dpSrc := stat (joinPath .chezmoi.homeDir ".local" "share" "dracula-pro" "themes" "sublime") -}}
+{{- $dpSrc := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro/themes/sublime") -}}
 {{- if $dpSrc }}
 RSTUDIO_THEME_DARK=Dracula Pro
 RSTUDIO_THEME_LIGHT=Dracula Pro Alucard

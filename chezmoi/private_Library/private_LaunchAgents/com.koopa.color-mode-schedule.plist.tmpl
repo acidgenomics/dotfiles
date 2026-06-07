@@ -1,0 +1,35 @@
+{{- $dpDir := joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro" -}}
+{{- if and (eq .chezmoi.os "darwin") (stat $dpDir) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.koopa.color-mode-schedule</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>if [ "$(/usr/bin/defaults read -g AppleInterfaceStyleSwitchesAutomatically 2&gt;/dev/null)" = 1 ]; then exit 0; fi; h=$(date +%H); if [ "$h" -ge 9 ] &amp;&amp; [ "$h" -lt 17 ]; then want=false; else want=true; fi; cur=$(/usr/bin/defaults read -g AppleInterfaceStyle 2&gt;/dev/null); if [ "$want" = true ] &amp;&amp; [ "$cur" != Dark ]; then /usr/bin/osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'; echo "$(date '+%Y-%m-%dT%H:%M:%S') -&gt; dark"; elif [ "$want" = false ] &amp;&amp; [ "$cur" = Dark ]; then /usr/bin/osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to false'; echo "$(date '+%Y-%m-%dT%H:%M:%S') -&gt; light"; fi</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key><integer>17</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa-color-mode-schedule.log</string>
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa-color-mode-schedule.log</string>
+</dict>
+</plist>
+{{- end }}

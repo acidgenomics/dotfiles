@@ -1790,12 +1790,6 @@ def main() -> None:
             cursor_dest = os.path.join(cursor_dir, "settings.json")
             if not os.path.islink(cursor_dest):
                 ln(os.path.join(xdg_config, "Cursor", "User", "settings.json"), cursor_dest)
-        # McFly.
-        mcfly_dir = os.path.join(app_support, "McFly")
-        mkdir(mcfly_dir)
-        mcfly_dest = os.path.join(mcfly_dir, "config.toml")
-        if not os.path.islink(mcfly_dest):
-            ln(os.path.join(xdg_config, "mcfly", "config.toml"), mcfly_dest)
         # Positron.
         positron_dir = os.path.join(app_support, "Positron", "User")
         mkdir(positron_dir)

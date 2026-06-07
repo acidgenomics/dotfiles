@@ -1,6 +1,7 @@
 [global]
-{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "ca-certificates" "cacert.pem") }}
-cert={{ .chezmoi.homeDir }}/.local/share/ca-certificates/cacert.pem
+{{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
+{{- if stat (joinPath $dataHome "ca-certificates" "cacert.pem") }}
+cert={{ $dataHome }}/ca-certificates/cacert.pem
 {{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
 cert=/etc/ssl/certs/ca-certificates.crt
 {{- end }}

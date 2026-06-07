@@ -1,0 +1,304 @@
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpProInstalled := glob (joinPath .chezmoi.homeDir ".antigravity/extensions/dracula-theme-pro.theme-dracula-pro-*") -}}
+{{- $dpDarkTheme := "Dracula Theme" -}}
+{{- $dpLightTheme := "Atom One Light" -}}
+{{- if $dpProInstalled -}}
+{{-   $dpDarkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-   end -}}
+{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
+{{- end -}}
+{
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2
+  },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false,
+    "editor.inlineSuggest.enabled": true
+  },
+  "[r]": {
+{{- if lookPath "air" }}
+    "editor.defaultFormatter": "Posit.air-vscode",
+{{- end }}
+    "editor.formatOnSave": true
+  },
+  "[toml]": {
+    "editor.tabSize": 2
+  },
+{{- if lookPath "air" }}
+  "air.executablePath": "{{ lookPath "air" }}",
+  "air.executableStrategy": "path",
+{{- end }}
+  "antigravity.allowAgentAccessNonWorkspaceFiles": true,
+  "antigravity.cascadeAutoExecutionPolicy": "Turbo",
+  "breadcrumbs.enabled": true,
+  "chat.tools.global.autoApprove": false,
+  "chat.tools.terminal.autoApprove": {
+    "/^.*$/": true
+  },
+  "chat.tools.terminal.enableAutoApprove": true,
+  "debug.terminal.clearBeforeReusing": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.accessibilitySupport": "off",
+  "editor.autoClosingBrackets": "never",
+  "editor.autoClosingQuotes": "never",
+  "editor.detectIndentation": true,
+  "editor.find.autoFindInSelection": "always",
+  "editor.fontFamily": "'JetBrains Mono', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 16,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.guides.indentation": false,
+  "editor.inlineSuggest.enabled": false,
+  "editor.minimap.enabled": false,
+  "editor.occurrencesHighlight": "off",
+  "editor.quickSuggestions": {
+    "comments": "off",
+    "strings": "off",
+    "other": "off"
+  },
+  "editor.quickSuggestionsDelay": 1000,
+  "editor.renderLineHighlight": "none",
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [
+    80
+  ],
+  "editor.scrollBeyondLastLine": false,
+  "editor.selectionHighlight": false,
+  "editor.stickyScroll.enabled": true,
+  "editor.tabSize": 4,
+  "editor.unicodeHighlight.nonBasicASCII": true,
+  "editor.wordBasedSuggestions": "off",
+  "editor.wordWrap": "on",
+  "editor.wordWrapColumn": 80,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "extensions.ignoreRecommendations": true,
+  "files.associations": {
+    "*.rmd": "rmd",
+    "CODEOWNERS": "ssh_config"
+  },
+  "files.eol": "\n",
+  "files.hotExit": "onExitAndWindowClose",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "git.autofetch": false,
+  "git.confirmSync": false,
+  "git.openRepositoryInParentFolders": "never",
+  "git.suggestSmartCommit": false,
+  "gitlens.blame.toggleMode": "window",
+  "gitlens.codeLens.enabled": false,
+  "gitlens.currentLine.enabled": false,
+  "gitlens.defaultDateStyle": "absolute",
+  "gitlens.gitkraken.mcp.autoEnabled": false,
+  "gitlens.heatmap.toggleMode": "window",
+  "gitlens.hovers.enabled": false,
+  "gitlens.integrations.enabled": false,
+  "gitlens.plusFeatures.enabled": false,
+  "gitlens.showWhatsNewAfterUpgrades": false,
+  "gitlens.statusBar.pullRequests.enabled": false,
+  "gitlens.telemetry.enabled": false,
+  "gitlens.virtualRepositories.enabled": false,
+{{- if lookPath "hadolint" }}
+  "hadolint.cliOptions": [],
+  "hadolint.hadolintPath": "{{ lookPath "hadolint" }}",
+{{- end }}
+  "html.format.wrapLineLength": 0,
+  "http.systemCertificatesNode": true,
+  "js/ts.suggest.enabled": false,
+  "jupyter.askForKernelRestart": false,
+  "jupyter.kernels.trusted": [
+{{- if stat (joinPath .chezmoi.homeDir ".venv" "share" "jupyter") }}
+    "{{ .chezmoi.homeDir }}/.venv/share/jupyter/kernels/python3/kernel.json"
+{{- else if stat (joinPath (env "KOOPA_PREFIX") "opt" "anaconda") }}
+    "{{ env "KOOPA_PREFIX" }}/opt/anaconda/share/jupyter/kernels/python3/kernel.json"
+{{- else if stat (joinPath (env "KOOPA_PREFIX") "opt" "jupyterlab") }}
+    "{{ env "KOOPA_PREFIX" }}/opt/jupyterlab/libexec/share/jupyter/kernels/python3/kernel.json"
+{{- end }}
+  ],
+{{- if lookPath "marimo" }}
+  "marimo.marimoPath": "{{ lookPath "marimo" }}",
+{{- end }}
+  "markdownlint.run": "onSave",
+  "notebook.codeActionsOnSave": {
+    "notebook.source.fixAll": "explicit",
+    "notebook.source.organizeImports.ruff": "explicit"
+  },
+  "notebook.formatOnSave.enabled": true,
+  "notebook.output.textLineLimit": 100,
+  "outline.collapseItems": "alwaysCollapse",
+  "path-autocomplete.pathMappings": {
+    ".": "${workspace}"
+  },
+  "python-envs.alwaysUseUv": false,
+  "python-envs.terminal.autoActivationType": "off",
+  "python-envs.workspaceSearchPaths": [
+    "./.venv"
+  ],
+  "python.REPL.enableREPLSmartSend": true,
+  "python.REPL.provideVariables": true,
+  "python.REPL.sendToNativeREPL": true,
+  "python.analysis.autoFormatStrings": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.autoSearchPaths": false,
+  "python.analysis.diagnosticsSource": "Pyright",
+  "python.analysis.typeCheckingMode": "strict",
+{{- if lookPath "conda" }}
+  "python.condaPath": "{{ lookPath "conda" }}",
+{{- end }}
+  "python.experiments.enabled": false,
+  "python.interpreter.infoVisibility": "always",
+  "python.terminal.activateEnvironment": false,
+  "python.terminal.useEnvFile": true,
+  "python.useEnvironmentsExtension": true,
+  "r.alwaysUseActiveTerminal": true,
+  "r.bracketedPaste": true,
+  "r.lsp.diagnostics": true,
+  "r.lsp.promptToInstall": false,
+  "r.plot.defaults.fullWindowMode": true,
+  "r.plot.useHttpgd": true,
+  "r.rpath.linux": "/usr/bin/R",
+{{- if eq .chezmoi.os "darwin" }}
+  "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
+{{- end }}
+{{- if lookPath "radian" }}
+  "r.rterm.linux": "{{ lookPath "radian" }}",
+{{- if eq .chezmoi.os "darwin" }}
+  "r.rterm.mac": "{{ lookPath "radian" }}",
+{{- end }}
+{{- end }}
+  "r.rterm.option": [
+    "--no-save",
+    "--no-restore",
+    "--quiet"
+  ],
+  "r.rtermSendDelay": 0,
+  "r.session.data.rowLimit": 100,
+  "r.session.levelOfObjectDetail": "Detailed",
+  "r.workspaceViewer.removeHiddenItems": true,
+  "r.workspaceViewer.showObjectSize": true,
+  "redhat.telemetry.enabled": false,
+  "remote.SSH.connectTimeout": 60,
+  "remote.SSH.enableRemoteCommand": true,
+  "remote.SSH.localServerDownload": "off",
+  "remote.SSH.maxReconnectionAttempts": 0,
+  "remote.SSH.remotePlatform": {
+    "*": "linux"
+  },
+  "remote.SSH.remoteServerListenOnSocket": true,
+  "remote.SSH.useCurlAndWgetConfigurationFiles": true,
+  "remote.autoForwardPortsSource": "hybrid",
+  "remote.downloadExtensionsLocally": false,
+{{- if lookPath "ruff" }}
+  "ruff.path": [
+    "{{ lookPath "ruff" }}"
+  ],
+{{- end }}
+  "security.workspace.trust.enabled": false,
+  "security.workspace.trust.untrustedFiles": "open",
+  "shellcheck.disableVersionCheck": true,
+  "shellcheck.exclude": [
+    "2119",
+    "2120",
+    "3040",
+    "3043"
+  ],
+  "shellcheck.run": "onSave",
+  "telemetry.feedback.enabled": false,
+  "telemetry.telemetryLevel": "off",
+{{- if and (eq .chezmoi.os "darwin") (stat "/Applications/Ghostty.app") }}
+  "terminal.external.osxExec": "Ghostty.app",
+{{- end }}
+  "terminal.integrated.cursorBlinking": false,
+  "terminal.integrated.cursorStyle": "block",
+  "terminal.integrated.defaultLocation": "editor",
+  "terminal.integrated.defaultProfile.linux": "bash",
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.defaultProfile.osx": "bash",
+{{- end }}
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+{{- end }}
+  "terminal.integrated.enableFileLinks": "off",
+  "terminal.integrated.fontFamily": "'JetBrains Mono'",
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.fontWeight": "normal",
+  "terminal.integrated.fontWeightBold": "bold",
+  "terminal.integrated.inheritEnv": true,
+  "terminal.integrated.initialHint": false,
+  "terminal.integrated.localEchoEnabled": "off",
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.profiles.osx": {
+    "bash": {
+      "args": [
+        "-il"
+      ],
+      "icon": "terminal-bash",
+      "path": "{{ lookPath "bash" }}"
+    },
+    "zsh": {
+      "args": [
+        "-il"
+      ],
+      "env": {
+        "ZDOTDIR": "${env:HOME}/.config/zsh"
+      },
+      "icon": "terminal-bash",
+{{- if eq .chezmoi.os "darwin" }}
+      "path": "/bin/zsh"
+{{- else }}
+      "path": "{{ lookPath "zsh" }}"
+{{- end }}
+    }
+  },
+{{- end }}
+  "terminal.integrated.stickyScroll.enabled": false,
+  "update.mode": "none",
+  "update.showReleaseNotes": false,
+  "vsicons.dontShowNewVersionMessage": true,
+  "window.autoDetectColorScheme": true,
+  "window.commandCenter": true,
+  "window.zoomLevel": 0,
+  "workbench.colorCustomizations": {
+    "activityBarBadge.background": "#0000",
+    "activityBarBadge.foreground": "#0000",
+    "editor.selectionBackground": "#5B557566",
+    "editor.selectionHighlightBackground": "#5B557533"
+  },
+{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
+  "workbench.colorTheme": "{{ $dpLightTheme }}",
+{{- else }}
+  "workbench.colorTheme": "{{ $dpDarkTheme }}",
+{{- end }}
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "workbench.editor.closeOnFileDelete": true,
+  "workbench.editor.empty.hint": "hidden",
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.editor.languageDetection": false,
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.panel.defaultLocation": "bottom",
+  "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
+  "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",
+  "workbench.startupEditor": "newUntitledFile",
+  "workbench.tree.renderIndentGuides": "always"
+}

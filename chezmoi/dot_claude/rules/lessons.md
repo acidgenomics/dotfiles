@@ -76,3 +76,51 @@ literal newline (e.g. a multi-line alias). Workaround:
 ```sh
 GIT_CONFIG_NOSYSTEM=1 HOME=/dev/null git filter-repo --path ... --invert-paths --force
 ```
+
+## Rewriting Commit Identity History: Use git filter-repo --mailmap
+
+When commits carry wrong author/committer emails (e.g. corporate email leaked
+into a personal OSS repo), use `git filter-repo --mailmap` — the simplest and
+correct tool for pure identity rewrites:
+
+```sh
+# mailmap format: canonical <right@email.com> <wrong@email.com>
+cat > mailmap << 'EOF'
+USER NAME <USER EMAIL> <wrong.name@corp.com>
+EOF
+
+GIT_CONFIG_NOSYSTEM=1 HOME=/dev/null git filter-repo --mailmap mailmap --force
+git remote add origin <url>   # filter-repo removes the remote as a safety measure
+git config --local user.name  "USER NAME"
+git config --local user.email "USER EMAIL"
+```
+
+**Choose this vs `git commit-tree` replay based on whether commits are unique:**
+
+- Offending commits have **distinct trees** (real unique work) → use `--mailmap`.
+  Filter-repo preserves graph topology and rewrites identity metadata only.
+- Offending commits are **duplicates** of clean-identity commits (e.g. history
+  was doubled by a botched cleanup + git pull re-merge) → use a `git commit-tree`
+  replay to de-duplicate. Filter-repo cannot collapse duplicate lineages.
+
+**How to check before choosing:**
+```sh
+# For each bad email, count distinct trees — if each is unique, mailmap is safe
+git log --all --format='%T %ae' | grep 'corp\.com' | awk '{print $1}' | sort -u | wc -l
+# Must equal the commit count; if less, duplicates exist and commit-tree is needed
+```
+
+**Verification after mailmap rewrite** (must all pass before force-push):
+```sh
+# 1. No bad identities remain (must print nothing):
+git log --all --format='%ae%n%ce' | grep -iE 'corp\.com'
+
+# 2. Good bots preserved (count should be unchanged):
+git log --all --format='%ce' | grep -c 'noreply@github\.com'
+
+# 3. Commit count unchanged:
+git rev-list --all --count
+```
+
+Always bundle-backup first (`git bundle create backup.bundle --all`) and keep it
+until the force-push is confirmed correct on the remote.

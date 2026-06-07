@@ -36,6 +36,13 @@ vim.api.nvim_create_autocmd('User', {
     end,
 })
 
+-- Recovery mapping for tmux/terminal stuck-in-paste-mode (#10865):
+-- if a `\e[201~` paste-end sequence gets lost, Neovim keeps treating all
+-- subsequent keystrokes as a paste. <leader>P resets it.
+vim.keymap.set('n', '<leader>P', function()
+    vim.paste({''}, 3)
+end, { desc = 'Reset stuck paste mode' })
+
 -- LSP (Neovim 0.11+ native API)
 {{- if lookPath "bash-language-server" }}
 vim.lsp.enable('bashls')

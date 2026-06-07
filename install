@@ -110,6 +110,16 @@ def _positron_ext_dir(home: str) -> str:
     return os.path.join(home, ".positron", "extensions")
 
 
+def _cursor_ext_dir(home: str) -> str:
+    """Return Cursor's extension directory path."""
+    return os.path.join(home, ".cursor", "extensions")
+
+
+def _antigravity_ext_dir(home: str) -> str:
+    """Return Antigravity's extension directory path."""
+    return os.path.join(home, ".antigravity", "extensions")
+
+
 def _generate_pycharm_alucard_theme(
     dp_dir: str,
 ) -> tuple[str, str] | None:
@@ -150,7 +160,7 @@ def _generate_pycharm_alucard_theme(
         "name": "Dracula Pro Alucard",
         "dark": False,
         "author": "Zeno Rocha (light adaptation by koopa)",
-        "editorScheme": "/colors/Dracula Pro Alucard.xml",
+        "editorScheme": "/themes/DraculaProAlucard.xml",
         "ui": {
             "*": {
                 "arc": "5",
@@ -419,7 +429,7 @@ def _generate_pycharm_alucard_theme(
 
 
 def _configure_jetbrains(home: str) -> None:
-    """Configure JetBrains IDEs with Dracula Pro theme and Sync with OS."""
+    """Configure JetBrains IDEs with Dracula Pro theme and sync with OS."""
     import glob as _glob
     if not is_macos():
         return
@@ -430,7 +440,7 @@ def _configure_jetbrains(home: str) -> None:
         return
     # Find all JetBrains IDE settings directories
     ide_dirs = sorted(
-        _glob.glob(os.path.join(jetbrains_base, "PyCharm*"))
+        _glob.glob(os.path.join(jetbrains_base, "PyCharm[0-9]*"))
         + _glob.glob(os.path.join(jetbrains_base, "IntelliJIdea*"))
         + _glob.glob(os.path.join(jetbrains_base, "DataGrip*"))
         + _glob.glob(os.path.join(jetbrains_base, "WebStorm*"))
@@ -448,47 +458,89 @@ def _configure_jetbrains(home: str) -> None:
         if result:
             alucard_theme_json, alucard_xml = result
 
-    # Dracula Pro dark themeId (from plugin.xml)
+    # themeIds: dark from the official plugin.xml; Alucard from koopa's local plugin
     _DP_DARK_THEME_ID = "171dce76-a3c5-4429-91af-41cf86094740"
-    # Free Dracula themeId — using Darcula (built-in) as dark fallback
-    _DARCULA_THEME_ID = "com.intellij.ide.ui.laf.darcula.DarculaLookAndFeel"
+    _DP_ALUCARD_THEME_ID = "a71dce76-a3c5-4429-91af-41cf86094740"
+    # Built-in fallback themeIds (no Pro source available)
+    _DARCULA_THEME_ID = "Darcula"
+    _LIGHT_THEME_ID = "ExperimentalLight"
+
+    # Staged official plugin zip (symlinked by _configure_dracula_pro_post)
+    vsix_path = os.path.join(xdg_config_home(), "koopa", "jetbrains-theme", "dracula-pro.zip")
+    has_plugin_zip = has_dracula_pro and os.path.isfile(vsix_path)
+
+    # Current OS appearance — set authoritatively in main() before this runs
+    is_light = os.environ.get("KOOPA_COLOR_MODE", "dark") == "light"
 
     for ide_dir in ide_dirs:
         options_dir = os.path.join(ide_dir, "options")
         os.makedirs(options_dir, exist_ok=True)
+        plugins_dir = os.path.join(ide_dir, "plugins")
 
-        # Deploy Alucard theme files if generated
+        newly_installed = False
+
+        if has_plugin_zip:
+            # Install official dark plugin if absent
+            dark_plugin_dir = os.path.join(plugins_dir, "dracula-pro")
+            if not os.path.isdir(dark_plugin_dir):
+                os.makedirs(plugins_dir, exist_ok=True)
+                with zipfile.ZipFile(vsix_path) as zf:
+                    zf.extractall(plugins_dir)
+                newly_installed = True
+
         if alucard_theme_json and alucard_xml:
-            themes_dir = os.path.join(ide_dir, "themes")
-            colors_dir = os.path.join(ide_dir, "colors")
-            os.makedirs(themes_dir, exist_ok=True)
-            os.makedirs(colors_dir, exist_ok=True)
-            with open(os.path.join(themes_dir, "Dracula Pro Alucard.theme.json"), "w") as fh:
-                fh.write(alucard_theme_json)
-            with open(os.path.join(colors_dir, "Dracula Pro Alucard.xml"), "w") as fh:
-                fh.write(alucard_xml)
-
-        # Write laf.xml — skip if already exists (preserve user customizations)
-        laf_path = os.path.join(options_dir, "laf.xml")
-        if not os.path.isfile(laf_path):
-            if has_dracula_pro and alucard_theme_json:
-                dark_id = _DP_DARK_THEME_ID
-                light_id = "Dracula Pro Alucard"
-            else:
-                dark_id = _DARCULA_THEME_ID
-                light_id = "JetBrainsLightTheme"
-            laf_content = (
-                '<application>\n'
-                '  <component name="LafManager" autodetect="true">\n'
-                '    <laf class-name="com.intellij.ide.ui.laf.IntelliJLookAndFeel"'
-                ' themeId="JetBrainsLightTheme" />\n'
-                f'    <preferredDarkLaf themeId="{dark_id}" />\n'
-                f'    <preferredLightLaf themeId="{light_id}" />\n'
-                '  </component>\n'
-                '</application>\n'
+            # Build the koopa Alucard plugin jar (pure-resource, no .class files)
+            alucard_plugin_dir = os.path.join(plugins_dir, "dracula-pro-alucard", "lib")
+            os.makedirs(alucard_plugin_dir, exist_ok=True)
+            alucard_jar_path = os.path.join(alucard_plugin_dir, "dracula-pro-alucard.jar")
+            plugin_xml = (
+                '<idea-plugin>\n'
+                '  <idea-version since-build="191"/>\n'
+                '  <id>com.koopa.dracula-pro-alucard</id>\n'
+                '  <name>Dracula Pro Alucard</name>\n'
+                '  <version>1.0.0</version>\n'
+                '  <vendor>koopa</vendor>\n'
+                '  <depends>com.intellij.modules.lang</depends>\n'
+                '  <extensions defaultExtensionNs="com.intellij">\n'
+                f'    <themeProvider id="{_DP_ALUCARD_THEME_ID}"'
+                ' path="/themes/DraculaProAlucard.theme.json"/>\n'
+                '  </extensions>\n'
+                '</idea-plugin>\n'
             )
-            with open(laf_path, "w") as fh:
-                fh.write(laf_content)
+            with zipfile.ZipFile(alucard_jar_path, "w", zipfile.ZIP_DEFLATED) as jar:
+                jar.writestr("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n")
+                jar.writestr("META-INF/plugin.xml", plugin_xml)
+                jar.writestr("themes/DraculaProAlucard.theme.json", alucard_theme_json)
+                jar.writestr("themes/DraculaProAlucard.xml", alucard_xml)
+            newly_installed = True
+
+        # Write laf.xml — always rewrite so koopa can correct stale IDE defaults.
+        # laf.xml holds only LafManager theme wiring; koopa owns this file.
+        laf_path = os.path.join(options_dir, "laf.xml")
+        if has_plugin_zip and alucard_theme_json:
+            dark_id = _DP_DARK_THEME_ID
+            light_id = _DP_ALUCARD_THEME_ID
+            dark_scheme = "Dracula Pro"
+            light_scheme = "Dracula Pro Alucard"
+        else:
+            dark_id = _DARCULA_THEME_ID
+            light_id = _LIGHT_THEME_ID
+            dark_scheme = "Darcula"
+            light_scheme = "Default"
+        active_id = light_id if is_light else dark_id
+        laf_content = (
+            '<application>\n'
+            '  <component name="LafManager" autodetect="true">\n'
+            f'    <laf themeId="{active_id}" />\n'
+            f'    <preferred-light-laf themeId="{light_id}" />\n'
+            f'    <preferred-dark-laf themeId="{dark_id}" />\n'
+            f'    <preferred-light-editor-scheme editorSchemeId="{light_scheme}" />\n'
+            f'    <preferred-dark-editor-scheme editorSchemeId="{dark_scheme}" />\n'
+            '  </component>\n'
+            '</application>\n'
+        )
+        with open(laf_path, "w") as fh:
+            fh.write(laf_content)
 
         # Merge ide.mac.appearance.mode=system into ide.general.xml
         general_xml_path = os.path.join(options_dir, "ide.general.xml")
@@ -512,6 +564,14 @@ def _configure_jetbrains(home: str) -> None:
                     '  </component>\n'
                     '</application>\n'
                 )
+
+        if newly_installed:
+            print(
+                f"JetBrains ({os.path.basename(ide_dir)}): installed Dracula Pro plugins.\n"
+                "  Quit PyCharm (if running) and restart it to apply the theme.\n"
+                "  On first launch you may see a third-party plugin consent prompt — "
+                "click Enable."
+            )
 
 
 def _configure_koopa_color_mode_sync(home: str) -> None:
@@ -538,6 +598,12 @@ def _configure_koopa_color_mode_sync(home: str) -> None:
     positron = _positron_cli(home)
     if positron:
         targets.append((positron, _positron_ext_dir(home)))
+    cursor = shutil.which("cursor")
+    if cursor:
+        targets.append((cursor, _cursor_ext_dir(home)))
+    antigravity = shutil.which("antigravity")
+    if antigravity:
+        targets.append((antigravity, _antigravity_ext_dir(home)))
     for binary, ext_dir in targets:
         _install_vscode_extension(
             vsix, dir_prefix, ext_dir, binary,
@@ -575,6 +641,20 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
                 vsix, dp_prefix,
                 _positron_ext_dir(home),
                 positron, "Dracula Pro Positron extension",
+            )
+        cursor = shutil.which("cursor")
+        if cursor:
+            _install_vscode_extension(
+                vsix, dp_prefix,
+                _cursor_ext_dir(home),
+                cursor, "Dracula Pro Cursor extension",
+            )
+        antigravity = shutil.which("antigravity")
+        if antigravity:
+            _install_vscode_extension(
+                vsix, dp_prefix,
+                _antigravity_ext_dir(home),
+                antigravity, "Dracula Pro Antigravity extension",
             )
 
 
@@ -1373,7 +1453,57 @@ def _generate_rstudio_rstheme(
         "type":       colors["type"],
         "variable":   colors["variable"],
     }
-    for free_hex, role in _FREE_DRACULA_COLOR_MAP:
+    color_map = list(_FREE_DRACULA_COLOR_MAP)
+    # Light variants (e.g. Alucard): the dark template's UI-chrome colors and
+    # ANSI base palette must also be remapped; dark variants are unchanged.
+    if not colors["is_dark"]:
+        bg = colors["background"]
+        fg = colors["foreground"]
+        muted = _hex_lerp(fg, bg, 0.45)
+        role_to_pro.update({
+            "foreground": fg,
+            "panel_bg":   _hex_lerp(bg, "#000000", 0.06),
+            "deep_bg":    _hex_lerp(bg, "#000000", 0.12),
+            "hover_bg":   _hex_lerp(bg, "#000000", 0.10),
+            "border":     _hex_lerp(bg, fg, 0.18),
+            "selection":  colors["selection"],
+            "muted":      muted,
+        })
+        color_map += [
+            ("#f8f8f2", "foreground"),
+            ("#252631", "panel_bg"),
+            ("#1a1b22", "deep_bg"),
+            ("#32343f", "hover_bg"),
+            ("#303140", "border"),
+            ("#464b5d", "selection"),   # alpha suffix (#464B5D80) preserved by re.sub
+            ("#adb5cb", "muted"),
+            ("#4b5578", "muted"),
+        ]
+        # Remap ANSI base palette (indices 0-15 only; 16-255 are the standard
+        # xterm color cube — protocol-literal, must not be changed).
+        ansi = _parse_ghostty_palette(dp_dir, "alucard")
+        if ansi:
+            tango_to_alucard = [
+                ("#2e3436", ansi["black"]),           # 0
+                ("#cc0000", ansi["red"]),              # 1
+                ("#4e9a06", ansi["green"]),            # 2
+                ("#c4a000", ansi["yellow"]),           # 3
+                ("#3465a4", ansi["blue"]),             # 4
+                ("#75507b", ansi["magenta"]),          # 5
+                ("#06989a", ansi["cyan"]),             # 6
+                ("#d3d7cf", ansi["foreground"]),       # 7 (ANSI white → palette fg)
+                ("#555753", ansi["black_bright"]),     # 8
+                ("#ef2929", ansi["red_bright"]),       # 9
+                ("#8ae234", ansi["green_bright"]),     # 10
+                ("#fce94f", ansi["yellow_bright"]),    # 11
+                ("#729fcf", ansi["blue_bright"]),      # 12
+                ("#ad7fa8", ansi["magenta_bright"]),   # 13
+                ("#34e2e2", ansi["cyan_bright"]),      # 14
+                ("#eeeeec", ansi["foreground"]),       # 15 (bright white → palette fg)
+            ]
+            for free_hex, pro_hex in tango_to_alucard:
+                css = re.sub(re.escape(free_hex), pro_hex, css, flags=re.IGNORECASE)
+    for free_hex, role in color_map:
         pro_hex = role_to_pro.get(role, free_hex)
         css = re.sub(re.escape(free_hex), pro_hex, css, flags=re.IGNORECASE)
     return css
@@ -1659,14 +1789,13 @@ def _configure_age(xdg_config: str) -> None:
     key_file = os.path.join(age_dir, "key.txt")
     if not os.path.isfile(key_file):
         os.makedirs(age_dir, mode=0o700, exist_ok=True)
-        result = subprocess.run(
+        subprocess.run(
             [age_keygen, "-o", key_file],
             capture_output=True,
             text=True,
             check=True,
         )
         os.chmod(key_file, 0o600)
-        print(result.stderr.strip())
     with open(key_file) as fh:
         recipient = next(
             (line.split(": ", 1)[1].strip() for line in fh if line.startswith("# public key: ")),
@@ -1809,6 +1938,20 @@ def main() -> None:
             cursor_dest = os.path.join(cursor_dir, "settings.json")
             if not os.path.islink(cursor_dest):
                 ln(os.path.join(xdg_config, "Cursor", "User", "settings.json"), cursor_dest)
+        # Antigravity IDE. The app-support folder may be "Antigravity IDE" or
+        # "Antigravity" depending on the installed version; try both.
+        for ag_app_name in ("Antigravity IDE", "Antigravity"):
+            if os.path.isdir(os.path.join(app_support, ag_app_name)):
+                ag_dir = os.path.join(app_support, ag_app_name, "User")
+                mkdir(ag_dir)
+                for f in ("keybindings.json", "settings.json"):
+                    ag_dest = os.path.join(ag_dir, f)
+                    if not os.path.islink(ag_dest):
+                        ln(
+                            os.path.join(xdg_config, "Antigravity", "User", f),
+                            ag_dest,
+                        )
+                break
         # Positron.
         positron_dir = os.path.join(app_support, "Positron", "User")
         mkdir(positron_dir)

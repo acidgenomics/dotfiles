@@ -157,6 +157,17 @@ if-shell -b \
     "source-file \"${colors_dir}/light.conf\"" \
     "source-file \"${colors_dir}/dark.conf\""
 
+# Manual color-mode refresh (tmux < 3.6 fallback, prefix+M-r).
+# Reads the cache file and pushes the correct mode into the global env + reloads
+# colors.  Use this after a dark/light flip on the laptop when the 2031 hooks
+# below cannot fire (tmux < 3.6).
+bind M-r if-shell \
+    '[ "$(cat ~/.cache/koopa/color-mode 2>/dev/null)" = "light" ]' \
+    "set-environment -g KOOPA_COLOR_MODE light ; \
+     source-file \"${colors_dir}/light.conf\"" \
+    "set-environment -g KOOPA_COLOR_MODE dark ; \
+     source-file \"${colors_dir}/dark.conf\""
+
 # Mode 2031: real-time dark/light theme tracking (tmux 3.6+).
 # The outer terminal (Ghostty, Kitty, etc.) pushes theme change notifications
 # through SSH to tmux, which fires these hooks automatically.

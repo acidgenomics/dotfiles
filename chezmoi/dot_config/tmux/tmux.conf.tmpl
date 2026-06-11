@@ -172,6 +172,7 @@ bind M-r if-shell \
 # The outer terminal (Ghostty, Kitty, etc.) pushes theme change notifications
 # through SSH to tmux, which fires these hooks automatically.
 # See: https://github.com/tmux/tmux/pull/4353
+%if #{>=:#{version},3.6}
 set-hook -g client-dark-theme \
     "set-environment -g KOOPA_COLOR_MODE dark ; \
      set-environment KOOPA_COLOR_MODE dark ; \
@@ -182,6 +183,7 @@ set-hook -g client-light-theme \
      set-environment KOOPA_COLOR_MODE light ; \
      run-shell 'printf light > \${HOME}/.cache/koopa/color-mode' ; \
      source-file \"${colors_dir}/light.conf\""
+%endif
 
 # Mouse mode
 # ==============================================================================

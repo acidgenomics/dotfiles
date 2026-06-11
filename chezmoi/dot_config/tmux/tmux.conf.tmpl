@@ -154,8 +154,10 @@ set-option -g status-right-length 200
 %hidden color_cache="~/.cache/koopa/color-mode"
 if-shell -b \
     '[ "${KOOPA_COLOR_MODE:-$(cat "${HOME}/.cache/koopa/color-mode" 2>/dev/null)}" = "light" ]' \
-    "source-file \"${colors_dir}/light.conf\"" \
-    "source-file \"${colors_dir}/dark.conf\""
+    "set-environment -g KOOPA_COLOR_MODE light ; \
+     source-file \"${colors_dir}/light.conf\"" \
+    "set-environment -g KOOPA_COLOR_MODE dark ; \
+     source-file \"${colors_dir}/dark.conf\""
 
 # Manual color-mode refresh (tmux < 3.6 fallback, prefix+M-r).
 # Reads the cache file and pushes the correct mode into the global env + reloads

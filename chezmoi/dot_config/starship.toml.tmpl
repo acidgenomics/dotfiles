@@ -63,13 +63,13 @@ disabled = true
 disabled = true
 
 [custom.git_email]
-command = 'git config user.email || echo "⚠ no user.email"'
+command = 'git config user.email'
 description = 'Effective git user.email'
 disabled = false
 format = '[<$output>]($style) '
 shell = ['bash', '--noprofile', '--norc']
 style = 'purple'
-when = 'git rev-parse --is-inside-work-tree 2>/dev/null'
+when = 'git rev-parse --is-inside-work-tree 2>/dev/null && git config --get user.email'
 
 [daml]
 disabled = true

@@ -37,9 +37,10 @@ Plan mode is a conversation, not a race to produce a plan document.
   pattern (project-level only — skip if no `.claude/rules/` directory exists).
 - Write rules for yourself that prevent the same mistake.
 - Ruthlessly iterate on these lessons until mistake rate drops.
-- Global cross-project patterns live in `~/.claude/rules/lessons.md` (auto-loaded,
-  user-curated in chezmoi). Per-project lessons live in `.claude/rules/lessons.md`
-  within the repo (Claude-maintained). Both are auto-loaded into context.
+- `~/.claude/rules/lessons.md` is **user-curated** (general patterns only; Claude
+  does not auto-write here). Per-project lessons live in `.claude/rules/lessons.md`
+  within the repo (Claude-maintained). Automatic cross-project capture is configured
+  per-machine via a local rule.
 
 ## 4. Verification Before Done
 

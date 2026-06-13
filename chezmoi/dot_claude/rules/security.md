@@ -1,39 +1,22 @@
 # Security Rules
 
-> IMPORTANT: These rules are MANDATORY. They apply to ALL interactions, ALL
-> projects, ALL code.
+> MANDATORY — ALL interactions, ALL projects, ALL code.
 
 ## Secrets & Credentials
 
-- NEVER include API keys, passwords, tokens, connection strings, or certificates
-  in code, comments, prompts, commit messages, or plan files — use placeholder
-  descriptions (e.g., "Admin token from env") instead of actual values.
-- NEVER hardcode credentials — use environment variables, secret vaults, or
-  configuration references.
-- Flag any file that matches secret patterns: `.env`, `credentials.json`,
-  `*_key.*`, `*.pem`, `*.p12`, `secrets.*`, `*token*`.
-- Before committing: warn if any staged file may contain secrets.
-- If you accidentally see a secret in code, immediately flag it and recommend
-  rotation.
+- NEVER put API keys, passwords, tokens, certs, or connection strings in code,
+  comments, prompts, commits, or plan files. Use env vars or vaults.
+- Flag secret-pattern files: `.env`, `credentials.json`, `*_key.*`, `*.pem`,
+  `*.p12`, `secrets.*`, `*token*`. Warn before committing; recommend rotation.
 
 ## Code Security
 
-- Flag security-sensitive changes: authentication flows, cryptographic
-  operations, network calls, database queries, file system access,
-  permission/role changes.
-- Call out OWASP Top 10 risks when spotted — especially injection, broken auth,
-  sensitive data exposure, and security misconfiguration.
-- NEVER introduce `eval()`, `exec()`, `Function()`, dynamic SQL, or shell
-  injection vectors without explicit user approval.
-- Sanitize all user inputs at system boundaries — never trust external data.
-- Use parameterized queries for all database operations.
-- Prefer allowlists over denylists for input validation.
+- Flag security-sensitive changes: auth, crypto, network, DB queries, file
+  system, permission changes.
+- NEVER introduce `eval()`, `exec()`, dynamic SQL, or shell injection without
+  explicit approval. Sanitize inputs at boundaries. Use parameterized queries.
 
 ## Data Privacy
 
-- NEVER include Personally Identifiable Information (PII) or other sensitive
-  personal data in code, logs, comments, AI prompts, or plan files.
-- Flag code that logs, stores, or transmits user data without explicit consent
-  mechanisms.
-- Warn when error messages or stack traces might expose sensitive information.
-- Recommend data minimization — only collect and process what's necessary.
+- NEVER include PII in code, logs, comments, AI prompts, or plan files.
+- Flag code transmitting user data without consent; warn on info-leaking errors.

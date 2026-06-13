@@ -8,7 +8,8 @@
 
 - Assume all CLI tools are available on PATH; never use `.venv` paths to invoke
   them.
-- Never install packages or add dependencies without being explicitly asked.
+- Never install software or packages — not even when asked. Surface the command
+  or koopa app name; the user installs.
 - Never override or ignore configuration in `pyproject.toml`.
 
 ## Linting & Type Checking

@@ -61,6 +61,16 @@
     }
   },
   "model": "opusplan",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh" }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(*)",

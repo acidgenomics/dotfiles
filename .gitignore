@@ -1,7 +1,5 @@
 .install/
 .koopa*
-etc/iterm/dracula-pro.itermcolors
-etc/terminal/dracula-pro.terminal
 etc/vscode/*/node_modules/
 etc/vscode/*/out/
 etc/vscode/*/package-lock.json

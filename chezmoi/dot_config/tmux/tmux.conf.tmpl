@@ -150,14 +150,17 @@ set-option -g status-right-length 200
 # when set via SSH SendEnv) and falls back to reading the cache file directly
 # (set by shell activation). Mode 2031 hooks handle live switching thereafter.
 
+{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") -}}
 %hidden colors_dir="~/.config/tmux/colors"
 %hidden color_cache="~/.cache/koopa/color-mode"
+%hidden dark_conf="${colors_dir}/{{ if $dpProInstalled }}dracula-pro{{ else }}dark{{ end }}.conf"
+%hidden light_conf="${colors_dir}/{{ if $dpProInstalled }}dracula-pro-alucard{{ else }}light{{ end }}.conf"
 if-shell -b \
     '[ "${KOOPA_COLOR_MODE:-$(cat "${HOME}/.cache/koopa/color-mode" 2>/dev/null)}" = "light" ]' \
     "set-environment -g KOOPA_COLOR_MODE light ; \
-     source-file \"${colors_dir}/light.conf\"" \
+     source-file \"${light_conf}\"" \
     "set-environment -g KOOPA_COLOR_MODE dark ; \
-     source-file \"${colors_dir}/dark.conf\""
+     source-file \"${dark_conf}\""
 
 # Manual color-mode refresh (tmux < 3.6 fallback, prefix+M-r).
 # Reads the cache file and pushes the correct mode into the global env + reloads
@@ -166,9 +169,9 @@ if-shell -b \
 bind M-r if-shell \
     '[ "$(cat ~/.cache/koopa/color-mode 2>/dev/null)" = "light" ]' \
     "set-environment -g KOOPA_COLOR_MODE light ; \
-     source-file \"${colors_dir}/light.conf\"" \
+     source-file \"${light_conf}\"" \
     "set-environment -g KOOPA_COLOR_MODE dark ; \
-     source-file \"${colors_dir}/dark.conf\""
+     source-file \"${dark_conf}\""
 
 # Mode 2031: real-time dark/light theme tracking (tmux 3.6+).
 # The outer terminal (Ghostty, Kitty, etc.) pushes theme change notifications
@@ -179,12 +182,12 @@ set-hook -g client-dark-theme \
     "set-environment -g KOOPA_COLOR_MODE dark ; \
      set-environment KOOPA_COLOR_MODE dark ; \
      run-shell 'printf dark > \${HOME}/.cache/koopa/color-mode' ; \
-     source-file \"${colors_dir}/dark.conf\""
+     source-file \"${dark_conf}\""
 set-hook -g client-light-theme \
     "set-environment -g KOOPA_COLOR_MODE light ; \
      set-environment KOOPA_COLOR_MODE light ; \
      run-shell 'printf light > \${HOME}/.cache/koopa/color-mode' ; \
-     source-file \"${colors_dir}/light.conf\""
+     source-file \"${light_conf}\""
 %endif
 
 # Mouse mode

@@ -1,6 +1,6 @@
 # Nushell Environment Config File
 #
-# version = 0.78.0
+# version = "0.113.1"
 
 def create_left_prompt [] {
     mut home = ""
@@ -13,7 +13,7 @@ def create_left_prompt [] {
     }
 
     let dir = ([
-        ($env.PWD | str substring 0..($home | str length) | str replace -s $home "~"),
+        ($env.PWD | str substring 0..<($home | str length) | str replace $home "~"),
         ($env.PWD | str substring ($home | str length)..)
     ] | str join)
 
@@ -28,28 +28,28 @@ def create_left_prompt [] {
 
 def create_right_prompt [] {
     let time_segment = ([
-        (date now | date format '%m/%d/%Y %r')
+        (date now | format date '%m/%d/%Y %r')
     ] | str join)
 
     $time_segment
 }
 
 # Use nushell functions to define your right and left prompt
-let-env PROMPT_COMMAND = {|| create_left_prompt }
-let-env PROMPT_COMMAND_RIGHT = {|| create_right_prompt }
+$env.PROMPT_COMMAND = {|| create_left_prompt }
+$env.PROMPT_COMMAND_RIGHT = {|| create_right_prompt }
 
 # The prompt indicators are environmental variables that represent
 # the state of the prompt
-let-env PROMPT_INDICATOR = {|| "> " }
-let-env PROMPT_INDICATOR_VI_INSERT = {|| ": " }
-let-env PROMPT_INDICATOR_VI_NORMAL = {|| "> " }
-let-env PROMPT_MULTILINE_INDICATOR = {|| "::: " }
+$env.PROMPT_INDICATOR = {|| "> " }
+$env.PROMPT_INDICATOR_VI_INSERT = {|| ": " }
+$env.PROMPT_INDICATOR_VI_NORMAL = {|| "> " }
+$env.PROMPT_MULTILINE_INDICATOR = {|| "::: " }
 
 # Specifies how environment variables are:
 # - converted from a string to a value on Nushell startup (from_string)
 # - converted from a value back to a string when running external commands (to_string)
 # Note: The conversions happen *after* config.nu is loaded
-let-env ENV_CONVERSIONS = {
+$env.ENV_CONVERSIONS = {
   "PATH": {
     from_string: { |s| $s | split row (char esep) | path expand -n }
     to_string: { |v| $v | path expand -n | str join (char esep) }
@@ -63,23 +63,40 @@ let-env ENV_CONVERSIONS = {
 # Directories to search for scripts when calling source or use
 #
 # By default, <nushell-config-dir>/scripts is added
-let-env NU_LIB_DIRS = [
+$env.NU_LIB_DIRS = [
     ($nu.config-path | path dirname | path join 'scripts')
 ]
 
 # Directories to search for plugin binaries when calling register
 #
 # By default, <nushell-config-dir>/plugins is added
-let-env NU_PLUGIN_DIRS = [
+$env.NU_PLUGIN_DIRS = [
     ($nu.config-path | path dirname | path join 'plugins')
 ]
 
 # To add entries to PATH (on Windows you might use Path), you can use the following pattern:
-# let-env PATH = ($env.PATH | split row (char esep) | prepend '/some/path')
+# $env.PATH = ($env.PATH | split row (char esep) | prepend '/some/path')
 
 # Koopa activation: set KOOPA_PREFIX for activate.nu.
-$env.KOOPA_PREFIX = if ($env | get -i XDG_DATA_HOME | is-empty) {
+$env.KOOPA_PREFIX = if ($env.XDG_DATA_HOME? | default "" | is-empty) {
     $"($env.HOME)/.local/share/koopa"
 } else {
     $"($env.XDG_DATA_HOME)/koopa"
+}
+
+# Koopa: ensure cached prompt-tool init exists for parse-time `source` in config.nu.
+# Sourcing is deferred to config.nu (nushell evaluates env.nu first, then parses config.nu).
+# The mtime-guarded _koopa_activate_starship/_koopa_activate_zoxide in header.nu keep
+# the caches fresh on binary upgrade; this block only guarantees they exist on first run.
+let _koopa_cache = $"($env.HOME)/.cache/koopa"
+for _t in [
+    { bin: "starship", args: ["init", "nu"] }
+    { bin: "zoxide",   args: ["init", "nushell"] }
+] {
+    let _out = $"($_koopa_cache)/($_t.bin).nu"
+    if not ($_out | path exists) {
+        mkdir $_koopa_cache
+        let _bin = $"($env.KOOPA_PREFIX)/bin/($_t.bin)"
+        if ($_bin | path exists) { ^$_bin ...$_t.args | save -f $_out } else { "" | save -f $_out }
+    }
 }

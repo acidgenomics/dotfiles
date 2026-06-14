@@ -172,6 +172,12 @@ This config spans two chezmoi trees. The public koopa tree cedes ownership of
 - Work-specific rules, hooks, and settings stay in the work tree. Nothing work-specific
   ever enters koopa.
 
+## See also
+
+- `claude-permissions` — protected paths, permission modes, allow/ask/deny
+  precedence, PreToolUse `permissionDecision` contract, and the carve-out hook
+  for `.claude/` writes. Use when debugging unexpected permission prompts.
+
 ## What Belongs in This Project's Setup
 
 This user's configuration lives in chezmoi at:

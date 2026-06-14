@@ -1,8 +1,9 @@
 ---
 name: koopa-theming
 description: >
-  Reference for koopa theme synthesis across editors and terminals — JetBrains/
-  IntelliJ scheme delivery, runtime palette derivation, atuin and mcfly color
+  Reference for koopa theme synthesis across editors and terminals — Dracula Pro
+  runtime pipeline, fish color architecture (fish_frozen_theme.fish override, _FISH_COLOR_ROLES
+  generator, live sync hook), JetBrains/IntelliJ scheme delivery, atuin and mcfly color
   config, and macOS sandboxed-app theme installation. Use when generating or fixing
   editor/terminal color schemes, debugging a theme that renders incorrectly, or
   writing theme-install code. For the "never hardcode Pro hex" guardrail see the
@@ -42,6 +43,102 @@ purple = "#bd93f9"
 grep -iE '<THE_HEX>' ~/.local/share/dracula-pro/themes/ghostty/pro
 ```
 If it matches, the code must read it at runtime.
+
+## Fish Color Pipeline
+
+### Architecture
+
+Fish colors are set via the **generated palette file**, sourced by `conf.d/koopa.fish`
+at startup and on live dark↔light flips:
+
+```
+_generate_fish_dracula_pro_palette()   ←  dotfiles install script
+        │
+        ▼
+~/.config/fish/dracula-pro-colors.fish         (dark)
+~/.config/fish/dracula-pro-alucard-colors.fish (light)
+        │
+        ▼  sourced by conf.d/koopa.fish (k > f, loads after fish_frozen_theme.fish)
+fish_color_* globals override the frozen One Light theme
+```
+
+The generator (`_generate_fish_dracula_pro_palette` in `app/dotfiles/2937f77/install`)
+uses `_FISH_COLOR_ROLES` (a module-level table adjacent to `_ZSH_HIGHLIGHT_ROLES`) to
+loop over role→variable pairs and emit `set -g fish_color_*` lines, followed by
+`set -gx FZF_DEFAULT_OPTS`. Colors are runtime-derived from `_parse_ghostty_palette` —
+no Pro hex literals in tracked files.
+
+### fish_frozen_theme.fish — the One Light override problem
+
+Fish 4.3 auto-generates `~/.config/fish/conf.d/fish_frozen_theme.fish` when upgrading,
+migrating theme vars from universal to global scope. This file:
+- Is fish-owned; header says "Don't edit this file."
+- Sets the full One Light palette (`A0A1A7` autosuggestion, `383A42` normal, etc.) as
+  `set --global` on every startup.
+- Loads *before* `koopa.fish` alphabetically — so `koopa.fish`'s globals win.
+
+Never edit or delete `fish_frozen_theme.fish` — the fix is always to override via a
+conf.d file that loads later (alphabetically after `f`).
+
+### Alucard quirk: ANSI 8 = white
+
+In the Dracula Pro Alucard palette, ANSI 8 (the `comment` role from
+`_parse_ghostty_palette`) is white — invisible on the light background. The fish
+generator handles this:
+
+```python
+dim = p["cursor"] if variant == "alucard" else p["comment"]
+```
+
+This substitutes the cursor color (a legible mid-purple, runtime-derived) as the
+dim/comment tone for alucard, mirroring the existing alucard bg override in
+`_fzf_color_opts`. The `#8787af` autosuggestion color is a fixed xterm-256 index-103
+value (allowlist-safe generic, absent from both Pro/Alucard ghostty palettes) that reads
+well on both backgrounds, so it bypasses both `comment` and `cursor`.
+
+### Live color-mode sync
+
+`lang/fish/functions/activate/activate-color-mode-sync.fish` fires on `fish_postexec`.
+After re-running fzf/difftastic/dircolors, it re-sources the appropriate palette file:
+
+```fish
+set -l _palette
+if test "$new_mode" = light
+    set _palette (test -n "$XDG_CONFIG_HOME" && echo "$XDG_CONFIG_HOME" || echo "$HOME/.config")/fish/dracula-pro-alucard-colors.fish
+else
+    set _palette (test -n "$XDG_CONFIG_HOME" && echo "$XDG_CONFIG_HOME" || echo "$HOME/.config")/fish/dracula-pro-colors.fish
+end
+test -f "$_palette"; and source "$_palette"
+```
+
+This refreshes `fish_color_*` and `FZF_DEFAULT_OPTS` live without a shell restart,
+mirroring zsh's hook in `lang/zsh/include/functions.sh`.
+
+### Fallback (no Dracula Pro installed)
+
+`conf.d/koopa.fish.tmpl` has an `else` branch (when the generated palette file is absent)
+that sets a compact free-Dracula OSS `fish_color_*` set using only allowlisted literals.
+The dark arm covers the high-visibility roles (normal/command/autosuggestion/comment/
+error/quote/selection etc.).
+
+### Proprietary hex audit command
+
+Run after any change to the fish pipeline. **Comments count** — do not name proprietary
+hex values in comments even when the code itself is runtime-derived. The audit pattern
+is derived at runtime from the installed palette — never hardcode the hex here.
+
+```sh
+cd ~/.local/share/koopa
+dp="${XDG_DATA_HOME:-$HOME/.local/share}/dracula-pro/themes/ghostty"
+# Free Dracula OSS + generic neutrals that legitimately appear as literals.
+allow='F8F8F2|F5F5F5|FFFFFF|1F1F1F|000000|FAFAFA'
+PAT=$(find "$dp" -type f ! -name '*.md' -exec grep -hoiE '#[0-9a-f]{6}' {} + \
+  | tr -d '#' | tr 'a-f' 'A-F' | sort -u | grep -ivxE "$allow" | paste -sd'|' -)
+git grep -inE "$PAT" -- . ':(exclude)app/dotfiles'
+( cd app/dotfiles/2937f77 && git grep -inE "$PAT" )
+```
+
+Both should return empty. (Requires Dracula Pro installed at `$dp`; empty `PAT` if absent.)
 
 ## JetBrains Editor Scheme Synthesis
 

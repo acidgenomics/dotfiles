@@ -1,3 +1,4 @@
+{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") -}}
 [bell]
 duration = 0
 
@@ -38,7 +39,7 @@ x = 0
 y = 0
 
 [general]
-import = ["~/.config/alacritty/colors-{{ env "KOOPA_COLOR_MODE" }}.toml"]
+import = ["~/.config/alacritty/themes/{{ if eq (env "KOOPA_COLOR_MODE") "dark" }}{{ if $dpProInstalled }}dracula-pro{{ else }}dracula{{ end }}{{ else if $dpProInstalled }}dracula-pro-alucard{{ else }}one-light{{ end }}.toml"]
 live_config_reload = true
 
 [[hints.enabled]]

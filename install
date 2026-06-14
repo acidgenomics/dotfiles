@@ -703,7 +703,10 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
             dest = os.path.join(ghostty_themes, dest_name)
             if os.path.isfile(src):
                 ln(src, dest)
-    # Alacritty: symlink selected dark variant and alucard light variant.
+    # Alacritty: symlink Pro/Alucard variants to chezmoi-UNMANAGED sidecar names.
+    # alacritty.toml.tmpl selects these at render time when Pro is installed; the
+    # chezmoi-managed themes/dracula.toml / themes/one-light.toml (OSS) are left
+    # untouched so chezmoi converges (no dual ownership -> no perpetual MM loop).
     alacritty_themes = os.path.join(home, ".config", "alacritty", "themes")
     alacritty_src_dir = os.path.join(dp_dir, "themes", "alacritty", "themes")
     if os.path.isdir(alacritty_themes) and os.path.isdir(alacritty_src_dir):
@@ -714,10 +717,10 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
         )
         dark_src = os.path.join(alacritty_src_dir, variant_file)
         if os.path.isfile(dark_src):
-            ln(dark_src, os.path.join(alacritty_themes, "dracula.toml"))
+            ln(dark_src, os.path.join(alacritty_themes, "dracula-pro.toml"))
         alucard_src = os.path.join(alacritty_src_dir, "dracula-pro-alucard.toml")
         if os.path.isfile(alucard_src):
-            ln(alucard_src, os.path.join(alacritty_themes, "one-light.toml"))
+            ln(alucard_src, os.path.join(alacritty_themes, "dracula-pro-alucard.toml"))
     # Emacs/Doom: symlink all variant .el files into ~/.config/doom/themes/.
     doom_themes = os.path.join(home, ".config", "doom", "themes")
     emacs_src = os.path.join(dp_dir, "themes", "emacs")
@@ -879,16 +882,21 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                     os.path.join(raycast_src, f),
                     os.path.join(raycast_staging, f),
                 )
-    # Tmux: generate Pro dark.conf and Alucard light.conf, override chezmoi files.
+    # Tmux: generate Pro/Alucard palettes to chezmoi-UNMANAGED sidecar names.
+    # tmux.conf.tmpl selects these at render time when Pro is installed; the
+    # chezmoi-managed dark.conf/light.conf (OSS) are left untouched so chezmoi
+    # converges (no dual ownership -> no perpetual MM loop).
     tmux_colors = os.path.join(home, ".config", "tmux", "colors")
     if os.path.isdir(tmux_colors):
         pro_conf = _generate_tmux_dracula_pro_conf(dp_dir, variant)
         if pro_conf:
-            with open(os.path.join(tmux_colors, "dark.conf"), "w") as fh:
+            with open(os.path.join(tmux_colors, "dracula-pro.conf"), "w") as fh:
                 fh.write(pro_conf)
         alucard_conf = _generate_tmux_alucard_conf(dp_dir)
         if alucard_conf:
-            with open(os.path.join(tmux_colors, "light.conf"), "w") as fh:
+            with open(
+                os.path.join(tmux_colors, "dracula-pro-alucard.conf"), "w"
+            ) as fh:
                 fh.write(alucard_conf)
     # Zsh: generate palette files sourced at runtime by .zshrc.
     zsh_config = os.path.join(home, ".config", "zsh")
@@ -903,6 +911,21 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(zsh_config, "dracula-pro-alucard-colors.zsh"), "w"
             ) as fh:
                 fh.write(alucard_palette)
+    # Fish: generate fzf palette files sourced at runtime by conf.d/koopa.fish.
+    fish_config = os.path.join(home, ".config", "fish")
+    if os.path.isdir(fish_config):
+        fish_palette = _generate_fish_dracula_pro_palette(dp_dir, variant)
+        if fish_palette:
+            with open(
+                os.path.join(fish_config, "dracula-pro-colors.fish"), "w"
+            ) as fh:
+                fh.write(fish_palette)
+        fish_alucard_palette = _generate_fish_dracula_pro_palette(dp_dir, "alucard")
+        if fish_alucard_palette:
+            with open(
+                os.path.join(fish_config, "dracula-pro-alucard-colors.fish"), "w"
+            ) as fh:
+                fh.write(fish_alucard_palette)
     # Kitty: generate Dracula Pro theme conf files for selected variant and Alucard.
     kitty_themes = os.path.join(home, ".config", "kitty", "themes")
     if os.path.isdir(kitty_themes):
@@ -1324,6 +1347,90 @@ _ZSH_HIGHLIGHT_ROLES = [
 ]
 
 
+_FISH_COLOR_ROLES = [
+    ("fish_color_normal",                    "foreground"),
+    ("fish_color_command",                   "green"),
+    ("fish_color_keyword",                   "cyan"),
+    ("fish_color_quote",                     "yellow"),
+    ("fish_color_redirection",               "magenta"),
+    ("fish_color_end",                       "magenta"),
+    ("fish_color_error",                     "red"),
+    ("fish_color_param",                     "foreground"),
+    ("fish_color_option",                    "foreground"),
+    ("fish_color_comment",                   "dim"),
+    ("fish_color_selection",                 "selection_bg"),
+    ("fish_color_operator",                  "magenta"),
+    ("fish_color_escape",                    "cyan"),
+    ("fish_color_autosuggestion",            "autosuggest"),
+    ("fish_color_cwd",                       "green"),
+    ("fish_color_cwd_root",                  "red"),
+    ("fish_color_user",                      "cyan"),
+    ("fish_color_host",                      "foreground"),
+    ("fish_color_host_remote",               "yellow"),
+    ("fish_color_cancel",                    "red"),
+    ("fish_color_search_match",              "selection_bg"),
+    ("fish_color_valid_path",                "underline"),
+    ("fish_pager_color_progress",            "dim"),
+    ("fish_pager_color_prefix",              "cyan_bold"),
+    ("fish_pager_color_completion",          "foreground"),
+    ("fish_pager_color_description",         "yellow"),
+    ("fish_pager_color_selected_background", "selection_bg"),
+]
+
+
+def _fzf_color_opts(p: dict[str, str], variant: str) -> str:
+    """Build the fzf --color option string from a parsed palette.
+
+    Shared by the zsh and fish palette generators so the color math
+    (notably the alucard light-bg override) lives in exactly one place.
+    """
+    fg = p["foreground"]
+    bg = "#fafafa" if variant == "alucard" else p["black"]
+    hl = p["blue"]
+    sel_bg = p["selection_bg"]
+    return (
+        f"--color=fg:{fg},bg:{bg},hl:{hl} "
+        f"--color=fg+:{fg},bg+:{sel_bg},hl+:{hl} "
+        f"--color=info:{p['yellow']},prompt:{p['green']},pointer:{p['magenta']} "
+        f"--color=marker:{p['magenta']},spinner:{p['yellow']},header:{p['comment']}"
+    )
+
+
+def _generate_fish_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
+    """Generate ~/.config/fish/dracula-pro-colors.fish from local Dracula Pro source.
+
+    Emits a full set of fish_color_* variables (sourced by conf.d/koopa.fish at
+    startup and on dark<->light flips) followed by FZF_DEFAULT_OPTS.
+    """
+    p = _parse_ghostty_palette(dp_dir, variant)
+    if not p:
+        return None
+    # In alucard, ANSI 8 is white, invisible on the light bg; use the cursor
+    # color (runtime-derived) as the dim/comment tone for that variant.
+    dim = p["cursor"] if variant == "alucard" else p["comment"]
+    lines = [
+        f"# Dracula Pro fish palette ({variant}).",
+        "# Auto-generated by koopa dotfiles install from local Dracula Pro source.",
+    ]
+    for var, role in _FISH_COLOR_ROLES:
+        if role == "autosuggest":
+            # Match zsh's ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=103' (xterm-256
+            # index 103 = #8787af). Not a Pro hex; allowlist-safe generic neutral.
+            lines.append(f"set -g {var} #8787af")
+        elif role == "dim":
+            lines.append(f"set -g {var} {dim}")
+        elif role == "selection_bg":
+            lines.append(f"set -g {var} --background={p['selection_bg']}")
+        elif role == "underline":
+            lines.append(f"set -g {var} --underline")
+        elif role == "cyan_bold":
+            lines.append(f"set -g {var} --bold {p['cyan']}")
+        else:
+            lines.append(f"set -g {var} {p[role]}")
+    lines.append(f"set -gx FZF_DEFAULT_OPTS '{_fzf_color_opts(p, variant)}'")
+    return "\n".join(lines) + "\n"
+
+
 def _generate_zsh_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
     """Generate ~/.config/zsh/dracula-pro-colors.zsh from local Dracula Pro source."""
     p = _parse_ghostty_palette(dp_dir, variant)
@@ -1369,17 +1476,7 @@ def _generate_zsh_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
         else:
             hex_val = color_map.get(color_key, p.get(color_key, "#F8F8F2"))
             lines.append(f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={hex_val}'")
-    fg = p["foreground"]
-    bg = "#fafafa" if variant == "alucard" else p["black"]
-    hl = p["blue"]
-    sel_bg = p["selection_bg"]
-    lines.append(
-        f"export FZF_DEFAULT_OPTS='"
-        f"--color=fg:{fg},bg:{bg},hl:{hl} "
-        f"--color=fg+:{fg},bg+:{sel_bg},hl+:{hl} "
-        f"--color=info:{p['yellow']},prompt:{p['green']},pointer:{p['magenta']} "
-        f"--color=marker:{p['magenta']},spinner:{p['yellow']},header:{p['comment']}'"
-    )
+    lines.append(f"export FZF_DEFAULT_OPTS='{_fzf_color_opts(p, variant)}'")
     return "\n".join(lines) + "\n"
 
 

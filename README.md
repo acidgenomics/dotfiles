@@ -78,6 +78,10 @@ Atom One Light / OneHalfLight (light).
 - [Dracula Pro][]
 - [chezmoi documentation][chezmoi]
 
+## License
+
+Apache-2.0 — Copyright 2016 Acid Genomics LLC — see [LICENSE](LICENSE).
+
 [acid genomics]: https://acidgenomics.com/
 [chezmoi]: https://www.chezmoi.io/
 [dracula]: https://draculatheme.com/

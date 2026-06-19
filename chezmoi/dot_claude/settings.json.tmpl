@@ -15,6 +15,7 @@
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "DISABLE_AUTOUPDATER": "1",
 {{- if stat (joinPath $dataHome "ca-certificates" "cacert.pem") }}
     "AWS_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
     "CURL_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
@@ -31,7 +32,7 @@
   },
   "extensions": {
     "anthropic.claude-code": {
-      "autoUpdate": true
+      "autoUpdate": false
     }
   },
   "extraKnownMarketplaces": {

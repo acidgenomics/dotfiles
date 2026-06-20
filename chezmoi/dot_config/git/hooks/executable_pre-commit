@@ -1,0 +1,59 @@
+#!/bin/sh
+# Global pre-commit guard: block restricted identifiers from reaching
+# non-allowlisted destinations (public repos, vendor platforms, partner TREs,
+# external-company repos).
+#
+# Token lists are read from private git config so this public file stays
+# token-free. No-op on any machine where the config keys are unset.
+#
+#   koopa.restrictedTokens          checked in staged file paths AND content
+#   koopa.restrictedTokensContentOnly  checked in staged content ONLY
+#     (use for identifiers that appear in every local absolute path and
+#      would false-positive on filename matching)
+#
+# Mirrors the identity guard in pre-push: exits 0 immediately when the
+# config keys are absent, and defers for allowlisted corporate remotes.
+
+tokens=$(git config --get-all koopa.restrictedTokens 2>/dev/null || true)
+tokens_co=$(git config --get-all koopa.restrictedTokensContentOnly 2>/dev/null || true)
+[ -n "$tokens" ] || [ -n "$tokens_co" ] || exit 0
+
+# Defer for allowlisted (corporate) remotes — tokens are legitimate there.
+origin=$(git remote get-url origin 2>/dev/null || true)
+for a in $(git config --get-all koopa.corpRemoteAllowlist 2>/dev/null || true); do
+    case "$origin" in *"$a"*) exit 0 ;; esac
+done
+
+# Word-boundary wrappers (mirrors guard-public-leak.sh _wb_match).
+wbpre='(^|[^[:alnum:]_])('
+wbsuf=')([^[:alnum:]_]|$)'
+
+fail=0
+
+# 1. Staged file paths — restrictedTokens only.
+if [ -n "$tokens" ]; then
+    pat=$(printf '%s' "$tokens" | tr '\n' '|' | sed 's/|$//')
+    git diff --cached --name-only \
+        | grep -qiE "${wbpre}${pat}${wbsuf}" && fail=1
+fi
+
+# 2. Added content lines — both token lists combined.
+if [ "$fail" = 0 ]; then
+    allpat=''
+    [ -n "$tokens" ]    && allpat="${tokens}"
+    [ -n "$tokens_co" ] && allpat="${allpat}${allpat:+$'\n'}${tokens_co}"
+    if [ -n "$allpat" ]; then
+        pat=$(printf '%s' "$allpat" | tr '\n' '|' | sed 's/|$//')
+        added=$(git diff --cached --unified=0 --no-color \
+                | grep '^+' | grep -v '^+++')
+        printf '%s\n' "$added" \
+            | grep -qiE "${wbpre}${pat}${wbsuf}" && fail=1
+    fi
+fi
+
+[ "$fail" = 0 ] && exit 0
+printf '%s\n' \
+    'ERROR (koopa pre-commit guard): staged change embeds a restricted identifier.' \
+    '  Move work-specific content to the private work tree.' \
+    "  Bypass with: git commit --no-verify  (false positives only)" >&2
+exit 1

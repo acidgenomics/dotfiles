@@ -1,6 +1,11 @@
 {{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
 {
   "alwaysThinkingEnabled": true,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "autoMemoryEnabled": false,
   "autoUpdatesChannel": "latest",
   "effortLevel": "xhigh",

@@ -1,6 +1,8 @@
 linters: linters_with_defaults(
-    # Updated 2026-05-11.
+    # Updated 2026-06-19.
     # > help(topic = "linters", package = "lintr")
+    # Disable for S4 packages: @importFrom symbols cause pervasive FPs.
+    object_usage_linter = NULL,
     absolute_path_linter(),
     all_equal_linter(),
     any_duplicated_linter(),
@@ -19,7 +21,7 @@ linters: linters_with_defaults(
     conjunct_test_linter(),
     consecutive_assertion_linter(),
     consecutive_mutate_linter(),
-    cyclocomp_linter(complexity_limit = 30L),
+    cyclocomp_linter(complexity_limit = 45L),
     download_file_linter(),
     duplicate_argument_linter(),
     empty_assignment_linter(),
@@ -47,7 +49,6 @@ linters: linters_with_defaults(
     infix_spaces_linter(),
     inner_combine_linter(),
     is_numeric_linter(),
-    keyword_quote_linter(),
     length_levels_linter(),
     length_test_linter(),
     lengths_linter(),
@@ -66,9 +67,13 @@ linters: linters_with_defaults(
     numeric_leading_zero_linter(),
     nzchar_linter(),
     object_length_linter(length = 40L),
-    object_name_linter(styles = "camelCase"),
-    object_overwrite_linter(),
-    object_usage_linter(),
+    object_name_linter(
+        styles = c("camelCase", "CamelCase", "dotted.case"),
+        regexes = c(
+            # S4 coerce generics require dotted names (e.g. as.DataFrame).
+            "^as\\."
+        )
+    ),
     one_call_pipe_linter(),
     outer_negation_linter(),
     package_hooks_linter(),

@@ -2,4 +2,4 @@
 
 # Source work-specific profile overrides if present.
 # shellcheck source=/dev/null
-[ -f "${HOME}/.zprofile-work" ] && . "${HOME}/.zprofile-work"
+[ -f "${ZDOTDIR}/.zprofile-work" ] && . "${ZDOTDIR}/.zprofile-work"

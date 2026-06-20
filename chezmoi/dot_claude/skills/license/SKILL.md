@@ -5,18 +5,32 @@ Applies to all repos under `~/git/personal/` and `~/.local/share/koopa/`.
 ## How GitHub detects licenses
 
 GitHub uses the Ruby `licensee` gem. It normalizes the LICENSE file body
-(strips markdown, collapses whitespace) and computes similarity against SPDX
-canonical texts. Detection requires ≥98% match — any abridged or altered text
-drops below the threshold and the repo shows `NOASSERTION` in the sidebar.
+(strips markdown, collapses whitespace, normalizes quote characters) and
+computes similarity against SPDX canonical texts. Detection requires ≥98% match
+— any abridged or *substantively* altered text drops below the threshold and the
+repo shows `NOASSERTION` in the sidebar.
 
-**Content is what matters, not filename.** `LICENSE`, `LICENSE.md`, `LICENSE.txt`
-are all recognized equally. Format (plain text vs markdown) is stripped during
-matching.
+**Content is what matters, not filename or cosmetics.** `LICENSE`, `LICENSE.md`,
+`LICENSE.txt` are all recognized equally. The normalizer makes these invisible
+to detection:
 
-Verify detection status:
+- format (plain text vs markdown headings/emphasis)
+- straight `"` vs curly `“”` quotes
+- trailing whitespace / extra blank lines
+
+So only *wording* changes (missing clauses, swapped words) break detection.
+
+Verify detection status — this is the ground truth, not the rendered sidebar:
 ```sh
 gh api repos/acidgenomics/<repo> --jq '.license.spdx_id'
 # Apache-2.0 = detected; NOASSERTION = not detected
+```
+
+Detection runs only on the repo's **default branch**. Pushing the fix to a
+non-default branch (e.g. koopa's `develop`) leaves the sidebar unchanged — the
+canonical `LICENSE` must reach `main`:
+```sh
+gh api repos/acidgenomics/<repo> --jq '.default_branch'
 ```
 
 ## Canonical sources by repo type
@@ -75,9 +89,19 @@ lines, 10805 bytes). Key missing/altered content vs canonical:
 - Several §4 redistribution clauses were abridged.
 
 The R `LICENSE.md` files used the markdown-reflowed usethis format, which has
-canonical text. So R packages were detected (`Apache-2.0`) while everything
-else was not (`NOASSERTION`). Fixed 2026-06-20 by replacing all files with
-their respective canonical sources above.
+canonical text. So **R packages were already detected** (`Apache-2.0`) while
+everything else was not (`NOASSERTION`).
+
+Fixed 2026-06-20:
+
+- **9 plaintext repos (real fix):** koopa, dotfiles, all 7 `py-*` — replaced the
+  abridged `LICENSE` with `gh api /licenses/apache-2.0`. This is what flips
+  `NOASSERTION` → `Apache-2.0`.
+- **24 R repos (cosmetic only):** re-copied the installed usethis template into
+  `LICENSE.md`. The sole diff was straight-quote → curly-quote typography, which
+  licensee normalizes away — detection was already correct, so this commit is
+  optional consistency, not a fix. Do not mistake an R `LICENSE.md` working-tree
+  diff for a compliance problem; `grep -c consequential` was already 1.
 
 ## Scope of repos affected
 

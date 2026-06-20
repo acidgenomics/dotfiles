@@ -66,7 +66,8 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh" }
+          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh" },
+          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-broad-scan.sh" }
         ]
       }
     ]

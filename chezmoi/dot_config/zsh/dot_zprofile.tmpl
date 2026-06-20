@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+{{- if eq .chezmoi.os "darwin" }}
+
+# Source machine-local / work-specific profile overrides if present.
+# shellcheck source=/dev/null
+[ -f "${HOME}/.zprofile.local" ] && . "${HOME}/.zprofile.local"
+{{- end }}

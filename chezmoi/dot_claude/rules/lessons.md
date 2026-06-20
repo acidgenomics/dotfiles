@@ -22,12 +22,3 @@ research. GitHub surfaces implementation details absent from web sources.
 Use `mktemp` (respects `$TMPDIR`). In Python: `tempfile.mkstemp()`. Delete immediately.
 
 > Git-history surgery: use the `git-history-surgery` skill.
-
-## Never Install Software
-
-Enforced by `guard-installs.sh` hook. Surface the command and stop.
-
-## Never Add Co-Authored-By Trailers
-
-Never add `Co-Authored-By:` lines to commit messages in any repo. The user
-does not want Claude attribution in git history or GitHub commit views.

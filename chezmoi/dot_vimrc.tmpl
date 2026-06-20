@@ -584,6 +584,7 @@ if !g:is_nvim
         if isdirectory(join([themes_home, 'dracula_pro'], '/'))
             packadd! dracula_pro
             colorscheme dracula_pro_alucard
+            let g:airline_theme='dracula_pro'
         elseif isdirectory(join([vim_plug_home, 'vim-one'], '/'))
             colorscheme one
             let g:airline_theme='one'
@@ -597,6 +598,7 @@ if !g:is_nvim
             else
                 execute 'colorscheme dracula_pro_' .. substitute(s:dracula_variant, '-', '_', 'g')
             endif
+            let g:airline_theme='dracula_pro'
         elseif isdirectory(join([vim_plug_home, 'dracula'], '/'))
             colorscheme dracula
         endif
@@ -613,6 +615,7 @@ if !g:is_nvim && has('macunix')
             set background=light
             if isdirectory(join([g:themes_home, 'dracula_pro'], '/'))
                 colorscheme dracula_pro_alucard
+                silent! AirlineTheme dracula_pro
             elseif isdirectory(join([g:vim_plug_home, 'vim-one'], '/'))
                 colorscheme one
             endif
@@ -625,6 +628,7 @@ if !g:is_nvim && has('macunix')
                 else
                     execute 'colorscheme dracula_pro_' .. substitute(s:v, '-', '_', 'g')
                 endif
+                silent! AirlineTheme dracula_pro
             elseif isdirectory(join([g:vim_plug_home, 'dracula'], '/'))
                 colorscheme dracula
             endif

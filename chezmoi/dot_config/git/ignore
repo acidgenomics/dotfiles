@@ -225,6 +225,7 @@ develop-eggs/
 dist/
 dmypy.json
 doc/
+docs/
 docs/_build/
 docs/build/
 docs/site/
@@ -302,6 +303,7 @@ sra/
 star-*/
 star/
 target/
+tests/testthat/_problems/
 tmp*/
 tmp/
 token.*

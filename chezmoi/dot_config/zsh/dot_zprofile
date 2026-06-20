@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+# Source work-specific profile overrides if present.
+# shellcheck source=/dev/null
+[ -f "${HOME}/.zprofile-work" ] && . "${HOME}/.zprofile-work"

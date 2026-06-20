@@ -1,6 +1,7 @@
 # Dotfiles
 
 ![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)
+![License: Apache-2.0](https://img.shields.io/github/license/acidgenomics/dotfiles)
 
 [Acid Genomics][] configuration files managed with [chezmoi][] via the [koopa][]
 shell framework.

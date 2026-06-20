@@ -150,7 +150,7 @@ set-option -g status-right-length 200
 # when set via SSH SendEnv) and falls back to reading the cache file directly
 # (set by shell activation). Mode 2031 hooks handle live switching thereafter.
 
-{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") -}}
+{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") }}
 %hidden colors_dir="~/.config/tmux/colors"
 %hidden color_cache="~/.cache/koopa/color-mode"
 %hidden dark_conf="${colors_dir}/{{ if $dpProInstalled }}dracula-pro{{ else }}dark{{ end }}.conf"

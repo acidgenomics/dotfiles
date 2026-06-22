@@ -41,7 +41,9 @@ def _add_config_link(source: str, name: str) -> None:
     config_dir = os.path.join(xdg_config_home(), "koopa")
     mkdir(config_dir)
     dest = os.path.join(config_dir, name)
-    if os.path.islink(dest):
+    # Self-heal: no-op only if the link already resolves to the source.
+    # A broken or mis-targeted symlink (or a stale file/dir) is repaired below.
+    if os.path.islink(dest) and os.path.realpath(dest) == os.path.realpath(source):
         return
     ln(source, dest)
 
@@ -2022,7 +2024,7 @@ def main() -> None:
     stale_chezmoi_src = os.path.join(xdg_data, "chezmoi")
     if os.path.islink(stale_chezmoi_src):
         os.unlink(stale_chezmoi_src)
-    _add_config_link(prefix, "dotfiles")
+    _add_config_link(os.path.join(_KOOPA_PREFIX, "opt", "dotfiles"), "dotfiles")
     _configure_age(xdg_config)
     _configure_dracula_pro(home, xdg_data)
     _configure_koopa_color_mode_sync(home)

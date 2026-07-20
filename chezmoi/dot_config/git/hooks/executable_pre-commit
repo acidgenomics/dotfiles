@@ -20,7 +20,8 @@ tokens_co=$(git config --get-all koopa.restrictedTokensContentOnly 2>/dev/null |
 
 # Defer for allowlisted (corporate) remotes — tokens are legitimate there.
 origin=$(git remote get-url origin 2>/dev/null || true)
-for a in $(git config --get-all koopa.corpRemoteAllowlist 2>/dev/null || true); do
+for a in $(git config --get-all koopa.corpRemoteAllowlist 2>/dev/null || true)
+do
     case "$origin" in *"$a"*) exit 0 ;; esac
 done
 
@@ -31,18 +32,21 @@ wbsuf=')([^[:alnum:]_]|$)'
 fail=0
 
 # 1. Staged file paths — restrictedTokens only.
-if [ -n "$tokens" ]; then
+if [ -n "$tokens" ]
+then
     pat=$(printf '%s' "$tokens" | tr '\n' '|' | sed 's/|$//')
     git diff --cached --name-only \
         | grep -qiE "${wbpre}${pat}${wbsuf}" && fail=1
 fi
 
 # 2. Added content lines — both token lists combined.
-if [ "$fail" = 0 ]; then
+if [ "$fail" = 0 ]
+then
     allpat=''
     [ -n "$tokens" ]    && allpat="${tokens}"
     [ -n "$tokens_co" ] && allpat="${allpat}${allpat:+$'\n'}${tokens_co}"
-    if [ -n "$allpat" ]; then
+    if [ -n "$allpat" ]
+    then
         pat=$(printf '%s' "$allpat" | tr '\n' '|' | sed 's/|$//')
         added=$(git diff --cached --unified=0 --no-color \
                 | grep '^+' | grep -v '^+++')

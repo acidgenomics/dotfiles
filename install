@@ -2047,6 +2047,14 @@ def main() -> None:
         home, "Library", "LaunchAgents", "com.koopa.color-mode-schedule.plist"
     )
     _color_sched_is_new = _color_sched_has_dp and not os.path.isfile(_color_sched_plist)
+    _today_bucket_has_dir = is_macos() and (
+        os.path.isdir(os.path.join(home, "bucket"))
+        or os.path.isdir(os.path.join(home, "Documents", "bucket"))
+    )
+    _today_bucket_plist = os.path.join(
+        home, "Library", "LaunchAgents", "com.koopa.today-bucket.plist"
+    )
+    _today_bucket_is_new = _today_bucket_has_dir and not os.path.isfile(_today_bucket_plist)
     # Always derive color mode from the OS before rendering templates.
     # Never trust inherited env — stale KOOPA_COLOR_MODE from a long-running
     # caller would silently render the wrong palette.
@@ -2096,6 +2104,18 @@ def main() -> None:
                     "  Purpose: sets macOS appearance on a fixed daily schedule\n"
                     "           (dark before 9am, light 9am-5pm, dark after 5pm),\n"
                     "           in the machine's local timezone.\n"
+                    "  Note: macOS may show a notification that 'sh' is running\n"
+                    "        in the background. This is expected and safe."
+                )
+        if _today_bucket_has_dir:
+            _sync_launchd_agent(home, "com.koopa.today-bucket")
+            if _today_bucket_is_new:
+                print(
+                    "Installed launch agent: com.koopa.today-bucket\n"
+                    "  Location: ~/Library/LaunchAgents/"
+                    "com.koopa.today-bucket.plist\n"
+                    "  Purpose: keeps the ~/today dated symlink current at midnight\n"
+                    "           (and on wake from sleep) without needing a new shell.\n"
                     "  Note: macOS may show a notification that 'sh' is running\n"
                     "        in the background. This is expected and safe."
                 )

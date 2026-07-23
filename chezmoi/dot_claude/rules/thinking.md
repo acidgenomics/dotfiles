@@ -15,6 +15,12 @@ present both with tradeoffs — don't pick silently (skip for trivial tasks).
 Transform tasks into verifiable goals. State a brief plan with a verify step per
 item for multi-step work.
 
+## Prose Style
+
+Never use em-dashes (" — ") in any output: code, comments, tickets, documents,
+or chat. They read as AI-generated text. Use a colon, a comma, or restructure
+the sentence instead.
+
 ## When to Ask / Scope Default
 
 Ask when: two interpretations materially affect output; change is load-bearing or

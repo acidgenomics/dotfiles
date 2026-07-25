@@ -2129,65 +2129,6 @@ def main() -> None:
     zshrc_dest = os.path.join(home, ".zshrc")
     if not os.path.islink(zshrc_dest):
         ln(zshrc_src, zshrc_dest)
-    if is_macos():
-        app_support = os.path.join(home, "Library", "Application Support")
-        # VS Code.
-        code_dir = os.path.join(app_support, "Code", "User")
-        mkdir(code_dir)
-        for f in ("keybindings.json", "settings.json"):
-            dest = os.path.join(code_dir, f)
-            if not os.path.islink(dest):
-                ln(os.path.join(xdg_config, "Code", "User", f), dest)
-        # Cursor.
-        cursor_dir = os.path.join(app_support, "Cursor", "User")
-        if os.path.isdir(os.path.join(app_support, "Cursor")):
-            mkdir(cursor_dir)
-            cursor_dest = os.path.join(cursor_dir, "settings.json")
-            if not os.path.islink(cursor_dest):
-                ln(os.path.join(xdg_config, "Cursor", "User", "settings.json"), cursor_dest)
-        # Antigravity IDE. The app-support folder may be "Antigravity IDE" or
-        # "Antigravity" depending on the installed version; try both.
-        for ag_app_name in ("Antigravity IDE", "Antigravity"):
-            if os.path.isdir(os.path.join(app_support, ag_app_name)):
-                ag_dir = os.path.join(app_support, ag_app_name, "User")
-                mkdir(ag_dir)
-                for f in ("keybindings.json", "settings.json"):
-                    ag_dest = os.path.join(ag_dir, f)
-                    if not os.path.islink(ag_dest):
-                        ln(
-                            os.path.join(xdg_config, "Antigravity", "User", f),
-                            ag_dest,
-                        )
-                break
-        # Positron.
-        positron_dir = os.path.join(app_support, "Positron", "User")
-        mkdir(positron_dir)
-        positron_dest = os.path.join(positron_dir, "settings.json")
-        if not os.path.islink(positron_dest):
-            ln(
-                os.path.join(xdg_config, "Positron", "User", "settings.json"),
-                positron_dest,
-            )
-        # nushell.
-        nushell_dir = os.path.join(app_support, "nushell")
-        if os.path.islink(nushell_dir):
-            rm(nushell_dir)
-        mkdir(nushell_dir)
-        for f in ("config.nu", "env.nu"):
-            dest = os.path.join(nushell_dir, f)
-            if not os.path.islink(dest):
-                ln(os.path.join(xdg_config, "nushell", f), dest)
-        # ruff.
-        ruff_dir = os.path.join(app_support, "ruff")
-        if os.path.islink(ruff_dir):
-            rm(ruff_dir)
-        mkdir(ruff_dir)
-        ruff_dest = os.path.join(ruff_dir, "pyproject.toml")
-        if not os.path.islink(ruff_dest):
-            ln(
-                os.path.join(xdg_config, "ruff", "pyproject.toml"),
-                ruff_dest,
-            )
 
 
 if __name__ == "__main__":

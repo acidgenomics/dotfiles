@@ -22,3 +22,6 @@ Library/
 .config/pip/pip.conf
 .npmrc
 {{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".config" "koopa" "dotfiles-work") }}
+.copilot/settings.json
+{{- end }}

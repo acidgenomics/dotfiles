@@ -7,6 +7,44 @@ local dracula_pro_scheme = dracula_pro_variant == 'pro'
     and 'dracula_pro'
     or ('dracula_pro_' .. dracula_pro_variant:gsub('-', '_'))
 
+-- Build a lualine theme from the live Dracula Pro palette.
+-- Dracula Pro ships airline/lightline themes but no lualine theme, so lualine's
+-- 'auto' theme guesses from highlight groups and produces washed-out grays.
+-- Each variant colorscheme (pro, alucard, van_helsing, ...) overwrites this global,
+-- so reading it after :colorscheme yields the active variant. No hex is hardcoded.
+local function dracula_pro_lualine_theme()
+    local p = vim.g['dracula_pro#palette']
+    if type(p) ~= 'table' or type(p.purple) ~= 'table' then
+        return nil
+    end
+    local function c(name)
+        return p[name] and p[name][1] or nil
+    end
+    local outer = { bg = c('selection'), fg = c('fg') }
+    local inner = { bg = c('bgdark'), fg = c('fg') }
+    local function mode(accent)
+        return {
+            a = { bg = c(accent), fg = c('bg'), gui = 'bold' },
+            b = outer,
+            c = inner,
+        }
+    end
+    local muted = { bg = c('bgdark'), fg = c('comment') }
+    return {
+        normal = mode('purple'),
+        insert = mode('green'),
+        visual = mode('yellow'),
+        replace = mode('red'),
+        command = mode('cyan'),
+        terminal = mode('green'),
+        inactive = {
+            a = vim.tbl_extend('force', muted, { gui = 'bold' }),
+            b = muted,
+            c = muted,
+        },
+    }
+end
+
 return {
     -- Dark colorscheme (dracula.nvim unless dracula_pro is installed locally)
     {
@@ -79,12 +117,26 @@ return {
         'nvim-lualine/lualine.nvim',
         event = 'VeryLazy',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
-        opts = {
-            options = {
-                theme = 'auto',
-                component_separators = { left = '', right = '' },
-                section_separators = { left = '', right = '' },
-            },
-        },
+        opts = function()
+            return {
+                options = {
+                    -- Function form: re-evaluated on every ColorScheme event, so a
+                    -- dark<->light flip re-derives from the new palette.
+                    theme = function()
+                        return dracula_pro_lualine_theme() or 'auto'
+                    end,
+                    component_separators = { left = '', right = '' },
+                    section_separators = { left = '', right = '' },
+                },
+                sections = {
+                    lualine_a = { 'mode' },
+                    lualine_b = { 'branch', 'diff' },
+                    lualine_c = { { 'filename', path = 1 } },
+                    lualine_x = { 'diagnostics', 'filetype' },
+                    lualine_y = { 'progress' },
+                    lualine_z = { 'location' },
+                },
+            }
+        end,
     },
 }

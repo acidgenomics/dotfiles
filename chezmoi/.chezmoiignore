@@ -17,7 +17,7 @@
 .terminfo/
 Library/
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".config" "koopa" "dotfiles-work") }}
+{{- if lstat (joinPath .chezmoi.homeDir ".config" "koopa" "dotfiles-work") }}
 .claude/settings.json
 .config/pip/pip.conf
 .npmrc

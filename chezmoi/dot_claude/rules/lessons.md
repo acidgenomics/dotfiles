@@ -31,3 +31,17 @@ Enforced by `guard-installs.sh` hook. Surface the command and stop.
 
 Never add `Co-Authored-By:` lines to commit messages in any repo. The user
 does not want Claude attribution in git history or GitHub commit views.
+
+## SKILL.md Descriptions Must Be Compatible with Both Claude Code and Copilot CLI
+
+Always use `description: >-` (folded-strip block scalar). Never inline (`description: ...`
+on one line) and never plain `>` (folded adds a trailing `\n`, pushing parsed length to
+`raw + 1`). Rules:
+
+- Keep raw description text ≤1023 chars. Copilot CLI enforces a 1024-char limit on the
+  parsed value; `>-` makes parsed == raw, so 1023 raw == 1023 parsed — safely under.
+- Never put `key: value` patterns (colon-space) inside the description text. Copilot's
+  YAML parser treats them as mapping entries and rejects the file. Block scalar sidesteps
+  the ambiguity entirely.
+- A single skill over the limit causes Copilot to reject the **entire** `.claude/skills/`
+  directory load ("Failed to load N skills") — it is not a per-skill failure.

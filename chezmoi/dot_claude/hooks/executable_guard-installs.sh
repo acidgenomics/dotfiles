@@ -42,7 +42,8 @@ _matches_install() {
   return 1
 }
 
-if _matches_install "$cmd"; then
+if _matches_install "$cmd"
+then
   printf '%s\n' '{"decision":"block","reason":"Software installs are not allowed. Surface the command or koopa app name and let the user install it."}' >&2
   exit 2
 fi

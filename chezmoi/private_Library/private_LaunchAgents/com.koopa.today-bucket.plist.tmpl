@@ -1,0 +1,28 @@
+{{- if and (eq .chezmoi.os "darwin") (or (stat (joinPath .chezmoi.homeDir "bucket")) (stat (joinPath .chezmoi.homeDir "Documents/bucket"))) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.koopa.today-bucket</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>{{ .chezmoi.homeDir }}/.local/share/koopa/bin/koopa run update-today-bucket</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>0</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa-today-bucket.log</string>
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa-today-bucket.log</string>
+</dict>
+</plist>
+{{- end }}

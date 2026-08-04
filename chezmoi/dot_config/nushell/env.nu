@@ -78,6 +78,7 @@ $env.NU_PLUGIN_DIRS = [
 # $env.PATH = ($env.PATH | split row (char esep) | prepend '/some/path')
 
 # Koopa activation: set KOOPA_PREFIX for activate.nu.
+$env.STARSHIP_LOG = 'error'
 $env.KOOPA_PREFIX = if ($env.XDG_DATA_HOME? | default "" | is-empty) {
     $"($env.HOME)/.local/share/koopa"
 } else {

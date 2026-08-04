@@ -181,12 +181,12 @@ bind M-r if-shell \
 set-hook -g client-dark-theme \
     "set-environment -g KOOPA_COLOR_MODE dark ; \
      set-environment KOOPA_COLOR_MODE dark ; \
-     run-shell 'printf dark > \${HOME}/.cache/koopa/color-mode' ; \
+     run-shell 'echo dark > \${HOME}/.cache/koopa/color-mode' ; \
      source-file \"${dark_conf}\""
 set-hook -g client-light-theme \
     "set-environment -g KOOPA_COLOR_MODE light ; \
      set-environment KOOPA_COLOR_MODE light ; \
-     run-shell 'printf light > \${HOME}/.cache/koopa/color-mode' ; \
+     run-shell 'echo light > \${HOME}/.cache/koopa/color-mode' ; \
      source-file \"${light_conf}\""
 %endif
 

@@ -23,15 +23,6 @@ Use `mktemp` (respects `$TMPDIR`). In Python: `tempfile.mkstemp()`. Delete immed
 
 > Git-history surgery: use the `git-history-surgery` skill.
 
-## Never Install Software
-
-Enforced by `guard-installs.sh` hook. Surface the command and stop.
-
-## Never Add Co-Authored-By Trailers
-
-Never add `Co-Authored-By:` lines to commit messages in any repo. The user
-does not want Claude attribution in git history or GitHub commit views.
-
 ## SKILL.md Descriptions Must Be Compatible with Both Claude Code and Copilot CLI
 
 Always use `description: >-` (folded-strip block scalar). Never inline (`description: ...`

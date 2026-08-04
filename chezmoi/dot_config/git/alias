@@ -5,22 +5,14 @@
     br = branch -vv
     c = commit
     ca = !git add --all && git commit
-    catchup = !git fetch upstream && git rebase upstream/main
-    coi = "!f() { \
-        git checkout \"$@\" 2>/dev/null && return; \
-        git checkout \"$@\" 2>&1 | grep '^\t' | xargs rm -f; \
-        git checkout \"$@\"; \
-    }; f"
-    cleanup =!git remote prune origin \
+    cleanup = !git remote prune origin \
         && git gc \
-        && git clean -dfx \
-        && git stash clear
+        && git clean -df
     cm = commit -m
     co = checkout
     contrib = shortlog --email --no-merges --numbered --summary
     d = diff
     dev = checkout -B develop origin/develop
-    diff-remote = diff origin..main
     difft = difftool --tool=difftastic
     f = fetch
     fa = fetch --all
@@ -47,12 +39,14 @@
         git ls-remote --heads \"$remote\"; \
     }; f"
     main = checkout -B main origin/main
-    no-cache-credential = config --local credential.helper ""
-    nuke = reset --hard HEAD
+    nuke = "!f() { \
+        ref=\"${1:-HEAD}\"; \
+        git reset --hard \"$ref\"; \
+    }; f"
     p = push
+    pf = push --force-with-lease
     pr = !sh -c 'git fetch origin pull/$1/head:pr$1' -
     r = rebase
-    reset-cache-credential = config --local --unset credential.helper
     retag = "!f() { \
         git tag --delete \"$1\" &> /dev/null; \
         git tag \"$1\"; \
@@ -71,5 +65,4 @@
     }; f"
     unstage = reset HEAD --
     untracked = ls-files --directory --exclude-standard --others
-    up = !sh -c 'git pull --rebase --prune && git log --pretty HEAD@{1}..'
-    web = instaweb --httpd=webrick
+    up = !sh -c 'git pull --rebase --prune && git log --pretty=custom HEAD@{1}..'

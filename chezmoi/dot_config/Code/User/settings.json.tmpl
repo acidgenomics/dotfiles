@@ -21,6 +21,7 @@
     "editor.formatOnSave": true
   },
   "[toml]": {
+    "editor.formatOnSave": false,
     "editor.tabSize": 2
   },
 {{- if lookPath "air" }}
@@ -32,7 +33,7 @@
   "chat.editing.autoAcceptDelay": 10,
   "chat.tools.global.autoApprove": false,
   "chat.tools.terminal.autoApprove": {
-    "/^.*$/": true
+    "/.*/": { "approve": true, "matchCommandLine": true }
   },
   "chat.tools.terminal.enableAutoApprove": true,
   "chat.tools.urls.autoApprove": {
@@ -53,8 +54,8 @@
   "editor.autoClosingQuotes": "never",
   "editor.detectIndentation": true,
   "editor.find.autoFindInSelection": "always",
-  "editor.fontFamily": "'JetBrains Mono', monospace",
-  "editor.fontLigatures": true,
+  "editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
+  "editor.fontLigatures": false,
   "editor.fontSize": 16,
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
@@ -250,7 +251,7 @@
   },
 {{- end }}
   "terminal.integrated.enableFileLinks": "off",
-  "terminal.integrated.fontFamily": "'JetBrains Mono'",
+  "terminal.integrated.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "terminal.integrated.fontSize": 16,
   "terminal.integrated.fontWeight": "normal",
   "terminal.integrated.fontWeightBold": "bold",
@@ -306,11 +307,6 @@
 {{-   end -}}
 {{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
 {{- end -}}
-{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-  "workbench.colorTheme": "{{ $dpLightTheme }}",
-{{- else }}
-  "workbench.colorTheme": "{{ $dpDarkTheme }}",
-{{- end }}
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook"
   },

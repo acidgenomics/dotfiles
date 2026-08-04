@@ -1,11 +1,5 @@
 # Coding Rules
 
-## No Over-Engineering
-
-Don't add features, refactor, or "improve" beyond the ask. No docstrings,
-comments, or type annotations on code you didn't change. Three similar lines
-beats a premature abstraction. Bias toward deleting code over adding it.
-
 ## Error Handling
 
 Error handling only at system boundaries (user input, external APIs, file I/O).

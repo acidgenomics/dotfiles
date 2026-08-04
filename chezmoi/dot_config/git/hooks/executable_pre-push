@@ -16,7 +16,8 @@ allow=$(git config --get-all koopa.corpRemoteAllowlist)
 
 # Is the destination remote permitted to receive corp-identity commits?
 remote_allowed=0
-for a in $allow; do
+for a in $allow
+do
     case "$remote_url" in
         *"$a"*) remote_allowed=1 ;;
     esac
@@ -26,19 +27,23 @@ done
 dpat=$(printf '%s' "$domains" | tr ' \n' '|' | sed 's/|*$//; s/\./\\./g')
 
 found_corp=0
-while read -r lref loid rref roid; do
+while read -r lref loid rref roid
+do
     [ "$loid" = "$z" ] && continue
-    if [ "$roid" = "$z" ]; then
+    if [ "$roid" = "$z" ]
+    then
         range="$loid --not --remotes"
     else
         range="$roid..$loid"
     fi
-    if git log --format='%ae%n%ce' $range 2>/dev/null | grep -qiE "@($dpat)\$"; then
+    if git log --format='%ae%n%ce' $range 2>/dev/null | grep -qiE "@($dpat)\$"
+    then
         found_corp=1
     fi
 done
 
-if [ "$found_corp" = 1 ] && [ "$remote_allowed" = 0 ]; then
+if [ "$found_corp" = 1 ] && [ "$remote_allowed" = 0 ]
+then
     echo "ERROR (koopa pre-push guard): refusing to push commits authored with a" >&2
     echo "  corporate identity ($domains) to a non-corporate remote:" >&2
     echo "    $remote_url" >&2

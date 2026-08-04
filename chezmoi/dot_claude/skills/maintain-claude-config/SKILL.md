@@ -105,43 +105,67 @@ echo '{"decision": "block", "reason": "Install commands are not allowed. Surface
 exit 2
 ```
 
+## Auditing Token Usage with `koopa app claude audit-tokens`
+
+The command reports approximate token cost for always-loaded Claude config.
+Token estimate: `len(text) // 4` (chars, not bytes).
+
+**Flags:**
+- `--scope {all,global,project}` — default `all`; scan global `~/.claude/`, the
+  current project's `.claude/`, or both. Project root is auto-discovered by walking
+  up from CWD looking for a `.claude/` subdir or `.git/`.
+- `--project-dir PATH` — explicit project root, skips CWD discovery.
+- `--max-tokens N` — exit 1 if combined always-loaded tokens exceed N.
+
+**What "always-loaded" means:** `CLAUDE.md` + all `rules/**/*.md` files without
+`paths:` frontmatter. Path-scoped files are reported separately but excluded from
+the gated total.
+
+The combined `all` output is the true per-session token cost before the first prompt.
+Use `--scope global` to see only the global `~/.claude/` tree (pre-2026-07 behavior).
+
+## Slimming a Bloated `lessons.md` (migration pattern)
+
+When a project `lessons.md` exceeds ~200 lines, apply this triage to each lesson:
+
+1. **Subsystem gotcha / how-to reference** → fold the full content verbatim into
+   the matching skill under a `## Lessons (Migrated from rules/lessons.md)` section.
+   Replace the lessons.md entry with a 1-line pointer:
+   `- **Title** → see \`skill-name\` skill.`
+2. **Universal behavioral rule** (short, fires without a specific file open) →
+   keep in lessons.md, trimmed to 1–2 sentences.
+3. Never delete institutional knowledge — only move it to the skill that owns the
+   subsystem. If no matching skill exists, keep it (trimmed) in lessons.md.
+
+This pattern routinely achieves 70–80% token reduction on a bloated lessons.md
+while preserving all knowledge in skill files that load on-demand.
+
 ## Priority Moves for This Config
 
 **Token targets:**
-- Enforced gate: `audit-tokens --max-tokens 4500` (passes after work-rules restructure)
-- Next gate: 2,500 — achievable via deferred items below
-- Long-term target: ≤2,000 always-loaded tokens (~<200 lines, per Anthropic guidance)
+- Global always-loaded: ~2,161 tokens (stable)
+- Any project `lessons.md`: ≤200 lines / ≤3,000 tokens
+- Combined (global + project): target ≤8,000 tokens
 
-**Status (2026-06-13 after work-rules restructure):** ~4,000 always-loaded tokens across
-14 files (down from 7,051). Work-tree GHA, IaC, and AWS platform rules are now
-path-scoped (conditional); the encrypted-dotfiles procedure rule converted to a skill pointer.
+### Completed moves
 
-1. **Hook: never-install enforcement** — `~/.claude/hooks/guard-installs.sh` (PreToolUse
-   Bash matcher). General purpose. Wire into both settings templates. Done. `audit-tokens`
-   now separates always-loaded from path-scoped totals, so path-scoping a rule is reflected
-   in the gated number.
+1. **Hook: never-install enforcement** — `~/.claude/hooks/guard-installs.sh`. Done.
 
-2. **Path-scope `python.md`** — add `paths: ["**/*.py", "**/pyproject.toml"]` frontmatter.
-   Removes 15 lines from every non-Python session. Done.
+2. **Path-scope `python.md`** — `paths: ["**/*.py", "**/pyproject.toml"]`. Done.
 
-3. **Migrate `workflow.md` (107 lines) to a skill** — it is entirely procedure/reference
-   ("when plan mode", "git hygiene", "session hygiene"), never a hard behavioral constraint.
-   Candidate skill name: `workflow-guidance`. Keep `workflow.md` as a ~10-line stub that
-   references the skill.
+3. **Path-scope environment-specific rules** — GHA, IaC, cloud-platform rules
+   path-scoped to their relevant file patterns. Done.
 
-4. **Migrate bulky how-to lessons from `lessons.md`** — entries longer than ~10 lines
-   that describe *how to do X* (git filter-repo, mailmap, XDG dirs, etc.) belong in skills.
-   Keep `lessons.md` as a thin append-target with 1–2 sentence entries + `> See skill X`.
-   Candidate: `git-history-surgery` skill (already exists), `xdg-conventions` skill.
+4. **Migrate bulky `lessons.md` entries to skills** — apply the triage pattern above
+   whenever a project lessons.md exceeds 200 lines.
 
-5. **Audit and prune `coding.md`, `thinking.md`, `security.md`** — apply the test: "would
-   removing this instruction change Claude's behavior?" Delete anything where the answer is no.
-   These are currently 45, 82, 39 lines respectively — good candidates to get under 20.
+### Remaining items
 
-6. **Path-scope work-specific rules** — Done. Work-tree GHA rules (→ `.github/`),
-   IaC rules (→ `*.tf/*.hcl/iac/`), and AWS platform rules (→ `*.tf/.github/`) are now
-   path-scoped. The encrypted-dotfiles procedure rule converted to a work-tree skill.
-   Remaining follow-up: tighten the 2,500-token gate once `workflow.md` is migrated to a skill.
+5. **Migrate `workflow.md` (107 lines) to a skill** — entirely procedure/reference,
+   never a hard behavioral constraint. Keep as a ~10-line stub + skill pointer.
+
+6. **Audit and prune `coding.md`, `thinking.md`, `security.md`** — apply the test:
+   "would removing this instruction change Claude's behavior?" Delete where no.
 
 ### Bottom line
 

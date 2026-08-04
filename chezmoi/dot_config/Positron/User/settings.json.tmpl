@@ -27,8 +27,8 @@
   "editor.autoClosingQuotes": "never",
   "editor.autoSurround": "never",
   "editor.codeLens": false,
-  "editor.fontFamily": "'JetBrains Mono', monospace",
-  "editor.fontLigatures": true,
+  "editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
+  "editor.fontLigatures": false,
   "editor.fontSize": 16,
   "editor.pasteAs.enabled": false,
   "files.associations": {
@@ -48,7 +48,9 @@
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
 {{- end }}
   "python.experiments.enabled": false,
-{{- if lookPath "python3" }}
+{{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
+  "python.pythonPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
+{{- else if lookPath "python3" }}
   "python.pythonPath": "{{ lookPath "python3" }}",
 {{- end }}
 {{- if lookPath "quarto" }}
@@ -58,7 +60,7 @@
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.defaultProfile.osx": "bash",
 {{- end }}
-  "terminal.integrated.fontFamily": "'JetBrains Mono'",
+  "terminal.integrated.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "terminal.integrated.fontSize": 16,
   "terminal.integrated.fontWeight": "normal",
   "terminal.integrated.fontWeightBold": "bold",
@@ -90,11 +92,6 @@
   "window.autoDetectColorScheme": true,
   "workbench.editor.empty.hint": "hidden",
   "workbench.keybindings.rstudioKeybindings": true,
-{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-  "workbench.colorTheme": "{{ $dpLightTheme }}",
-{{- else }}
-  "workbench.colorTheme": "{{ $dpDarkTheme }}",
-{{- end }}
   "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
   "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",
   "workbench.startupEditor": "newUntitledFile"

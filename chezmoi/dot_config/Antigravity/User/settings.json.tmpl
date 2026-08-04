@@ -55,8 +55,8 @@
   "editor.autoClosingQuotes": "never",
   "editor.detectIndentation": true,
   "editor.find.autoFindInSelection": "always",
-  "editor.fontFamily": "'JetBrains Mono', monospace",
-  "editor.fontLigatures": true,
+  "editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
+  "editor.fontLigatures": false,
   "editor.fontSize": 16,
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
@@ -237,7 +237,7 @@
   },
 {{- end }}
   "terminal.integrated.enableFileLinks": "off",
-  "terminal.integrated.fontFamily": "'JetBrains Mono'",
+  "terminal.integrated.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "terminal.integrated.fontSize": 16,
   "terminal.integrated.fontWeight": "normal",
   "terminal.integrated.fontWeightBold": "bold",
@@ -282,11 +282,6 @@
     "editor.selectionBackground": "#5B557566",
     "editor.selectionHighlightBackground": "#5B557533"
   },
-{{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-  "workbench.colorTheme": "{{ $dpLightTheme }}",
-{{- else }}
-  "workbench.colorTheme": "{{ $dpDarkTheme }}",
-{{- end }}
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook"
   },

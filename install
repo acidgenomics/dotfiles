@@ -41,7 +41,9 @@ def _add_config_link(source: str, name: str) -> None:
     config_dir = os.path.join(xdg_config_home(), "koopa")
     mkdir(config_dir)
     dest = os.path.join(config_dir, name)
-    if os.path.islink(dest):
+    # Self-heal: no-op only if the link already resolves to the source.
+    # A broken or mis-targeted symlink (or a stale file/dir) is repaired below.
+    if os.path.islink(dest) and os.path.realpath(dest) == os.path.realpath(source):
         return
     ln(source, dest)
 
@@ -2022,7 +2024,7 @@ def main() -> None:
     stale_chezmoi_src = os.path.join(xdg_data, "chezmoi")
     if os.path.islink(stale_chezmoi_src):
         os.unlink(stale_chezmoi_src)
-    _add_config_link(prefix, "dotfiles")
+    _add_config_link(os.path.join(_KOOPA_PREFIX, "opt", "dotfiles"), "dotfiles")
     _configure_age(xdg_config)
     _configure_dracula_pro(home, xdg_data)
     _configure_koopa_color_mode_sync(home)
@@ -2045,6 +2047,14 @@ def main() -> None:
         home, "Library", "LaunchAgents", "com.koopa.color-mode-schedule.plist"
     )
     _color_sched_is_new = _color_sched_has_dp and not os.path.isfile(_color_sched_plist)
+    _today_bucket_has_dir = is_macos() and (
+        os.path.isdir(os.path.join(home, "bucket"))
+        or os.path.isdir(os.path.join(home, "Documents", "bucket"))
+    )
+    _today_bucket_plist = os.path.join(
+        home, "Library", "LaunchAgents", "com.koopa.today-bucket.plist"
+    )
+    _today_bucket_is_new = _today_bucket_has_dir and not os.path.isfile(_today_bucket_plist)
     # Always derive color mode from the OS before rendering templates.
     # Never trust inherited env — stale KOOPA_COLOR_MODE from a long-running
     # caller would silently render the wrong palette.
@@ -2097,6 +2107,18 @@ def main() -> None:
                     "  Note: macOS may show a notification that 'sh' is running\n"
                     "        in the background. This is expected and safe."
                 )
+        if _today_bucket_has_dir:
+            _sync_launchd_agent(home, "com.koopa.today-bucket")
+            if _today_bucket_is_new:
+                print(
+                    "Installed launch agent: com.koopa.today-bucket\n"
+                    "  Location: ~/Library/LaunchAgents/"
+                    "com.koopa.today-bucket.plist\n"
+                    "  Purpose: keeps the ~/today dated symlink current at midnight\n"
+                    "           (and on wake from sleep) without needing a new shell.\n"
+                    "  Note: macOS may show a notification that 'sh' is running\n"
+                    "        in the background. This is expected and safe."
+                )
     elif is_linux():
         _sync_systemd_user_agent("koopa-color-mode-sync.service")
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")
@@ -2107,65 +2129,6 @@ def main() -> None:
     zshrc_dest = os.path.join(home, ".zshrc")
     if not os.path.islink(zshrc_dest):
         ln(zshrc_src, zshrc_dest)
-    if is_macos():
-        app_support = os.path.join(home, "Library", "Application Support")
-        # VS Code.
-        code_dir = os.path.join(app_support, "Code", "User")
-        mkdir(code_dir)
-        for f in ("keybindings.json", "settings.json"):
-            dest = os.path.join(code_dir, f)
-            if not os.path.islink(dest):
-                ln(os.path.join(xdg_config, "Code", "User", f), dest)
-        # Cursor.
-        cursor_dir = os.path.join(app_support, "Cursor", "User")
-        if os.path.isdir(os.path.join(app_support, "Cursor")):
-            mkdir(cursor_dir)
-            cursor_dest = os.path.join(cursor_dir, "settings.json")
-            if not os.path.islink(cursor_dest):
-                ln(os.path.join(xdg_config, "Cursor", "User", "settings.json"), cursor_dest)
-        # Antigravity IDE. The app-support folder may be "Antigravity IDE" or
-        # "Antigravity" depending on the installed version; try both.
-        for ag_app_name in ("Antigravity IDE", "Antigravity"):
-            if os.path.isdir(os.path.join(app_support, ag_app_name)):
-                ag_dir = os.path.join(app_support, ag_app_name, "User")
-                mkdir(ag_dir)
-                for f in ("keybindings.json", "settings.json"):
-                    ag_dest = os.path.join(ag_dir, f)
-                    if not os.path.islink(ag_dest):
-                        ln(
-                            os.path.join(xdg_config, "Antigravity", "User", f),
-                            ag_dest,
-                        )
-                break
-        # Positron.
-        positron_dir = os.path.join(app_support, "Positron", "User")
-        mkdir(positron_dir)
-        positron_dest = os.path.join(positron_dir, "settings.json")
-        if not os.path.islink(positron_dest):
-            ln(
-                os.path.join(xdg_config, "Positron", "User", "settings.json"),
-                positron_dest,
-            )
-        # nushell.
-        nushell_dir = os.path.join(app_support, "nushell")
-        if os.path.islink(nushell_dir):
-            rm(nushell_dir)
-        mkdir(nushell_dir)
-        for f in ("config.nu", "env.nu"):
-            dest = os.path.join(nushell_dir, f)
-            if not os.path.islink(dest):
-                ln(os.path.join(xdg_config, "nushell", f), dest)
-        # ruff.
-        ruff_dir = os.path.join(app_support, "ruff")
-        if os.path.islink(ruff_dir):
-            rm(ruff_dir)
-        mkdir(ruff_dir)
-        ruff_dest = os.path.join(ruff_dir, "pyproject.toml")
-        if not os.path.islink(ruff_dest):
-            ln(
-                os.path.join(xdg_config, "ruff", "pyproject.toml"),
-                ruff_dest,
-            )
 
 
 if __name__ == "__main__":

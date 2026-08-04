@@ -23,6 +23,22 @@ Use `mktemp` (respects `$TMPDIR`). In Python: `tempfile.mkstemp()`. Delete immed
 
 > Git-history surgery: use the `git-history-surgery` skill.
 
+## Path-Scoped Rule Globs Must Account for chezmoi Filename Prefixes
+
+A `paths:`-scoped rule in `~/.claude/rules/` matching `**/*.sh` silently covers
+**zero** chezmoi shell sources: they are named `dot_zprofile-work.tmpl`,
+`dot_bashrc-work`, `install` — no `.sh` suffix. `shell.md` carried the correct
+4-space rule for months while every file it mattered for went unmatched. A
+rule that never fires looks identical to a rule that does not exist. When
+adding a path-scoped rule, test the globs against actual `git ls-files` output
+before trusting it, and mirror the convention into `.editorconfig`
+(declarative, editor-visible) rather than relying on prose alone.
+
+Two nuances: an `.editorconfig` section glob matches on **basename** for a
+bare pattern, so extension-less files need explicit brace lists
+(`{install,dot_profile*,...}`); and a child `.editorconfig` must **omit**
+`root=true` to override one property while inheriting the rest from a parent.
+
 ## SKILL.md Descriptions Must Be Compatible with Both Claude Code and Copilot CLI
 
 Always use `description: >-` (folded-strip block scalar). Never inline (`description: ...`

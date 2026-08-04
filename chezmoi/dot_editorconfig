@@ -1,7 +1,7 @@
 # """
 # EditorConfig
 #
-# @note Updated 2025-04-30.
+# @note Updated 2026-08-04.
 #
 # @seealso
 # - https://editorconfig.org
@@ -22,6 +22,19 @@ indent_style = tab
 indent_size = 4
 indent_style = space
 max_line_length = 80
+tab_width = 4
+
+[*.{sh,bash,zsh}]
+indent_size = 4
+indent_style = space
+tab_width = 4
+
+# Chezmoi source files carry filename prefixes/suffixes (dot_, private_,
+# executable_, .tmpl) instead of a shell extension, so the section above
+# cannot reach them.
+[{install,dot_profile*,dot_bashrc*,dot_aliases*,dot_z*,executable_*}]
+indent_size = 4
+indent_style = space
 tab_width = 4
 
 [*.{Rmd,md}]

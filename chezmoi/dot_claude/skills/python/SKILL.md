@@ -1,3 +1,14 @@
+---
+name: python
+description: >-
+  Python virtual environment lessons — why moving a project directory breaks
+  .venv/bin/activate's hardcoded absolute path, and why direnv's PATH_add is
+  relocation-proof where source activate is not. Use when a console-script
+  entry point becomes "command not found" after moving a project directory,
+  when writing or debugging a .envrc that activates a Python venv, or when
+  deciding between PATH_add and source activate under direnv's strict_env.
+---
+
 # Python Virtual Environment Lessons
 
 ## Moving a `.venv` breaks `activate` scripts — use `PATH_add` in `.envrc` instead

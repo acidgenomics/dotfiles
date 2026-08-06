@@ -903,6 +903,24 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(tmux_colors, "dracula-pro-alucard.conf"), "w"
             ) as fh:
                 fh.write(alucard_conf)
+    # Claude Code: generate custom theme files selected at runtime by
+    # settings.json.tmpl ("theme": "custom:dracula-pro[-alucard]", branched on
+    # KOOPA_COLOR_MODE). ~/.claude/themes/ is not chezmoi-managed, so this
+    # never shows up as chezmoi drift.
+    claude_prefix = os.path.join(home, ".claude")
+    if os.path.isdir(claude_prefix):
+        claude_themes = os.path.join(claude_prefix, "themes")
+        mkdir(claude_themes)
+        claude_dark = _generate_claude_dracula_pro_theme(dp_dir, variant)
+        if claude_dark:
+            with open(os.path.join(claude_themes, "dracula-pro.json"), "w") as fh:
+                fh.write(claude_dark)
+        claude_alucard = _generate_claude_dracula_pro_theme(dp_dir, "alucard")
+        if claude_alucard:
+            with open(
+                os.path.join(claude_themes, "dracula-pro-alucard.json"), "w"
+            ) as fh:
+                fh.write(claude_alucard)
     # Zsh: generate palette files sourced at runtime by .zshrc.
     zsh_config = os.path.join(home, ".config", "zsh")
     if os.path.isdir(zsh_config):
@@ -1090,6 +1108,36 @@ def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
         "cursor":       extras.get("cursor-color", "#6272a4"),
         "white_bright": ansi.get(15, "#ffffff"),
     }
+
+
+_VIM_PALETTE_RE = re.compile(
+    r"^let g:dracula_pro#palette\.([a-z_]+)\s*=\s*\['(#[0-9A-Fa-f]{6})'"
+)
+
+
+def _parse_vim_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
+    """Parse the named-role palette from a Dracula Pro vim colorscheme.
+
+    Unlike the ghostty palette (16 raw ANSI slots), this source names
+    orange/pink/purple explicitly and provides a 5-step background ramp
+    (bg/bgdark/bgdarker/bglight/bglighter), which the per-token Claude Code
+    theme mapping needs and the ANSI-only ghostty palette lacks.
+    """
+    if variant == "pro":
+        path = os.path.join(dp_dir, "themes", "vim", "autoload", "dracula_pro.vim")
+    else:
+        path = os.path.join(
+            dp_dir, "themes", "vim", "colors", f"dracula_pro_{variant}.vim"
+        )
+    if not os.path.isfile(path):
+        return None
+    palette: dict[str, str] = {}
+    with open(path) as fh:
+        for line in fh:
+            match = _VIM_PALETTE_RE.match(line)
+            if match:
+                palette[match.group(1)] = match.group(2)
+    return palette or None
 
 
 def _generate_tmux_dracula_pro_conf(dp_dir: str, variant: str) -> str | None:
@@ -1483,6 +1531,191 @@ def _generate_zsh_dracula_pro_palette(dp_dir: str, variant: str) -> str | None:
             lines.append(f"ZSH_HIGHLIGHT_STYLES['{role}']='fg={hex_val}'")
     lines.append(f"export FZF_DEFAULT_OPTS='{_fzf_color_opts(p, variant)}'")
     return "\n".join(lines) + "\n"
+
+
+# Claude Code custom-theme token -> Dracula Pro vim-palette role. A value may be
+# a bare role name, or (role, "shimmer") for a lightened/darkened sibling tone.
+# Tokens not listed here are intentionally left unset so they inherit from the
+# theme's declared "base" (dark/light), which Claude Code already renders
+# legibly. See koopa-theming skill: never hardcode Pro hex, only derive at
+# runtime from the local Dracula Pro source.
+_CLAUDE_THEME_TOKEN_ROLES: list[tuple[str, str | tuple[str, str]]] = [
+    ("text", "fg"),
+    ("inverseText", "bg"),
+    ("inactive", "comment"),
+    ("inactiveShimmer", ("comment", "shimmer")),
+    ("subtle", "comment"),
+    ("promptBorder", "comment"),
+    ("promptBorderShimmer", ("comment", "shimmer")),
+    ("autoAccept", "purple"),
+    ("autoAcceptShimmer", ("purple", "shimmer")),
+    ("skill", "purple"),
+    ("merged", "purple"),
+    ("effortUltra", "purple"),
+    ("permission", "purple"),
+    ("permissionShimmer", ("purple", "shimmer")),
+    ("suggestion", "purple"),
+    ("remember", "purple"),
+    ("rate_limit_fill", "purple"),
+    ("rate_limit_empty", "selection"),
+    ("planMode", "cyan"),
+    ("background", "cyan"),
+    ("claudeBlue_FOR_SYSTEM_SPINNER", "cyan"),
+    ("claudeBlueShimmer_FOR_SYSTEM_SPINNER", ("cyan", "shimmer")),
+    ("ide", "cyan"),
+    ("professionalBlue", "cyan"),
+    ("briefLabelYou", "cyan"),
+    ("bashBorder", "pink"),
+    ("success", "green"),
+    ("error", "red"),
+    ("warning", "yellow"),
+    ("warningShimmer", ("yellow", "shimmer")),
+    ("chromeYellow", "yellow"),
+    ("claude", "orange"),
+    ("claudeShimmer", ("orange", "shimmer")),
+    ("clawd_body", "orange"),
+    ("briefLabelClaude", "orange"),
+    ("fastMode", "orange"),
+    ("fastModeShimmer", ("orange", "shimmer")),
+    ("selectionBg", "selection"),
+    ("userMessageBackground", "bgdark"),
+    ("userMessageBackgroundHover", "bgdarker"),
+    ("composerSidebarBackground", "bgdark"),
+    ("bashMessageBackgroundColor", "bgdark"),
+    ("memoryBackgroundColor", "bgdark"),
+    ("clawd_background", "bgdarker"),
+    ("red_FOR_SUBAGENTS_ONLY", "red"),
+    ("blue_FOR_SUBAGENTS_ONLY", "cyan"),
+    ("green_FOR_SUBAGENTS_ONLY", "green"),
+    ("yellow_FOR_SUBAGENTS_ONLY", "yellow"),
+    ("purple_FOR_SUBAGENTS_ONLY", "purple"),
+    ("orange_FOR_SUBAGENTS_ONLY", "orange"),
+    ("pink_FOR_SUBAGENTS_ONLY", "pink"),
+    ("cyan_FOR_SUBAGENTS_ONLY", "cyan"),
+    ("rainbow_red", "red"),
+    ("rainbow_orange", "orange"),
+    ("rainbow_yellow", "yellow"),
+    ("rainbow_green", "green"),
+    ("rainbow_blue", "cyan"),
+    ("rainbow_indigo", "indigo"),
+    ("rainbow_violet", "pink"),
+    ("rainbow_red_shimmer", ("red", "shimmer")),
+    ("rainbow_orange_shimmer", ("orange", "shimmer")),
+    ("rainbow_yellow_shimmer", ("yellow", "shimmer")),
+    ("rainbow_green_shimmer", ("green", "shimmer")),
+    ("rainbow_blue_shimmer", ("cyan", "shimmer")),
+    ("rainbow_indigo_shimmer", ("indigo", "shimmer")),
+    ("rainbow_violet_shimmer", ("pink", "shimmer")),
+]
+
+# diffAdded/diffRemoved are muted background washes (blended heavily toward
+# bg); *Word is the bright unblended accent used for intra-line highlights;
+# *Dimmed is blended further still. Matches the stock theme's own luminance
+# ordering (word brightest, dimmed close to the wash) at 0/0.65/0.85 depths.
+_CLAUDE_DIFF_ROLES = {
+    "diffAdded":       ("green", 0.65),
+    "diffAddedWord":   ("green", 0.0),
+    "diffAddedDimmed": ("green", 0.85),
+    "diffRemoved":       ("red", 0.65),
+    "diffRemovedWord":   ("red", 0.0),
+    "diffRemovedDimmed": ("red", 0.85),
+}
+
+# Foreground-role tokens that must meet WCAG AA text contrast (4.5:1) against
+# bg. Chrome/dim tokens (comment-derived, selection/background roles) are held
+# to the UI-component bar (3:1) instead, matching WCAG 1.4.11. diffAdded/
+# diffRemoved/*Dimmed are background washes, not text, and are exempt.
+_CLAUDE_THEME_TEXT_TOKENS = {
+    "text", "success", "error", "warning", "autoAccept", "skill", "merged",
+    "effortUltra", "permission", "suggestion", "remember", "planMode",
+    "background", "ide", "professionalBlue", "briefLabelYou", "bashBorder",
+    "claude", "clawd_body", "briefLabelClaude", "fastMode", "chromeYellow",
+    "diffAddedWord", "diffRemovedWord",
+}
+_CLAUDE_THEME_CHROME_TOKENS = {
+    "inactive", "subtle", "promptBorder",
+}
+
+
+def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
+    """Generate a Claude Code custom theme JSON for a Dracula Pro variant.
+
+    Written to ~/.claude/themes/<slug>.json and selected at runtime via the
+    "theme": "custom:<slug>" setting (dot_claude/settings.json.tmpl branches on
+    KOOPA_COLOR_MODE to pick dracula-pro vs dracula-pro-alucard). "base" carries
+    any of Claude Code's ~72 tokens this mapping does not override.
+    """
+    p = _parse_vim_palette(dp_dir, variant)
+    if not p:
+        return None
+    is_light = variant == "alucard"
+    base = "light" if is_light else "dark"
+    fg, bg = p["fg"], p["bg"]
+    # Dracula Pro has no distinct indigo; split the difference between purple
+    # and cyan so rainbow_indigo reads as a hue between its neighbors.
+    indigo = _hex_lerp(p["purple"], p["cyan"], 0.5)
+    roles = dict(p)
+    roles["indigo"] = indigo
+
+    def _shimmer(hexval: str) -> str:
+        # Dark base: lighten toward white for a brighter accent. Light base
+        # (Alucard): lightening collapses contrast against the pale bg, so
+        # darken toward fg instead -- verified this keeps shimmer >= base
+        # contrast in both variants.
+        target = fg if is_light else "#FFFFFF"
+        return _hex_lerp(hexval, target, 0.35)
+
+    overrides: dict[str, str] = {}
+    for token, spec in _CLAUDE_THEME_TOKEN_ROLES:
+        if isinstance(spec, tuple):
+            role, _ = spec
+            overrides[token] = _shimmer(roles[role])
+        else:
+            overrides[token] = roles[spec]
+    for token, (role, blend) in _CLAUDE_DIFF_ROLES.items():
+        overrides[token] = _hex_lerp(roles[role], bg, blend)
+
+    for token in _CLAUDE_THEME_TEXT_TOKENS:
+        ratio = _contrast_ratio(overrides[token], bg)
+        assert ratio >= 4.5, (
+            f"[claude-theme:{variant}] {token} contrast {ratio:.2f}:1 < 4.5:1 AA"
+        )
+    for token in _CLAUDE_THEME_CHROME_TOKENS:
+        ratio = _contrast_ratio(overrides[token], bg)
+        assert ratio >= 3.0, (
+            f"[claude-theme:{variant}] {token} contrast {ratio:.2f}:1 < 3.0:1 (chrome)"
+        )
+
+    theme = {
+        "name": "Dracula Pro Alucard" if is_light else "Dracula Pro",
+        "base": base,
+        "overrides": overrides,
+    }
+    return json.dumps(theme, indent=2) + "\n"
+
+
+def _wcag_relative_luminance(hexcolor: str) -> float:
+    """True WCAG relative luminance, with sRGB gamma decoding.
+
+    _relative_luminance() above skips gamma decoding (it's a cheap "is this
+    background light enough" heuristic for the JetBrains synthesis check),
+    which understates the luminance of saturated colors and gives contrast
+    ratios that are too low. Contrast-ratio assertions need the real formula.
+    """
+    def _channel(c: float) -> float:
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+    r = _channel(int(hexcolor[1:3], 16) / 255)
+    g = _channel(int(hexcolor[3:5], 16) / 255)
+    b = _channel(int(hexcolor[5:7], 16) / 255)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _contrast_ratio(hex_a: str, hex_b: str) -> float:
+    """WCAG contrast ratio between two hex colors."""
+    lum_a, lum_b = _wcag_relative_luminance(hex_a), _wcag_relative_luminance(hex_b)
+    hi, lo = max(lum_a, lum_b), min(lum_a, lum_b)
+    return (hi + 0.05) / (lo + 0.05)
 
 
 def _tmtheme_colors(dp_dir: str, variant: str) -> dict[str, str] | None:

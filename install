@@ -2238,6 +2238,30 @@ def _configure_age(xdg_config: str) -> None:
     os.chmod(chezmoi_toml, 0o600)
 
 
+def _configure_claude_code(home: str) -> None:
+    """Seed ``hasCompletedOnboarding`` in ``~/.claude.json``.
+
+    Suppresses the first-run theme picker and security-notes screen. This file
+    also holds mutable runtime state (numStartups, per-project history, MCP
+    approvals) that must never be clobbered, so this is a targeted
+    read-modify-write, not a chezmoi template.
+    """
+    claude_json = os.path.join(home, ".claude.json")
+    data: dict = {}
+    if os.path.isfile(claude_json):
+        try:
+            with open(claude_json) as fh:
+                data = json.load(fh)
+        except (OSError, ValueError):
+            return
+        if not isinstance(data, dict) or data.get("hasCompletedOnboarding") is True:
+            return
+    data["hasCompletedOnboarding"] = True
+    with open(claude_json, "w") as fh:
+        json.dump(data, fh, indent=2)
+        fh.write("\n")
+
+
 def main() -> None:
     home = os.environ.get("HOME", "")
     if not os.path.isdir(home):
@@ -2315,6 +2339,7 @@ def main() -> None:
                 ln(xcode_free_src, xcode_free_dest)
     _configure_dracula_pro_post(home, xdg_data)
     _configure_jetbrains(home)
+    _configure_claude_code(home)
     if is_macos():
         _sync_launchd_agent(home, "com.koopa.color-mode-sync")
         if _color_sync_is_new:

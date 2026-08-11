@@ -39,6 +39,16 @@ bare pattern, so extension-less files need explicit brace lists
 (`{install,dot_profile*,...}`); and a child `.editorconfig` must **omit**
 `root=true` to override one property while inheriting the rest from a parent.
 
+## Never Reach for a Tool Outside the Current Project Without Asking
+
+Don't invoke a binary from an unrelated project's venv/node_modules, or trigger any
+download (even a "just this once" browser/model/dependency fetch), to unblock a
+verification step. Surface the missing capability and the command that would add it
+— e.g. as a koopa app — and let the user decide whether to install it. This applies
+even when the target directory is technically outside the project being worked on
+(a different repo's `.venv`) and even when the install is small: the violation is
+installing without asking, not the size or exact location of what got installed.
+
 ## SKILL.md Descriptions Must Be Compatible with Both Claude Code and Copilot CLI
 
 Always use `description: >-` (folded-strip block scalar). Never inline (`description: ...`

@@ -1,3 +1,4 @@
 {
-  "showTipsOnStartup": false
+  "showTipsOnStartup": false,
+  "theme": "default"
 }

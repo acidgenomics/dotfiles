@@ -18,3 +18,4 @@
 .SpaceVim.d/
 .emacs-profiles.el
 .spacemacs.d/init.el
+.config/bpytop/

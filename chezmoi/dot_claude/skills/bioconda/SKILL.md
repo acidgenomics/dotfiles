@@ -1,3 +1,16 @@
+---
+name: bioconda
+description: >-
+  Procedures for maintaining Acid Genomics R package recipes in
+  bioconda-recipes — recipe structure, Apache-2.0 license fields, GitHub
+  Contents API PR workflow (never git push, repo is ~700 MB), autobump PR
+  supersession, dependency tier ordering for CI, migration-lag dep solve
+  failures, PR labeling/merge process via Mergify, and post-merge
+  verification. Use when adding or updating an r-<pkg> bioconda recipe,
+  triaging bioconda CI failures, or managing PRs against
+  bioconda/bioconda-recipes.
+---
+
 # bioconda
 
 Procedures for maintaining Acid Genomics R package recipes in

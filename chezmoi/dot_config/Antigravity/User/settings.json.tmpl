@@ -1,5 +1,5 @@
 {{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
-{{- $dpProInstalled := glob (joinPath .chezmoi.homeDir ".antigravity/extensions/dracula-theme-pro.theme-dracula-pro-*") -}}
+{{- $dpProInstalled := or (glob (joinPath .chezmoi.homeDir ".antigravity/extensions/dracula-theme-pro.theme-dracula-pro-*")) (glob (joinPath .chezmoi.homeDir ".vscode/extensions/dracula-theme-pro.theme-dracula-pro-*")) (glob (joinPath .chezmoi.homeDir ".antigravity-server/extensions/dracula-theme-pro.theme-dracula-pro-*")) -}}
 {{- $dpDarkTheme := "Dracula Theme" -}}
 {{- $dpLightTheme := "Atom One Light" -}}
 {{- if $dpProInstalled -}}

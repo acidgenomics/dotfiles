@@ -1,6 +1,6 @@
 ---
 name: claude-permissions
-description: >
+description: >-
   Claude Code permission system internals — protected paths, permission modes,
   allow/ask/deny rule precedence, and the PreToolUse permissionDecision hook
   contract. Use when debugging unexpected permission prompts, understanding why

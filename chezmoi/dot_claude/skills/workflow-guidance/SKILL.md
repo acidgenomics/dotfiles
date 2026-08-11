@@ -1,6 +1,10 @@
 ---
 name: workflow-guidance
-description: Workflow orchestration guidance — plan mode etiquette, subagent discipline, session hygiene, and git commit conventions. Use when asked about plan mode, how to structure multi-step work, when to use subagents, or when making a git commit.
+description: >-
+  Workflow orchestration guidance — plan mode etiquette, subagent discipline,
+  session hygiene, and git commit conventions. Use when asked about plan mode,
+  how to structure multi-step work, when to use subagents, or when making a
+  git commit.
 ---
 
 # Workflow Orchestration

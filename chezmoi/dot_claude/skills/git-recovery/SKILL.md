@@ -1,6 +1,7 @@
 ---
 name: git-recovery
-description: Diagnose and recover from common git branch/state accidents — wrong-branch
+description: >-
+  Diagnose and recover from common git branch/state accidents — wrong-branch
   reset, git alias side effects, untracked-file checkout collisions, and stash cleanup.
   Use when a git command moved the wrong branch pointer, a checkout was blocked by
   untracked files, or stash noise is showing in the prompt.

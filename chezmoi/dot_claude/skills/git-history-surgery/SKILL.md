@@ -1,6 +1,7 @@
 ---
 name: git-history-surgery
-description: Rewrite git history safely with git filter-repo. Use when removing
+description: >-
+  Rewrite git history safely with git filter-repo. Use when removing
   secrets or sensitive files from commits, rewriting author/committer emails
   across history, de-duplicating doubled commits, or any commit-level surgery.
 ---

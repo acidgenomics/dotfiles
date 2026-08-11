@@ -1,6 +1,6 @@
 ---
 name: maintain-claude-config
-description: >
+description: >-
   Guide for maintaining and optimizing Claude Code configuration — CLAUDE.md,
   rules files, hooks, and skills. Use when auditing instruction bloat, deciding
   where a new rule belongs, or pruning stale content.
@@ -56,6 +56,65 @@ Ask these questions in order:
 4. **Does this genuinely apply to every session in every project?** → Keep it in
    `CLAUDE.md` or an unconditional `rules/*.md` file. Be ruthless — if Claude
    already does it correctly without the instruction, delete it.
+
+## SKILL.md Frontmatter Format (Cross-CLI Compatibility)
+
+Every skill's `description:` key must use the folded-strip block scalar:
+
+```yaml
+description: >-
+  One or more lines of prose describing what the skill covers and when to use it.
+```
+
+**Never** plain `>` and **never** an inline scalar. Two related constraints
+(Claude Code itself has no such limit, but a skill tree shared across tools must
+satisfy every reader):
+
+- **Length**: keep the raw description text ≤1023 chars. The 1024-char cap on the
+  *parsed* description is a constraint of the open Agent Skills spec itself
+  (agentskills.io) — Codex CLI hardcodes the same `MAX_DESCRIPTION_LEN=1024`, and
+  Copilot CLI enforces it too. An over-cap skill gets dropped by whichever CLI
+  reads it (Copilot CLI's current behavior is a per-skill drop with a "N skill(s)
+  failed to load" banner, not the whole-directory failure earlier Copilot versions
+  had). `>-` makes parsed length equal raw length; plain `>` folds in a trailing
+  newline, silently spending 1 char of the budget for nothing.
+- **Avoid stray `key: value` patterns inside the description body.** A naive
+  non-block-scalar extractor can misread a colon-space as a nested YAML mapping.
+  A correctly-formed `>-` block scalar sidesteps this — ordinary prose colons
+  ("Use when: X, Y, or Z") are safe once the block-scalar form is used.
+
+Verify any skill tree with the validator (checks frontmatter shape and length,
+not prose):
+
+```sh
+koopa develop check-skills                        # koopa's own two skill trees
+koopa develop check-skills <path/to/skills/dir>    # any other tree, e.g. a work repo
+```
+
+### Cross-CLI discovery: the `.agents/skills` convention
+
+The Agent Skills format is an open standard (originally from Anthropic,
+spec at agentskills.io) that Codex CLI, Gemini CLI, and Copilot CLI all read
+directly — same `SKILL.md` files, no format changes needed beyond the frontmatter
+rules above. Each tool also honors a shared `.agents/skills` alias directory in
+addition to its own native path:
+
+| Tool | Native path(s) | Also honors `.agents/skills`? |
+|---|---|---|
+| Claude Code | `.claude/skills/`, `~/.claude/skills/` | n/a (this is the source) |
+| Codex CLI | `.codex/skills/` (walking up to repo root), `~/.codex/skills/` | Yes |
+| Gemini CLI | `.gemini/skills/`, `~/.gemini/skills/` | Yes — wins over `.gemini/skills` at the same tier |
+| Copilot CLI | `.github/skills/`, `.claude/skills/`, `~/.copilot/skills/` | Yes |
+| Antigravity CLI (`agy`) | Unconfirmed — no public doc page found; changelog confirms native skill support exists | Unconfirmed — no evidence either way |
+
+Both this repo's `.agents/skills` (git-tracked symlink → `.claude/skills/`) and the
+user-global `~/.agents/skills` (chezmoi-managed symlink → `~/.claude/skills/`,
+source `dot_agents/symlink_skills.tmpl`) already exist, so Codex, Gemini CLI, and
+Copilot CLI all see this skill tree with zero extra work. Antigravity is an
+accepted gap, not a pending task: its config root is `~/.gemini/config/`, not
+`~/.gemini/skills/`, and confirming its exact skill-discovery path requires an
+authenticated `agy` session — this machine has no Antigravity login, so the path
+stays unverified here. Re-check only if Antigravity auth becomes available.
 
 ## The Iteration Loop (Boris Cherny / Anthropic official)
 

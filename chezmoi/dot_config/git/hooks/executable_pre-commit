@@ -26,8 +26,8 @@ do
 done
 
 # Word-boundary wrappers (mirrors guard-public-leak.sh _wb_match).
-wbpre='(^|[^[:alnum:]_])('
-wbsuf=')([^[:alnum:]_]|$)'
+wbpre='(^|[^[:alnum:]])('
+wbsuf=')([^[:alnum:]]|$)'
 
 fail=0
 

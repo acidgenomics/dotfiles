@@ -3,6 +3,7 @@
 */*/*.md
 */*/*/*.md
 !.claude/*.md
+!.claude/output-styles/*.md
 !.claude/rules/*.md
 !.claude/skills/**/*.md
 !.codex/AGENTS.md

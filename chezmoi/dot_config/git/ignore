@@ -253,8 +253,8 @@ instance/
 ipython_config.py
 kallisto-*/
 kallisto/
-lib/
-lib64/
+/lib/
+/lib64/
 links/
 local_settings.py
 logs/

@@ -643,7 +643,7 @@ def _configure_koopa_color_mode_sync(home: str) -> None:
 
 
 def _configure_dracula_pro(home: str, xdg_data: str) -> None:
-    """Pre-chezmoi: vim pack, VS Code extension install."""
+    """Pre-chezmoi: vim pack, Ghostty theme links, VS Code extension install."""
     dp_dir = os.path.join(xdg_data, "dracula-pro")
     if not os.path.isdir(dp_dir):
         return
@@ -653,6 +653,19 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     mkdir(vim_themes)
     if os.path.isdir(vim_src):
         ln(vim_src, os.path.join(vim_themes, "dracula_pro"))
+    # Ghostty: symlink all variant theme files into ~/.config/ghostty/themes/.
+    # Runs pre-chezmoi (not in _configure_dracula_pro_post) because
+    # config.tmpl stats this directory at render time to pick theme names;
+    # doing this post-chezmoi would leave the render one install cycle behind.
+    ghostty_themes = os.path.join(home, ".config", "ghostty", "themes")
+    ghostty_src = os.path.join(dp_dir, "themes", "ghostty")
+    if os.path.isdir(ghostty_src):
+        mkdir(ghostty_themes)
+        for src_name, dest_name in _DRACULA_VARIANT_NAMES.items():
+            src = os.path.join(ghostty_src, src_name)
+            dest = os.path.join(ghostty_themes, dest_name)
+            if os.path.isfile(src):
+                ln(src, dest)
     # VS Code / Positron: install VSIX if missing or version doesn't match.
     vsix = os.path.join(
         dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
@@ -695,16 +708,6 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     if not os.path.isdir(dp_dir):
         return
     variant = os.environ.get("KOOPA_DRACULA_PRO_VARIANT", "pro")
-    # Ghostty: symlink all variant theme files into ~/.config/ghostty/themes/.
-    ghostty_themes = os.path.join(home, ".config", "ghostty", "themes")
-    ghostty_src = os.path.join(dp_dir, "themes", "ghostty")
-    if os.path.isdir(ghostty_src):
-        mkdir(ghostty_themes)
-        for src_name, dest_name in _DRACULA_VARIANT_NAMES.items():
-            src = os.path.join(ghostty_src, src_name)
-            dest = os.path.join(ghostty_themes, dest_name)
-            if os.path.isfile(src):
-                ln(src, dest)
     # Alacritty: symlink Pro/Alucard variants to chezmoi-UNMANAGED sidecar names.
     # alacritty.toml.tmpl selects these at render time when Pro is installed; the
     # chezmoi-managed themes/dracula.toml / themes/one-light.toml (OSS) are left

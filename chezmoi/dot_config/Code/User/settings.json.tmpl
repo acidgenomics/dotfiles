@@ -262,6 +262,9 @@
   "terminal.integrated.inheritEnv": true,
   "terminal.integrated.initialHint": false,
   "terminal.integrated.localEchoEnabled": "off",
+{{- if hasSuffix "code-server-posit/User/settings.json.tmpl" .chezmoi.sourceFile }}
+  "terminal.integrated.sendKeybindingsToShell": true,
+{{- end }}
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.profiles.osx": {
     "bash": {

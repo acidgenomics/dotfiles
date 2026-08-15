@@ -1,35 +1,16 @@
-{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
-{{- $dpProInstalled := or
-    (glob (joinPath .chezmoi.homeDir ".positron" "extensions" "dracula-theme-pro.theme-dracula-pro-*"))
-    (glob (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*"))
--}}
-{{- $dpDarkTheme := "Dracula Theme" -}}
-{{- $dpLightTheme := "Atom One Light" -}}
-{{- if $dpProInstalled -}}
-{{-   $dpDarkTheme = "Dracula Pro" -}}
-{{-   if and $dpv (ne $dpv "pro") -}}
-{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
-{{-   end -}}
-{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
-{{- end -}}
 {
   "[python]": {
     "editor.formatOnSave": true
   },
   "[r]": {
-    "editor.defaultFormatter": "posit-dev.air-vscode",
+    "editor.defaultFormatter": "Posit.air-vscode",
     "editor.formatOnSave": true
   },
-  "editor.autoClosingBrackets": "never",
   "editor.autoClosingComments": "never",
   "editor.autoClosingDelete": "never",
   "editor.autoClosingOvertype": "never",
-  "editor.autoClosingQuotes": "never",
   "editor.autoSurround": "never",
   "editor.codeLens": false,
-  "editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
-  "editor.fontLigatures": false,
-  "editor.fontSize": 16,
   "editor.pasteAs.enabled": false,
   "files.associations": {
     "renv.lock": "json"
@@ -37,8 +18,6 @@
 {{- if lookPath "git" }}
   "git.path": "{{ lookPath "git" }}",
 {{- end }}
-  "python.analysis.autoSearchPaths": false,
-  "python.analysis.diagnosticsSource": "Pyright",
 {{- if lookPath "conda" }}
   "python.condaPath": "{{ lookPath "conda" }}",
 {{- end }}
@@ -47,24 +26,12 @@
 {{- else if lookPath "python3" }}
   "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
 {{- end }}
-  "python.experiments.enabled": false,
-{{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
-  "python.pythonPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
-{{- else if lookPath "python3" }}
-  "python.pythonPath": "{{ lookPath "python3" }}",
-{{- end }}
 {{- if lookPath "quarto" }}
   "quarto.path": "{{ lookPath "quarto" }}",
 {{- end }}
-  "terminal.integrated.defaultProfile.linux": "bash",
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.defaultProfile.osx": "bash",
 {{- end }}
-  "terminal.integrated.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
-  "terminal.integrated.fontSize": 16,
-  "terminal.integrated.fontWeight": "normal",
-  "terminal.integrated.fontWeightBold": "bold",
-  "terminal.integrated.inheritEnv": true,
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.profiles.osx": {
     "bash": {
@@ -86,13 +53,9 @@
     }
   },
 {{- end }}
-  "terminal.integrated.stickyScroll.enabled": false,
-  "update.mode": "none",
-  "update.showReleaseNotes": false,
-  "window.autoDetectColorScheme": true,
   "workbench.editor.empty.hint": "hidden",
   "workbench.keybindings.rstudioKeybindings": true,
-  "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
-  "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",
-  "workbench.startupEditor": "newUntitledFile"
+{{ template "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".positron" "extensions" "dracula-theme-pro.theme-dracula-pro-*") (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) }}
+{{ template "vscode-universal-common.tmpl" . }}
+  "window.autoDetectColorScheme": true
 }

@@ -423,18 +423,33 @@ def _generate_pycharm_alucard_theme(
         if orange_dark and orange_light:
             named_map[orange_dark] = orange_light
 
+    # Role-aware substitution. Background/decoration roles get the existing
+    # pale-flip (_lightify_hex); foreground/text roles get
+    # _darken_for_light_bg instead, or dark syntax colors (comments, strings,
+    # doc-tags, ...) collapse into unreadable near-white text on the light
+    # background -- a flat value-only substitution can't tell the two apart.
+    # named_map's ANSI substitutions are tried first but only kept for a
+    # foreground role if they clear 3:1: e.g. Pro's dark "selection_bg" hex is
+    # reused by the vendor XML for LINE_NUMBERS_COLOR/INDENT_GUIDE/separators
+    # too, and Alucard's selection_bg is deliberately close to the editor
+    # background, so that substitution alone would leave those unreadable.
+    _bg_role_re = re.compile(r"BACKGROUND|CARET_ROW_COLOR|STRIPE_COLOR")
+    _option_hex_re = re.compile(r'<option name="([A-Za-z_0-9.]+)"\s+value="([0-9A-Fa-f]{6})"')
+
     def _sub_token(m: re.Match) -> str:  # type: ignore[type-arg]
-        tok = m.group(1).lower()
-        if tok in named_map:
+        name, tok = m.group(1), m.group(2).lower()
+        if _bg_role_re.search(name):
+            replacement = _lightify_hex("#" + tok).lstrip("#").lower()
+        elif tok in named_map and _contrast_ratio("#" + named_map[tok], bg) >= 3.0:
             replacement = named_map[tok]
         else:
-            replacement = _lightify_hex("#" + tok).lstrip("#").lower()
-        return m.group(0).replace(m.group(1), replacement)
+            replacement = _darken_for_light_bg("#" + tok).lstrip("#").lower()
+        return m.group(0).replace(m.group(2), replacement)
 
     xml = dark_xml
     xml = xml.replace('name="Dracula Pro"', 'name="Dracula Pro Alucard"')
     xml = xml.replace('parent_scheme="Darcula"', 'parent_scheme="Default"')
-    xml = re.sub(r'value="([0-9A-Fa-f]{6})"', _sub_token, xml)
+    xml = _option_hex_re.sub(_sub_token, xml)
 
     # Verify no dark Pro token survived and all backgrounds are light.
     survivors = (
@@ -445,6 +460,15 @@ def _generate_pycharm_alucard_theme(
     for m in re.finditer(r'name="[A-Z_]*BACKGROUND[^"]*"\s+value="([0-9A-Fa-f]{6})"', xml):
         assert _relative_luminance("#" + m.group(1)) >= 0.55, (
             f"Background not light enough after substitution: #{m.group(1)}"
+        )
+    # Verify every foreground/text role is actually readable, not just every
+    # background role -- this is the check the pre-existing code lacked.
+    for m in _option_hex_re.finditer(xml):
+        if _bg_role_re.search(m.group(1)):
+            continue
+        ratio = _contrast_ratio("#" + m.group(2), bg)
+        assert ratio >= 3.0, (
+            f"{m.group(1)} contrast {ratio:.2f}:1 < 3:1 after substitution (#{m.group(2)})"
         )
 
     return json.dumps(theme, indent=2), xml
@@ -653,7 +677,11 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     mkdir(vim_themes)
     if os.path.isdir(vim_src):
         ln(vim_src, os.path.join(vim_themes, "dracula_pro"))
-    # Ghostty: symlink all variant theme files into ~/.config/ghostty/themes/.
+    # Ghostty: generate each variant theme file into ~/.config/ghostty/themes/,
+    # rewriting ANSI slot 8 to a readable dim color (see
+    # _generate_ghostty_dracula_pro_theme). Not a symlink: Ghostty, and any
+    # terminal app that reads its ANSI palette (htop's shadow color pair),
+    # would otherwise get the unreadable upstream value straight from disk.
     # Runs pre-chezmoi (not in _configure_dracula_pro_post) because
     # config.tmpl stats this directory at render time to pick theme names;
     # doing this post-chezmoi would leave the render one install cycle behind.
@@ -662,10 +690,17 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     if os.path.isdir(ghostty_src):
         mkdir(ghostty_themes)
         for src_name, dest_name in _DRACULA_VARIANT_NAMES.items():
-            src = os.path.join(ghostty_src, src_name)
-            dest = os.path.join(ghostty_themes, dest_name)
-            if os.path.isfile(src):
-                ln(src, dest)
+            theme = _generate_ghostty_dracula_pro_theme(dp_dir, src_name)
+            if theme:
+                dest = os.path.join(ghostty_themes, dest_name)
+                # Earlier koopa versions symlinked dest to the upstream file.
+                # Writing through a stale symlink would corrupt that upstream
+                # copy, so clear it first -- rm() unlinks the symlink itself,
+                # never the file it points to.
+                if os.path.lexists(dest):
+                    rm(dest)
+                with open(dest, "w") as fh:
+                    fh.write(theme)
     # VS Code / Positron: install VSIX if missing or version doesn't match.
     vsix = os.path.join(
         dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"
@@ -1102,8 +1137,10 @@ def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
                 extras[key.strip()] = val.strip()
     if not ansi:
         return None
+    fg = extras.get("foreground", ansi.get(7, "#F8F8F2"))
+    bg = extras.get("background", ansi.get(0, "#282a36"))
     return {
-        "foreground":   extras.get("foreground", ansi.get(7, "#F8F8F2")),
+        "foreground":   fg,
         "selection_bg": extras.get("selection-background", ansi.get(8, "#44475a")),
         "red":          ansi.get(1, "#ff5555"),
         "green":        ansi.get(2, "#50fa7b"),
@@ -1112,6 +1149,8 @@ def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
         "magenta":      ansi.get(5, "#ff79c6"),
         "cyan":         ansi.get(6, "#8be9fd"),
         "black":        ansi.get(0, "#282a36"),
+        # Raw ANSI slot 8. Only safe as a *background* (e.g. an inactive tab
+        # panel) -- too low-contrast to use as text. Use "comment" for text.
         "black_bright": ansi.get(8, "#6272a4"),
         "red_bright":   ansi.get(9, "#ff6e6e"),
         "green_bright": ansi.get(10, "#69ff94"),
@@ -1119,7 +1158,8 @@ def _parse_ghostty_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
         "blue_bright":  ansi.get(12, "#d6acff"),
         "magenta_bright": ansi.get(13, "#ff92df"),
         "cyan_bright":  ansi.get(14, "#a4ffff"),
-        "comment":      ansi.get(8, "#6272a4"),
+        # Readable dim/comment text color -- see _dracula_dim_color().
+        "comment":      _dracula_dim_color(dp_dir, variant, fg, bg),
         "cursor":       extras.get("cursor-color", "#6272a4"),
         "white_bright": ansi.get(15, "#ffffff"),
     }
@@ -1141,8 +1181,11 @@ def _parse_vim_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
     if variant == "pro":
         path = os.path.join(dp_dir, "themes", "vim", "autoload", "dracula_pro.vim")
     else:
+        # Variant keys are hyphenated (e.g. "van-helsing"); the shipped Vim
+        # colorscheme filenames use an underscore.
+        slug = variant.replace("-", "_")
         path = os.path.join(
-            dp_dir, "themes", "vim", "colors", f"dracula_pro_{variant}.vim"
+            dp_dir, "themes", "vim", "colors", f"dracula_pro_{slug}.vim"
         )
     if not os.path.isfile(path):
         return None
@@ -1153,6 +1196,45 @@ def _parse_vim_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
             if match:
                 palette[match.group(1)] = match.group(2)
     return palette or None
+
+
+def _dracula_dim_color(
+    dp_dir: str, variant: str, fallback_fg: str, fallback_bg: str
+) -> str:
+    """Return a dim-but-readable color for ANSI slot 8.
+
+    Every Dracula Pro variant sets slot 8 within ~2.4:1 contrast of its own
+    background (1.09:1 for Alucard), so anything that treats ANSI 8 as a
+    dim/comment/shadow color -- including htop's meter-shadow color pair --
+    renders as unreadable. The named ``comment`` role from the variant's Vim
+    colorscheme clears at least 3.5:1 against the background in every
+    variant, so prefer it. Fall back to a foreground/background blend
+    (mirroring the ``comment`` derivation in ``_generate_pycharm_alucard_theme``)
+    if the Vim palette is unavailable.
+    """
+    vim_palette = _parse_vim_palette(dp_dir, variant)
+    if vim_palette and "comment" in vim_palette:
+        return vim_palette["comment"]
+    return _hex_lerp(fallback_fg, fallback_bg, 0.6)
+
+
+def _generate_ghostty_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
+    """Return the upstream Ghostty theme text with ANSI slot 8 replaced.
+
+    Ghostty itself resolves ANSI 8 straight from this file, and so does any
+    terminal app that asks the terminal for it directly (htop's meter-shadow
+    color pair does exactly that). There is no koopa-owned config downstream
+    to intercept that read, so -- unlike every other Dracula Pro consumer in
+    this file, which is generated fresh -- the Ghostty theme itself must
+    become a generated file instead of a symlink to the upstream one.
+    """
+    p = _parse_ghostty_palette(dp_dir, variant)
+    if not p:
+        return None
+    theme_file = os.path.join(dp_dir, "themes", "ghostty", variant)
+    with open(theme_file) as fh:
+        text = fh.read()
+    return re.sub(r"(?m)^palette = 8=.*$", f"palette = 8={p['comment']}", text, count=1)
 
 
 def _generate_tmux_dracula_pro_conf(dp_dir: str, variant: str) -> str | None:
@@ -1266,7 +1348,7 @@ inactive_tab_foreground {p["comment"]}
 inactive_tab_background {p["black_bright"]}
 
 color0  {p["black"]}
-color8  {p["black_bright"]}
+color8  {p["comment"]}
 color1  {p["red"]}
 color9  {p["red_bright"]}
 color2  {p["green"]}
@@ -1315,7 +1397,7 @@ ansi = [
   "{p['blue']}", "{p['magenta']}", "{p['cyan']}", "{fg}",
 ]
 brights = [
-  "{p['black_bright']}", "{p['red_bright']}", "{p['green_bright']}", "{p['yellow_bright']}",
+  "{p['comment']}", "{p['red_bright']}", "{p['green_bright']}", "{p['yellow_bright']}",
   "{p['blue_bright']}", "{p['magenta_bright']}", "{p['cyan_bright']}", "#FFFFFF",
 ]
 
@@ -1946,7 +2028,7 @@ def _generate_rstudio_rstheme(
                 ("#75507b", ansi["magenta"]),          # 5
                 ("#06989a", ansi["cyan"]),             # 6
                 ("#d3d7cf", ansi["foreground"]),       # 7 (ANSI white → palette fg)
-                ("#555753", ansi["black_bright"]),     # 8
+                ("#555753", ansi["comment"]),          # 8 (raw slot too low-contrast)
                 ("#ef2929", ansi["red_bright"]),       # 9
                 ("#8ae234", ansi["green_bright"]),     # 10
                 ("#fce94f", ansi["yellow_bright"]),    # 11
@@ -1993,6 +2075,32 @@ def _lightify_hex(hexcolor: str) -> str:
     lum_light = max(0.88, 1.0 - lum * 0.25)
     s_light = min(s * 0.35, 0.18)
     r, g, b = colorsys.hls_to_rgb(h, lum_light, s_light)
+    return f"#{int(r * 255):02X}{int(g * 255):02X}{int(b * 255):02X}"
+
+
+def _darken_for_light_bg(hexcolor: str, bg: str = "#fafafa", min_ratio: float = 3.0) -> str:
+    """Invert a dark-theme foreground hex to a legible light-background hue.
+
+    Preserves hue and saturation; binary-searches HLS lightness until contrast
+    against ``bg`` clears ``min_ratio``. A fixed HLS-lightness constant is not
+    safe here -- WCAG luminance and HLS lightness diverge sharply for
+    green/yellow hues, so a naive inversion still leaves some hues unreadable.
+    This is the foreground counterpart to _lightify_hex(): that one always
+    pales toward white, which is correct for background roles but wrong for
+    text.
+    """
+    h, _, s = _hex_to_hls(hexcolor)
+    s_light = min(s * 1.1, 0.9) if s > 0 else 0.0
+    lo, hi = 0.0, 1.0
+    for _ in range(24):
+        mid = (lo + hi) / 2
+        r, g, b = colorsys.hls_to_rgb(h, mid, s_light)
+        candidate = f"#{int(r * 255):02X}{int(g * 255):02X}{int(b * 255):02X}"
+        if _contrast_ratio(candidate, bg) >= min_ratio:
+            lo = mid
+        else:
+            hi = mid
+    r, g, b = colorsys.hls_to_rgb(h, lo, s_light)
     return f"#{int(r * 255):02X}{int(g * 255):02X}{int(b * 255):02X}"
 
 

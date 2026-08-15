@@ -1,0 +1,24 @@
+{{- /*
+  Settings verified byte-identical across all four VS Code-family apps
+  (Code, Antigravity, Cursor, Positron). Call with `. ` (the root context) —
+  this partial does not use it today, but keeping the call signature
+  consistent with vscode-fork-common.tmpl avoids surprises if a future
+  addition needs .chezmoi.* here.
+*/ -}}
+  "editor.autoClosingBrackets": "never",
+  "editor.autoClosingQuotes": "never",
+  "editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
+  "editor.fontLigatures": false,
+  "editor.fontSize": 16,
+  "python.analysis.autoSearchPaths": false,
+  "python.experiments.enabled": false,
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.fontWeight": "normal",
+  "terminal.integrated.fontWeightBold": "bold",
+  "terminal.integrated.inheritEnv": true,
+  "terminal.integrated.stickyScroll.enabled": false,
+  "update.mode": "none",
+  "update.showReleaseNotes": false,
+  "workbench.startupEditor": "newUntitledFile",

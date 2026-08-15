@@ -1,0 +1,30 @@
+{{- /*
+  Shared Dracula Pro theme-name detection, used by every VS Code-family
+  User/settings.json.tmpl (Code, Antigravity, Cursor, Positron).
+
+  Call with a list of glob patterns (already joined against .chezmoi.homeDir
+  by the caller, since this partial does not receive the root context):
+
+    {{ template "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) }}
+
+  Emits the two workbench.preferred*ColorTheme settings lines, each with a
+  trailing comma — call it only where a key follows.
+*/ -}}
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpProInstalled := false -}}
+{{- range . -}}
+{{-   if glob . -}}
+{{-     $dpProInstalled = true -}}
+{{-   end -}}
+{{- end -}}
+{{- $dpDarkTheme := "Dracula Theme" -}}
+{{- $dpLightTheme := "Atom One Light" -}}
+{{- if $dpProInstalled -}}
+{{-   $dpDarkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-   end -}}
+{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
+{{- end -}}
+  "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
+  "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",

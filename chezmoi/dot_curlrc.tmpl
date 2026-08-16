@@ -7,6 +7,8 @@ cacert=/etc/ssl/certs/ca-certificates.crt
 connect-timeout=60
 # > insecure
 location
+retry=2
+retry-delay=5
 {{- if env "HTTP_PROXY" }}
 proxy={{ env "HTTP_PROXY" }}
 {{- end }}

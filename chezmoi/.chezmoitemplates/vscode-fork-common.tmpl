@@ -13,7 +13,7 @@
   (Code's [toml] and posit-only conditional differ; keeping the language
   blocks together at the top of each file is more readable than a few
   duplicated lines would cost).
-*/ -}}
+*/}}
   "breadcrumbs.enabled": true,
   "debug.terminal.clearBeforeReusing": true,
   "diffEditor.ignoreTrimWhitespace": false,
@@ -232,7 +232,8 @@
     "activityBarBadge.background": "#0000",
     "activityBarBadge.foreground": "#0000",
     "editor.selectionBackground": "#5B557566",
-    "editor.selectionHighlightBackground": "#5B557533"
+    "editor.selectionHighlightBackground": "#5B557533",
+{{ includeTemplate "dracula-pro-diff-colors.tmpl" . | trimAll "\n" }}
   },
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook"

@@ -735,6 +735,55 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
                 _antigravity_ext_dir(home),
                 antigravity, "Dracula Pro Antigravity extension",
             )
+    # Colorblind-safe diff/status colors (delta, git native [color], VS Code
+    # workbench.colorCustomizations): generated here, pre-chezmoi, not in
+    # _configure_dracula_pro_post. Their chezmoi templates `stat` the
+    # generated fragment at template-render time (unlike tmux.conf.tmpl,
+    # which only checks the *source* dp_dir and defers the actual file check
+    # to tmux's own runtime `source-file` -- see koopa-chezmoi-dotfiles skill,
+    # "Templates Run Before Post-Install Generators"). Generating post-chezmoi
+    # would make every fragment exist one run too late: chezmoi apply (inside
+    # main(), below) runs before _configure_dracula_pro_post, so the first
+    # apply would always render the fallback, converging only on a second run
+    # of the whole installer. mkdir() instead of an isdir() guard, since on a
+    # first-ever install chezmoi hasn't created these directories yet either.
+    diff_colorblind_variant = os.environ.get("KOOPA_DRACULA_PRO_VARIANT", "pro")
+    delta_dir = os.path.join(home, ".config", "delta")
+    mkdir(delta_dir)
+    dark_diff_colors = _generate_delta_diff_colors_gitconfig(dp_dir, diff_colorblind_variant)
+    if dark_diff_colors:
+        with open(
+            os.path.join(delta_dir, "dracula-pro-diff-colors.gitconfig"), "w"
+        ) as fh:
+            fh.write(dark_diff_colors)
+    alucard_diff_colors = _generate_delta_diff_colors_gitconfig(dp_dir, "alucard")
+    if alucard_diff_colors:
+        with open(
+            os.path.join(delta_dir, "dracula-pro-alucard-diff-colors.gitconfig"), "w"
+        ) as fh:
+            fh.write(alucard_diff_colors)
+    git_config_dir = os.path.join(home, ".config", "git")
+    mkdir(git_config_dir)
+    dark_native_colors = _generate_git_native_colorblind_gitconfig(dp_dir, diff_colorblind_variant)
+    if dark_native_colors:
+        with open(
+            os.path.join(git_config_dir, "dracula-pro-colorblind.gitconfig"), "w"
+        ) as fh:
+            fh.write(dark_native_colors)
+    alucard_native_colors = _generate_git_native_colorblind_gitconfig(dp_dir, "alucard")
+    if alucard_native_colors:
+        with open(
+            os.path.join(git_config_dir, "dracula-pro-alucard-colorblind.gitconfig"), "w"
+        ) as fh:
+            fh.write(alucard_native_colors)
+    vscode_diff_colors = _generate_vscode_diff_colorcustomizations(dp_dir, diff_colorblind_variant)
+    if vscode_diff_colors:
+        koopa_config_dir = os.path.join(xdg_config_home(), "koopa")
+        mkdir(koopa_config_dir)
+        with open(
+            os.path.join(koopa_config_dir, "vscode-diff-colors.json"), "w"
+        ) as fh:
+            fh.write(vscode_diff_colors)
 
 
 def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
@@ -1218,6 +1267,113 @@ def _dracula_dim_color(
     return _hex_lerp(fallback_fg, fallback_bg, 0.6)
 
 
+# Real theme labels contributed by the installed VS Code extension's
+# package.json (contributes.themes[].label) -- NOT reproducible from the
+# variant key via title-casing. "van-helsing" -> "Van Helsing" (a space, not
+# the hyphen str.title()/sprig's title would keep), verified against the
+# actual installed .vsix rather than assumed.
+_VSCODE_DRACULA_THEME_LABELS = {
+    "pro": "Dracula Pro",
+    "blade": "Dracula Pro (Blade)",
+    "buffy": "Dracula Pro (Buffy)",
+    "lincoln": "Dracula Pro (Lincoln)",
+    "morbius": "Dracula Pro (Morbius)",
+    "van-helsing": "Dracula Pro (Van Helsing)",
+    "alucard": "Dracula Pro (Alucard)",
+}
+
+
+def _generate_diff_colorblind_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
+    """Derive a colorblind-friendly diff/file-state palette (blue/orange/cyan).
+
+    Red/green is the classic hardest pair for red-green color-vision
+    deficiency (deuteranopia/protanopia) to distinguish. The Dracula Pro VS
+    Code extension, the vim colorscheme, and koopa's own generators before
+    this one all use plain green=added/red=removed -- there is no vendor
+    precedent for this substitution, it's a deliberate override, not an
+    adoption of upstream convention. What *is* adopted from upstream: orange
+    for a "modified/changed" role (verified against the vendor's own
+    gitDecoration.modifiedResourceForeground and the vim colorscheme's
+    DiffChange/DiffText groups -- both use orange, independently of this
+    file), and alpha levels for VS Code's translucent backgrounds (see
+    _generate_vscode_diff_colorcustomizations).
+
+    added=blue, removed=orange for diff-line concepts (delta, git diff,
+    VS Code diffEditor.*). added=blue, modified=orange (vendor-exact, never
+    overridden), deleted=cyan for file-state concepts (git status,
+    gitDecoration.*) -- deleted can't also be orange once modified owns it,
+    and the two roles co-occur in the same `git status` output.
+
+    Blue and orange sit on opposite sides of the color wheel and stay
+    distinguishable under every common color-vision simulation, but deriving
+    the diff-line backgrounds naively (each blended toward `bg` to hit the
+    *same* target contrast) makes the luminance-closeness problem worse, not
+    better: both land at nearly the same luminance, converging to a 1.01:1
+    mutual contrast almost regardless of hue. Deliberately using two
+    *different* target ratios (1.3 and 2.2) forces them apart in lightness
+    too, verified below. The file-state roles (raw_blue/raw_orange/raw_cyan,
+    used as plain text rather than a background wash) skip that treatment:
+    each git-status entry is always paired with its own English label
+    ("modified:", "deleted:"), so hue-only separation is enough there too --
+    the same standard the vendor's own theme uses for this same distinction.
+
+    Returns terminal-appropriate (pre-composited, opaque) colors for the
+    diff-line backgrounds -- a real terminal has no alpha compositing, so the
+    tint has to be baked in. VS Code's generator derives its own diff-line
+    values from raw_blue/raw_orange with an alpha suffix instead, since VS
+    Code composites live.
+    """
+    g = _parse_ghostty_palette(dp_dir, variant)
+    v = _parse_vim_palette(dp_dir, variant)
+    if not g or not v:
+        return None
+    bg, fg = v["bg"], v["fg"]
+    raw_blue, raw_cyan = g["blue"], g["cyan"]
+    raw_orange = _nudge_hue_toward(v["orange"], v["yellow"], 33.0)
+
+    def _tint(role_hex: str, target_ratio: float) -> str:
+        lo, hi = 0.0, 1.0
+        for _ in range(30):
+            mid = (lo + hi) / 2
+            if _contrast_ratio(_hex_lerp(role_hex, bg, mid), bg) >= target_ratio:
+                lo = mid
+            else:
+                hi = mid
+        return _hex_lerp(role_hex, bg, lo)
+
+    added_bg = _tint(raw_blue, 1.3)
+    removed_bg = _tint(raw_orange, 2.2)
+    assert _contrast_ratio(added_bg, removed_bg) >= 1.5, (
+        f"[diff-colorblind:{variant}] added/removed tints too similar: "
+        f"{_contrast_ratio(added_bg, removed_bg):.2f}:1"
+    )
+    assert _contrast_ratio(fg, added_bg) >= 4.5, (
+        f"[diff-colorblind:{variant}] text unreadable on added tint"
+    )
+    assert _contrast_ratio(fg, removed_bg) >= 4.5, (
+        f"[diff-colorblind:{variant}] text unreadable on removed tint"
+    )
+    assert _contrast_ratio(raw_blue, bg) >= 3.0, (
+        f"[diff-colorblind:{variant}] raw blue unreadable as text on bg"
+    )
+    assert _contrast_ratio(raw_orange, bg) >= 3.0, (
+        f"[diff-colorblind:{variant}] raw orange unreadable as text on bg"
+    )
+    assert _contrast_ratio(raw_cyan, bg) >= 3.0, (
+        f"[diff-colorblind:{variant}] raw cyan unreadable as text on bg"
+    )
+    return {
+        "bg": bg,
+        "fg": fg,
+        "raw_blue": raw_blue,
+        "raw_orange": raw_orange,
+        "raw_cyan": raw_cyan,
+        "added_bg": added_bg,
+        "removed_bg": removed_bg,
+        "vscode_theme_label": _VSCODE_DRACULA_THEME_LABELS.get(variant, "Dracula Pro"),
+    }
+
+
 def _generate_ghostty_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
     """Return the upstream Ghostty theme text with ANSI slot 8 replaced.
 
@@ -1314,6 +1470,153 @@ set-option -g status-right "#[fg={fg}] #h %I:%M %p "
 set-option -g status-style "bg={bg},fg={fg}"
 set-window-option -g window-status-current-format "#[fg={fg},bg={selection}] #I #W "
 set-window-option -g window-status-format "#[fg={comment}] #I #W "
+"""
+
+
+def _generate_delta_diff_colors_gitconfig(dp_dir: str, variant: str) -> str | None:
+    """Generate delta plus-style/minus-style overrides for colorblind-safe diffs.
+
+    Emitted as its own gitconfig fragment (not baked into
+    _generate_tmux_dracula_pro_conf-style full files) because theme.gitconfig.tmpl
+    already branches dark/light on KOOPA_COLOR_MODE -- unlike settings.json.tmpl,
+    which must never branch on it (see koopa-vscode skill). Delta re-reads its
+    config fresh on every invocation, so there's no live-app write race to avoid.
+    """
+    palette = _generate_diff_colorblind_palette(dp_dir, variant)
+    if not palette:
+        return None
+    return f"""\
+[delta "theme_{'dark' if variant != 'alucard' else 'light'}"]
+    plus-style = syntax "{palette['added_bg']}"
+    minus-style = syntax "{palette['removed_bg']}"
+"""
+
+
+def _generate_git_native_colorblind_gitconfig(dp_dir: str, variant: str) -> str | None:
+    """Generate colorblind-safe overrides for git's own [color] sections.
+
+    Only the roles that actually need to change: `color.branch.remote` (was
+    bare ANSI "yellow", which resolves to a muddy olive/brown in Alucard --
+    see _dracula_dim_color's docstring for the same defect in ANSI slot 8;
+    "yellow" has an analogous problem), `color.diff.meta` (same "yellow"
+    defect; reuses the already-verified dim/comment color instead, a better
+    semantic fit for de-emphasized metadata lines anyway), `color.diff.new`/
+    `old` and `color.status.added`/`changed`/`deleted` (the colorblind
+    substitution -- see _generate_diff_colorblind_palette's docstring for why
+    status.deleted is cyan, not orange, even though diff.old is orange).
+    `color.branch.current`/`local`, `color.diff.frag`/`newMoved`, and
+    `color.status.untracked` are untouched: no defect, or (untracked) matches
+    the vendor's own accepted default.
+    """
+    p = _generate_diff_colorblind_palette(dp_dir, variant)
+    if not p:
+        return None
+    meta = _dracula_dim_color(dp_dir, variant, p["fg"], p["bg"])
+    return f"""\
+[color "branch"]
+    remote = "{p['raw_cyan']}"
+[color "diff"]
+    meta = "{meta}"
+    new = "{p['raw_blue']}"
+    old = "{p['raw_orange']}"
+[color "status"]
+    added = "{p['raw_blue']}"
+    changed = "{p['raw_orange']}"
+    deleted = "{p['raw_cyan']}"
+"""
+
+
+# Color IDs verified against a real installed VS Code (workbench.desktop.main.js
+# for the diffEditor*/editorGutter*/scmGraph* core IDs; the bundled Git
+# extension's own package.json contributes.colors for gitDecoration.* -- those
+# are NOT in the core bundle, a plain grep against workbench.desktop.main.js
+# alone would have reported them as fake). See koopa-chezmoi-dotfiles skill
+# for the verification order this follows.
+#
+# Alpha suffixes (20/40/80) match the Dracula Pro extension's own theme JSON
+# exactly (themes/dracula-pro*.json colors.diffEditor.*) -- not invented, read
+# directly from the installed .vsix: line backgrounds 20 (~12%), text
+# backgrounds 40 (~25%), gutter 80 (~50%).
+#
+# diffEditor.*/diffEditorGutter.*/editorGutter.*/scmGraph.* are the DIFF-LINE
+# concept (added/removed within a diff) -- blue/orange, matching delta and
+# git's native color.diff. gitDecoration.* is the FILE-STATE concept (a whole
+# file added/modified/deleted) -- blue/cyan, NOT blue/orange, because orange
+# is reserved for "modified" (gitDecoration.modifiedResourceForeground is left
+# untouched at the vendor's own default, which already IS orange -- see
+# _generate_diff_colorblind_palette's docstring) and modified/deleted co-occur
+# in the same Source Control view, so they can't share a hue.
+_VSCODE_DIFF_LINE_KEYS_ADDED = (
+    # (color id, alpha suffix or None for opaque)
+    ("diffEditor.insertedLineBackground", "20"),
+    ("diffEditor.insertedTextBackground", "40"),
+    ("diffEditorGutter.insertedLineBackground", "80"),
+    ("editorGutter.addedBackground", "80"),
+    ("scmGraph.historyItemHoverAdditionsForeground", None),
+)
+_VSCODE_DIFF_LINE_KEYS_REMOVED = (
+    ("diffEditor.removedLineBackground", "20"),
+    ("diffEditor.removedTextBackground", "40"),
+    ("diffEditorGutter.removedLineBackground", "80"),
+    ("editorGutter.deletedBackground", "80"),
+    ("scmGraph.historyItemHoverDeletionsForeground", None),
+)
+_VSCODE_FILE_STATE_KEYS = (
+    ("gitDecoration.addedResourceForeground", "raw_blue"),
+    ("gitDecoration.deletedResourceForeground", "raw_cyan"),
+)
+
+
+def _generate_vscode_diff_colorcustomizations(dp_dir: str, variant: str) -> str | None:
+    """Generate a workbench.colorCustomizations fragment for colorblind-safe diffs.
+
+    VS Code composites color-customization values live over the underlying
+    syntax-highlighted text, so the *Background keys need alpha, not a
+    pre-composited opaque hex -- unlike the terminal (delta), which has no
+    compositing and needs the opposite (see
+    _generate_diff_colorblind_palette). Text-role keys (gitDecoration.*,
+    scmGraph.*) stay opaque since nothing is drawn on top of them.
+
+    Theme-scoped (``"[Dracula Pro]"``/``"[Dracula Pro (Alucard)]"``) rather
+    than KOOPA_COLOR_MODE-branched: settings.json.tmpl must never branch on
+    KOOPA_COLOR_MODE (write race with VS Code's own writes and the
+    color-mode-sync watcher -- see the koopa-vscode skill), and VS Code
+    already applies whichever scope matches the active theme on its own via
+    window.autoDetectColorScheme.
+
+    Returns only the two ``"[Theme]": { ... }`` blocks, comma-joined, with no
+    outer ``"workbench.colorCustomizations": { ... }`` wrapper and no leading
+    or trailing comma -- Code/Antigravity/Cursor already have an unscoped
+    "workbench.colorCustomizations" key (vscode-fork-common.tmpl); a second
+    one in the same object would silently lose whichever comes first when
+    parsed (JSON keeps the last duplicate key). The chezmoi partial
+    (dracula-pro-diff-colors.tmpl) splices this into whichever
+    "workbench.colorCustomizations" object each app's settings.json.tmpl
+    already has (or opens, for Positron, which has none).
+    """
+    dark = _generate_diff_colorblind_palette(dp_dir, variant)
+    light = _generate_diff_colorblind_palette(dp_dir, "alucard")
+    if not dark or not light:
+        return None
+
+    def _block(p: dict[str, str]) -> str:
+        lines = []
+        for key, alpha in _VSCODE_DIFF_LINE_KEYS_ADDED:
+            lines.append(f'      "{key}": "{p["raw_blue"]}{alpha or ""}",')
+        for key, alpha in _VSCODE_DIFF_LINE_KEYS_REMOVED:
+            lines.append(f'      "{key}": "{p["raw_orange"]}{alpha or ""}",')
+        for key, role in _VSCODE_FILE_STATE_KEYS:
+            lines.append(f'      "{key}": "{p[role]}",')
+        lines[-1] = lines[-1].rstrip(",")
+        return "\n".join(lines)
+
+    return f"""\
+    "[{dark['vscode_theme_label']}]": {{
+{_block(dark)}
+    }},
+    "[{light['vscode_theme_label']}]": {{
+{_block(light)}
+    }}
 """
 
 
@@ -2102,6 +2405,34 @@ def _darken_for_light_bg(hexcolor: str, bg: str = "#fafafa", min_ratio: float = 
             hi = mid
     r, g, b = colorsys.hls_to_rgb(h, lo, s_light)
     return f"#{int(r * 255):02X}{int(g * 255):02X}{int(b * 255):02X}"
+
+
+def _nudge_hue_toward(hexcolor: str, target_hex: str, min_hue_deg: float) -> str:
+    """Blend hexcolor toward target_hex only as far as needed to clear a hue floor.
+
+    Dracula Pro Alucard's "orange" role is #A34D14, hue ~24 degrees -- closer
+    to red (0 degrees) than to a hue most people would call orange (30-40
+    degrees). It's the vendor's own value (confirmed identical in the Fleet
+    experimental palette), not a koopa derivation bug, but it reads as "red"
+    when used for a role meant to signal "not red." Blending toward the
+    palette's own yellow (a real, verified color, never an invented literal)
+    raises the hue without inventing a new one. A no-op when the input
+    already clears the floor (Pro's orange is already hue ~35, untouched).
+    """
+    def _hue(hx: str) -> float:
+        h, _, _ = _hex_to_hls(hx)
+        return h * 360
+
+    if _hue(hexcolor) >= min_hue_deg:
+        return hexcolor
+    lo, hi = 0.0, 1.0
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        if _hue(_hex_lerp(hexcolor, target_hex, mid)) < min_hue_deg:
+            lo = mid
+        else:
+            hi = mid
+    return _hex_lerp(hexcolor, target_hex, hi)
 
 
 def _parse_fleet_palette(dp_dir: str, variant: str) -> dict[str, str] | None:

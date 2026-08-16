@@ -5,11 +5,15 @@
   Call with a list of glob patterns (already joined against .chezmoi.homeDir
   by the caller, since this partial does not receive the root context):
 
-    {{ template "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) }}
+    {{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
 
   Emits the two workbench.preferred*ColorTheme settings lines, each with a
-  trailing comma — call it only where a key follows.
-*/ -}}
+  trailing comma — call it only where a key follows. Use includeTemplate
+  piped through trimAll "\n" on its own line, with no trim markers — a plain
+  `template` action can't be piped, and a stray -}}/{{- at the call site eats
+  the neighboring line's indent or newline. See the "Go Template Whitespace
+  Trim" section in the koopa-chezmoi-dotfiles skill.
+*/}}
 {{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
 {{- $dpProInstalled := false -}}
 {{- range . -}}
@@ -25,6 +29,6 @@
 {{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
 {{-   end -}}
 {{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
-{{- end -}}
+{{- end }}
   "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
   "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",

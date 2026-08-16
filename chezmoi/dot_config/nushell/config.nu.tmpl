@@ -280,9 +280,9 @@ $env.config = {
     vi_insert: block # block, underscore, line (block is the default)
     vi_normal: underscore # block, underscore, line  (underscore is the default)
   }
-{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
+{{- if eq (env "KOOPA_COLOR_MODE") "dark" }}
   color_config: $dark_theme
-{{- else -}}
+{{- else }}
   color_config: $light_theme
 {{- end }}
   footer_mode: 25 # always, never, auto, or an integer row count

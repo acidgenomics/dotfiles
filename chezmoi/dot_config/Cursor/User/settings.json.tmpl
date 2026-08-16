@@ -27,7 +27,7 @@
   "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
 {{- end }}
-{{ template "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".cursor" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) }}
-{{ template "vscode-universal-common.tmpl" . }}
-{{ template "vscode-fork-common.tmpl" . }}
+{{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".cursor" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
+{{ includeTemplate "vscode-universal-common.tmpl" . | trimAll "\n" }}
+{{ includeTemplate "vscode-fork-common.tmpl" . | trimAll "\n" }}
 }

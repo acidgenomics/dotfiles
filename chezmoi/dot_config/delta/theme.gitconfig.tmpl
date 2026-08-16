@@ -1,4 +1,6 @@
 {{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") -}}
+{{- $deltaDiffColors := joinPath .chezmoi.homeDir ".config" "delta" "dracula-pro-diff-colors.gitconfig" -}}
+{{- $deltaAlucardDiffColors := joinPath .chezmoi.homeDir ".config" "delta" "dracula-pro-alucard-diff-colors.gitconfig" -}}
 {{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
 {{-   if $dpProInstalled -}}
 [delta]
@@ -6,12 +8,17 @@
 [delta "theme_dark"]
     dark = true
     syntax-theme = Dracula Pro
+{{    if stat $deltaDiffColors }}
+{{-     include $deltaDiffColors | trimAll "\n" -}}
+{{    end }}
 {{-   else -}}
 [delta]
     features = theme_dark
 [delta "theme_dark"]
     dark = true
     syntax-theme = Dracula
+    plus-style = syntax "#bd93f9"
+    minus-style = syntax "#ffb86c"
 {{-   end -}}
 {{- else -}}
 {{-   if $dpProInstalled -}}
@@ -20,11 +27,16 @@
 [delta "theme_light"]
     light = true
     syntax-theme = Dracula Pro (Alucard)
+{{    if stat $deltaAlucardDiffColors }}
+{{-     include $deltaAlucardDiffColors | trimAll "\n" -}}
+{{    end }}
 {{-   else -}}
 [delta]
     features = theme_light
 [delta "theme_light"]
     light = true
     syntax-theme = OneHalfLight
+    plus-style = syntax "#bd93f9"
+    minus-style = syntax "#ffb86c"
 {{-   end -}}
 {{- end }}

@@ -23,8 +23,6 @@
 {{- end }}
 {{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
   "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
-{{- else if lookPath "python3" }}
-  "python.defaultInterpreterPath": "{{ lookPath "python3" }}",
 {{- end }}
 {{- if lookPath "quarto" }}
   "quarto.path": "{{ lookPath "quarto" }}",
@@ -55,7 +53,10 @@
 {{- end }}
   "workbench.editor.empty.hint": "hidden",
   "workbench.keybindings.rstudioKeybindings": true,
-{{ template "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".positron" "extensions" "dracula-theme-pro.theme-dracula-pro-*") (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) }}
-{{ template "vscode-universal-common.tmpl" . }}
+{{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".positron" "extensions" "dracula-theme-pro.theme-dracula-pro-*") (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
+  "workbench.colorCustomizations": {
+{{ includeTemplate "dracula-pro-diff-colors.tmpl" . | trimAll "\n" }}
+  },
+{{ includeTemplate "vscode-universal-common.tmpl" . | trimAll "\n" }}
   "window.autoDetectColorScheme": true
 }

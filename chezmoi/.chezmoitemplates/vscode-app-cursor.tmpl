@@ -1,0 +1,41 @@
+{{- /*
+  Cursor's own settings.json body (deltas plus shared partials). Called by
+  dot_config/Cursor/User/settings.json.tmpl through
+  `fromJson | toPrettyJson`, which parses this partial's JSON output and
+  re-emits it 2-space indented with keys sorted. Call with `.` (the root
+  context) — this partial uses .chezmoi.homeDir, and vscode-fork-common.tmpl
+  (called from here) needs more of .chezmoi.*.
+*/}}
+{
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2
+  },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false,
+    "editor.inlineSuggest.enabled": true
+  },
+  "[r]": {
+{{- if lookPath "air" }}
+    "editor.defaultFormatter": "Posit.air-vscode",
+{{- end }}
+    "editor.formatOnSave": true
+  },
+  "[toml]": {
+    "editor.tabSize": 2
+  },
+{{- if lookPath "air" }}
+  "air.executablePath": "{{ lookPath "air" }}",
+  "air.executableStrategy": "path",
+{{- end }}
+{{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".cursor" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
+{{ includeTemplate "vscode-universal-common.tmpl" . | trimAll "\n" }}
+{{ includeTemplate "vscode-fork-common.tmpl" . | trimAll "\n" }}
+}

@@ -190,13 +190,13 @@
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.defaultProfile.osx": "bash",
 {{- end }}
+  "terminal.integrated.enableFileLinks": "off",
   "terminal.integrated.enableMultiLinePasteWarning": "never",
 {{- if eq .chezmoi.os "darwin" }}
   "terminal.integrated.env.osx": {
     "PYTHONPATH": "${workspaceFolder}"
   },
 {{- end }}
-  "terminal.integrated.enableFileLinks": "off",
   "terminal.integrated.initialHint": false,
   "terminal.integrated.localEchoEnabled": "off",
 {{- if eq .chezmoi.os "darwin" }}
@@ -235,14 +235,14 @@
     "editor.selectionHighlightBackground": "#5B557533",
 {{ includeTemplate "dracula-pro-diff-colors.tmpl" . | trimAll "\n" }}
   },
-  "workbench.editorAssociations": {
-    "*.ipynb": "jupyter-notebook"
-  },
   "workbench.editor.closeOnFileDelete": true,
   "workbench.editor.empty.hint": "hidden",
   "workbench.editor.enablePreview": true,
   "workbench.editor.highlightModifiedTabs": true,
   "workbench.editor.languageDetection": false,
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
   "workbench.iconTheme": "vscode-icons",
   "workbench.panel.defaultLocation": "bottom",
   "workbench.tree.renderIndentGuides": "always"

@@ -1,0 +1,34 @@
+{{- /*
+  Shared Dracula Pro theme-name detection, used by every VS Code-family
+  User/settings.json.tmpl (Code, Antigravity, Cursor, Positron).
+
+  Call with a list of glob patterns (already joined against .chezmoi.homeDir
+  by the caller, since this partial does not receive the root context):
+
+    {{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
+
+  Emits the two workbench.preferred*ColorTheme settings lines, each with a
+  trailing comma — call it only where a key follows. Use includeTemplate
+  piped through trimAll "\n" on its own line, with no trim markers — a plain
+  `template` action can't be piped, and a stray -}}/{{- at the call site eats
+  the neighboring line's indent or newline. See the "Go Template Whitespace
+  Trim" section in the koopa-chezmoi-dotfiles skill.
+*/}}
+{{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
+{{- $dpProInstalled := false -}}
+{{- range . -}}
+{{-   if glob . -}}
+{{-     $dpProInstalled = true -}}
+{{-   end -}}
+{{- end -}}
+{{- $dpDarkTheme := "Dracula Theme" -}}
+{{- $dpLightTheme := "Atom One Light" -}}
+{{- if $dpProInstalled -}}
+{{-   $dpDarkTheme = "Dracula Pro" -}}
+{{-   if and $dpv (ne $dpv "pro") -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-   end -}}
+{{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
+{{- end }}
+  "workbench.preferredDarkColorTheme": "{{ $dpDarkTheme }}",
+  "workbench.preferredLightColorTheme": "{{ $dpLightTheme }}",

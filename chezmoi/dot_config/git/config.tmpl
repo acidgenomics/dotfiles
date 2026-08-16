@@ -7,19 +7,46 @@
 [color "branch"]
     current = green bold
     local = green
-    remote = yellow
 [color "diff"]
     frag = magenta
+    newMoved = cyan
+    oldMoved = magenta
+[color "status"]
+    untracked = yellow
+{{- $dpProInstalled := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro") -}}
+{{- $gitColorblindColors := joinPath .chezmoi.homeDir ".config" "git" "dracula-pro-colorblind.gitconfig" -}}
+{{- $gitAlucardColorblindColors := joinPath .chezmoi.homeDir ".config" "git" "dracula-pro-alucard-colorblind.gitconfig" -}}
+{{ if eq (env "KOOPA_COLOR_MODE") "dark" -}}
+{{-   if and $dpProInstalled (stat $gitColorblindColors) }}
+{{      include $gitColorblindColors | trimAll "\n" -}}
+{{-   else }}
+[color "branch"]
+    remote = yellow
+[color "diff"]
     meta = yellow
     new = green
-    newMoved = cyan
     old = red
-    oldMoved = blue
 [color "status"]
     added = green
     changed = yellow
     deleted = red
-    untracked = yellow
+{{-   end -}}
+{{- else -}}
+{{-   if and $dpProInstalled (stat $gitAlucardColorblindColors) }}
+{{      include $gitAlucardColorblindColors | trimAll "\n" -}}
+{{-   else }}
+[color "branch"]
+    remote = yellow
+[color "diff"]
+    meta = yellow
+    new = green
+    old = red
+[color "status"]
+    added = green
+    changed = yellow
+    deleted = red
+{{-   end -}}
+{{- end }}
 
 [commit]
     verbose = true

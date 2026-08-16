@@ -1,0 +1,71 @@
+{{- /*
+  Positron's own settings.json body (deltas plus shared partials). Positron
+  is structured differently from Code/Antigravity/Cursor by design and does
+  not call vscode-fork-common.tmpl — see the koopa-vscode skill. Called by
+  dot_config/Positron/User/settings.json.tmpl through
+  `fromJson | toPrettyJson`, which parses this partial's JSON output and
+  re-emits it 2-space indented with keys sorted. Call with `.` (the root
+  context) — this partial uses .chezmoi.homeDir and .chezmoi.os.
+*/}}
+{
+  "[python]": {
+    "editor.formatOnSave": true
+  },
+  "[r]": {
+    "editor.defaultFormatter": "Posit.air-vscode",
+    "editor.formatOnSave": true
+  },
+  "editor.autoClosingComments": "never",
+  "editor.autoClosingDelete": "never",
+  "editor.autoClosingOvertype": "never",
+  "editor.autoSurround": "never",
+  "editor.codeLens": false,
+  "editor.pasteAs.enabled": false,
+  "files.associations": {
+    "renv.lock": "json"
+  },
+{{- if lookPath "git" }}
+  "git.path": "{{ lookPath "git" }}",
+{{- end }}
+{{- if lookPath "conda" }}
+  "python.condaPath": "{{ lookPath "conda" }}",
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
+  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
+{{- end }}
+{{- if lookPath "quarto" }}
+  "quarto.path": "{{ lookPath "quarto" }}",
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.defaultProfile.osx": "bash",
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+  "terminal.integrated.profiles.osx": {
+    "bash": {
+      "args": [
+        "-il"
+      ],
+      "icon": "terminal-bash",
+      "path": "{{ lookPath "bash" }}"
+    },
+    "zsh": {
+      "args": [
+        "-il"
+      ],
+      "env": {
+        "ZDOTDIR": "${env:HOME}/.config/zsh"
+      },
+      "icon": "terminal-bash",
+      "path": "/bin/zsh"
+    }
+  },
+{{- end }}
+  "workbench.editor.empty.hint": "hidden",
+  "workbench.keybindings.rstudioKeybindings": true,
+{{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".positron" "extensions" "dracula-theme-pro.theme-dracula-pro-*") (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
+  "workbench.colorCustomizations": {
+{{ includeTemplate "dracula-pro-diff-colors.tmpl" . | trimAll "\n" }}
+  },
+{{ includeTemplate "vscode-universal-common.tmpl" . | trimAll "\n" }}
+  "window.autoDetectColorScheme": true
+}

@@ -1,5 +1,6 @@
 {{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
 {{- $vimPalette := joinPath $dataHome "dracula-pro" "themes" "vim" "autoload" "dracula_pro.vim" -}}
+{{- $koopaMarketplace := joinPath $dataHome "koopa" ".claude-plugin" "marketplace.json" -}}
 {
   "alwaysThinkingEnabled": true,
   "attribution": {
@@ -19,6 +20,9 @@
   "enabledPlugins": {
     "astral@astral-sh": true,
     "claude-code-setup@claude-plugins-official": true,
+{{- if stat $koopaMarketplace }}
+    "koopa@koopa": true,
+{{- end }}
     "pyright-lsp@claude-plugins-official": true
   },
   "env": {
@@ -66,6 +70,14 @@
         "repo": "anthropics/claude-plugins-official"
       }
     },
+{{- if stat $koopaMarketplace }}
+    "koopa": {
+      "source": {
+        "source": "directory",
+        "path": "{{ joinPath $dataHome "koopa" }}"
+      }
+    },
+{{- end }}
     "life-sciences": {
       "source": {
         "source": "github",

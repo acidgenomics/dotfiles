@@ -1251,25 +1251,26 @@ def _parse_vim_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
     Unlike the ghostty palette (16 raw ANSI slots), this source names
     orange/pink/purple explicitly and provides a 5-step background ramp
     (bg/bgdark/bgdarker/bglight/bglighter), which the per-token Claude Code
-    theme mapping needs and the ANSI-only ghostty palette lacks.
+    theme mapping needs and the ANSI-only ghostty palette lacks. Dark variant
+    files only override the roles that differ from the base palette, so start
+    with the base autoload file and then apply variant overrides.
     """
-    if variant == "pro":
-        path = os.path.join(dp_dir, "themes", "vim", "autoload", "dracula_pro.vim")
-    else:
+    vim_dir = os.path.join(dp_dir, "themes", "vim")
+    paths = [os.path.join(vim_dir, "autoload", "dracula_pro.vim")]
+    if variant != "pro":
         # Variant keys are hyphenated (e.g. "van-helsing"); the shipped Vim
         # colorscheme filenames use an underscore.
         slug = variant.replace("-", "_")
-        path = os.path.join(
-            dp_dir, "themes", "vim", "colors", f"dracula_pro_{slug}.vim"
-        )
-    if not os.path.isfile(path):
+        paths.append(os.path.join(vim_dir, "colors", f"dracula_pro_{slug}.vim"))
+    if not all(os.path.isfile(path) for path in paths):
         return None
     palette: dict[str, str] = {}
-    with open(path) as fh:
-        for line in fh:
-            match = _VIM_PALETTE_RE.match(line)
-            if match:
-                palette[match.group(1)] = match.group(2)
+    for path in paths:
+        with open(path) as fh:
+            for line in fh:
+                match = _VIM_PALETTE_RE.match(line)
+                if match:
+                    palette[match.group(1)] = match.group(2)
     return palette or None
 
 

@@ -26,7 +26,7 @@
 {{- if $dpProInstalled -}}
 {{-   $dpDarkTheme = "Dracula Pro" -}}
 {{-   if and $dpv (ne $dpv "pro") -}}
-{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title (replace "-" " " $dpv)) -}}
 {{-   end -}}
 {{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
 {{- end }}

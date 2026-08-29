@@ -1008,6 +1008,32 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(claude_themes, "dracula-pro-alucard.json"), "w"
             ) as fh:
                 fh.write(claude_alucard)
+    # Obsidian: generate one theme.css with real .theme-dark (variant) and
+    # .theme-light (always alucard) blocks -- Obsidian's own Settings >
+    # Appearance toggle switches modes natively, so unlike every other app
+    # above this needs no KOOPA_COLOR_MODE branching. Vaults are per-vault,
+    # not a fixed config dir, so this is symlinked into every vault found in
+    # Obsidian's own registry, not a single hardcoded path. Never touch
+    # .obsidian/appearance.json -- Obsidian owns and rewrites that file on
+    # every settings change; picking "Dracula Pro" stays a one-time manual
+    # step in the app, same as any other community theme.
+    obsidian_css = _generate_obsidian_dracula_pro_theme(dp_dir, variant)
+    if obsidian_css:
+        obsidian_staging = os.path.join(
+            xdg_config_home(), "koopa", "obsidian-themes", "dracula-pro"
+        )
+        mkdir(obsidian_staging)
+        css_path = os.path.join(obsidian_staging, "theme.css")
+        manifest_path = os.path.join(obsidian_staging, "manifest.json")
+        with open(css_path, "w") as fh:
+            fh.write(obsidian_css)
+        with open(manifest_path, "w") as fh:
+            fh.write(_generate_obsidian_manifest())
+        for obsidian_dir in _obsidian_vault_dirs(home):
+            theme_dir = os.path.join(obsidian_dir, "themes", "Dracula Pro")
+            mkdir(theme_dir)
+            ln(css_path, os.path.join(theme_dir, "theme.css"))
+            ln(manifest_path, os.path.join(theme_dir, "manifest.json"))
     # Zsh: generate palette files sourced at runtime by .zshrc.
     zsh_config = os.path.join(home, ".config", "zsh")
     if os.path.isdir(zsh_config):
@@ -2165,6 +2191,186 @@ def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
         "overrides": overrides,
     }
     return json.dumps(theme, indent=2) + "\n"
+
+
+# Obsidian's own "--color-base-NN" ramp step -> blend fraction from bg (0.0)
+# toward fg (1.0). Obsidian derives most of its chrome from this ramp
+# (--background-secondary from base-20, --text-muted from base-70, etc.), so
+# generating the ramp covers far more UI than listing each semantic role by
+# hand. bg itself is step "00" and fg is step "100" (added separately below).
+_OBSIDIAN_RAMP_STEPS = {
+    "05": 0.03, "10": 0.06, "20": 0.10, "25": 0.13, "30": 0.16, "35": 0.20,
+    "40": 0.25, "50": 0.36, "60": 0.50, "70": 0.66,
+}
+
+# Stable emission order for the generated theme.css blocks.
+_OBSIDIAN_VAR_ORDER = (
+    "--color-base-00", "--color-base-05", "--color-base-10", "--color-base-20",
+    "--color-base-25", "--color-base-30", "--color-base-35", "--color-base-40",
+    "--color-base-50", "--color-base-60", "--color-base-70", "--color-base-100",
+    "--color-accent", "--color-accent-1", "--color-accent-2",
+    "--color-red", "--color-orange", "--color-yellow", "--color-green",
+    "--color-cyan", "--color-purple", "--color-pink", "--color-blue",
+    "--text-on-accent", "--text-selection",
+)
+
+# Contrast requirements checked against --color-base-00 (the mode's bg).
+# --color-base-50 only backs --text-faint in Obsidian's own var() chain, so
+# it gets a lower floor than the AA text tokens.
+_OBSIDIAN_AA_TEXT_VARS = {
+    "--color-base-70", "--color-base-100", "--color-accent",
+    "--color-accent-1", "--color-accent-2", "--color-red", "--color-orange",
+    "--color-yellow", "--color-green", "--color-cyan", "--color-purple",
+    "--color-pink", "--color-blue",
+}
+_OBSIDIAN_FAINT_VARS = {"--color-base-50"}
+
+
+def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
+    """Derive one mode's worth of Obsidian CSS variables from a Vim palette."""
+    p = _parse_vim_palette(dp_dir, variant)
+    if not p:
+        return None
+    bg, fg = p["bg"], p["fg"]
+    accent = p["purple"]
+    ramp: dict[str, str] = {"--color-base-00": bg, "--color-base-100": fg}
+    for step, frac in _OBSIDIAN_RAMP_STEPS.items():
+        ramp[f"--color-base-{step}"] = _hex_lerp(bg, fg, frac)
+    ramp.update({
+        "--color-accent": accent,
+        # accent-1/accent-2 are Obsidian's own hover/secondary accent slots.
+        "--color-accent-1": _hex_lerp(accent, fg, 0.20),
+        "--color-accent-2": _hex_lerp(accent, p["pink"], 0.35),
+        "--color-red": p["red"],
+        "--color-orange": p["orange"],
+        "--color-yellow": p["yellow"],
+        "--color-green": p["green"],
+        "--color-cyan": p["cyan"],
+        "--color-purple": p["purple"],
+        "--color-pink": p["pink"],
+        # Dracula Pro has no distinct blue role; split the difference
+        # between purple and cyan, same approach as the Claude theme's
+        # synthesized indigo.
+        "--color-blue": _hex_lerp(p["purple"], p["cyan"], 0.5),
+        # bg on the accent clears AA in every variant; fg on the accent does
+        # not (measured 2.89:1 pro / 2.64:1 alucard, both below 4.5:1).
+        "--text-on-accent": bg,
+        "--text-selection": p["selection"],
+    })
+    return ramp
+
+
+def _assert_obsidian_contrast(v: dict[str, str], variant: str) -> None:
+    """Check WCAG contrast for one mode's Obsidian variable set."""
+    bg = v["--color-base-00"]
+    for token in _OBSIDIAN_AA_TEXT_VARS:
+        ratio = _contrast_ratio(v[token], bg)
+        assert ratio >= 4.5, (
+            f"[obsidian-theme:{variant}] {token} contrast {ratio:.2f}:1 < 4.5:1 AA"
+        )
+    for token in _OBSIDIAN_FAINT_VARS:
+        ratio = _contrast_ratio(v[token], bg)
+        assert ratio >= 2.0, (
+            f"[obsidian-theme:{variant}] {token} contrast {ratio:.2f}:1 < 2.0:1"
+        )
+    on_accent_ratio = _contrast_ratio(v["--text-on-accent"], v["--color-accent"])
+    assert on_accent_ratio >= 4.5, (
+        f"[obsidian-theme:{variant}] --text-on-accent vs --color-accent "
+        f"contrast {on_accent_ratio:.2f}:1 < 4.5:1 AA"
+    )
+    # The ramp is built by blending bg toward fg with an increasing fraction,
+    # so its luminance must move monotonically from bg to fg. This is the
+    # guard against a variant where the named Vim ramp roles (bglight, etc.)
+    # don't move consistently -- Alucard's bglight equals its bg exactly --
+    # in case a future edit ever swaps the lerp for one of those named roles.
+    order = (
+        "00", "05", "10", "20", "25", "30", "35", "40", "50", "60", "70", "100"
+    )
+    lums = [_wcag_relative_luminance(v[f"--color-base-{step}"]) for step in order]
+    direction = 1 if lums[-1] > lums[0] else -1
+    for i in range(len(lums) - 1):
+        assert (lums[i + 1] - lums[i]) * direction >= -1e-9, (
+            f"[obsidian-theme:{variant}] base ramp not monotone at step {order[i + 1]}"
+        )
+
+
+def _generate_obsidian_dracula_pro_theme(dp_dir: str, dark_variant: str) -> str | None:
+    """Generate one Obsidian theme.css with real dark and light mode blocks.
+
+    Unlike every other Dracula Pro consumer in this file, Obsidian already
+    has a native Base color scheme toggle (Settings > Appearance), so a
+    single file with a genuine ``.theme-dark`` block (dark_variant) and a
+    genuine ``.theme-light`` block (always alucard) covers both modes --
+    no KOOPA_COLOR_MODE branching needed on the Obsidian side.
+    """
+    dark_vars = _obsidian_color_vars(dp_dir, dark_variant)
+    light_vars = _obsidian_color_vars(dp_dir, "alucard")
+    if not dark_vars or not light_vars:
+        return None
+    _assert_obsidian_contrast(dark_vars, dark_variant)
+    _assert_obsidian_contrast(light_vars, "alucard")
+    lines = [
+        "/* Generated by koopa from the user's local Dracula Pro assets. */",
+        "/* Do not edit by hand -- see install:_generate_obsidian_dracula_pro_theme. */",
+        "",
+        ".theme-dark {",
+    ]
+    lines += [f"    {key}: {dark_vars[key]};" for key in _OBSIDIAN_VAR_ORDER]
+    lines += ["}", "", ".theme-light {"]
+    lines += [f"    {key}: {light_vars[key]};" for key in _OBSIDIAN_VAR_ORDER]
+    lines += ["}", ""]
+    return "\n".join(lines)
+
+
+def _generate_obsidian_manifest() -> str:
+    """Generate a minimal, honest Obsidian theme manifest.
+
+    Not a vendor or "official" claim -- this is a derived, unofficial port
+    generated from the user's own paid Dracula Pro palette.
+    """
+    manifest = {
+        "name": "Dracula Pro",
+        "version": "1.0.0",
+        "minAppVersion": "1.0.0",
+        "author": "koopa (unofficial; generated from a local Dracula Pro license)",
+    }
+    return json.dumps(manifest, indent=2) + "\n"
+
+
+def _obsidian_vault_dirs(home: str) -> list[str]:
+    """Return the .obsidian dir of every vault registered with Obsidian.app.
+
+    Obsidian themes are per-vault, not a single fixed config dir like every
+    other app this pattern touches, so resolve every vault from Obsidian's
+    own registry file instead of assuming one path.
+    """
+    if is_macos():
+        registry = os.path.join(
+            home, "Library", "Application Support", "obsidian", "obsidian.json"
+        )
+    else:
+        registry = os.path.join(xdg_config_home(), "obsidian", "obsidian.json")
+    if not os.path.isfile(registry):
+        return []
+    try:
+        with open(registry) as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        return []
+    vaults = data.get("vaults") if isinstance(data, dict) else None
+    if not isinstance(vaults, dict):
+        return []
+    dirs = []
+    for entry in vaults.values():
+        if not isinstance(entry, dict):
+            continue
+        path = entry.get("path")
+        if not isinstance(path, str):
+            continue
+        obsidian_dir = os.path.join(path, ".obsidian")
+        if os.path.isdir(obsidian_dir):
+            dirs.append(obsidian_dir)
+    return dirs
 
 
 def _wcag_relative_luminance(hexcolor: str) -> float:

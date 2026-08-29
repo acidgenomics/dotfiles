@@ -1,5 +1,6 @@
 {{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
 {{- $vimPalette := joinPath $dataHome "dracula-pro" "themes" "vim" "autoload" "dracula_pro.vim" -}}
+{{- $koopaMarketplace := joinPath $dataHome "koopa" ".claude-plugin" "marketplace.json" -}}
 {
   "alwaysThinkingEnabled": true,
   "attribution": {
@@ -19,6 +20,9 @@
   "enabledPlugins": {
     "astral@astral-sh": true,
     "claude-code-setup@claude-plugins-official": true,
+{{- if stat $koopaMarketplace }}
+    "koopa@koopa": true,
+{{- end }}
     "pyright-lsp@claude-plugins-official": true
   },
   "env": {
@@ -66,6 +70,14 @@
         "repo": "anthropics/claude-plugins-official"
       }
     },
+{{- if stat $koopaMarketplace }}
+    "koopa": {
+      "source": {
+        "source": "directory",
+        "path": "{{ joinPath $dataHome "koopa" }}"
+      }
+    },
+{{- end }}
     "life-sciences": {
       "source": {
         "source": "github",
@@ -88,7 +100,52 @@
   },
   "permissions": {
     "allow": [
-      "Bash(*)",
+      "Bash(awk:*)",
+      "Bash(basename:*)",
+      "Bash(cat:*)",
+      "Bash(col:*)",
+      "Bash(command -v:*)",
+      "Bash(cut:*)",
+      "Bash(diff:*)",
+      "Bash(dirname:*)",
+      "Bash(echo:*)",
+      "Bash(env)",
+      "Bash(file:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(man:*)",
+      "Bash(otool:*)",
+      "Bash(printenv:*)",
+      "Bash(rg:*)",
+      "Bash(sed:*)",
+      "Bash(sort:*)",
+      "Bash(stat:*)",
+      "Bash(tail:*)",
+      "Bash(tr:*)",
+      "Bash(type:*)",
+      "Bash(uniq:*)",
+      "Bash(wc:*)",
+      "Bash(which:*)",
+      "Bash(git blame:*)",
+      "Bash(git branch:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git remote:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git show:*)",
+      "Bash(git stash list:*)",
+      "Bash(git status:*)",
+      "Bash(git worktree list:*)",
+      "Bash(bash:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(sh:*)",
+      "Bash(xargs:*)",
       "Edit(**)",
       "Edit(//**/*lessons.md)",
       "Grep",

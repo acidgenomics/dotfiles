@@ -1504,7 +1504,7 @@ def _generate_delta_diff_colors_gitconfig(dp_dir: str, variant: str) -> str | No
     which must never branch on it (see koopa-vscode skill). Delta re-reads its
     config fresh on every invocation, so there's no live-app write race to avoid.
     """
-    palette = _generate_diff_colorblind_palette(dp_dir, variant)
+    palette = _generate_diff_palette(dp_dir, variant)
     if not palette:
         return None
     return f"""\
@@ -1514,8 +1514,8 @@ def _generate_delta_diff_colors_gitconfig(dp_dir: str, variant: str) -> str | No
 """
 
 
-def _generate_git_native_colorblind_gitconfig(dp_dir: str, variant: str) -> str | None:
-    """Generate colorblind-safe overrides for git's own [color] sections.
+def _generate_git_native_diff_gitconfig(dp_dir: str, variant: str) -> str | None:
+    """Generate overrides for git's own [color] sections to match the diff palette.
 
     Only the roles that actually need to change: `color.branch.remote` (was
     bare ANSI "yellow", which resolves to a muddy olive/brown in Alucard --
@@ -1523,14 +1523,16 @@ def _generate_git_native_colorblind_gitconfig(dp_dir: str, variant: str) -> str 
     "yellow" has an analogous problem), `color.diff.meta` (same "yellow"
     defect; reuses the already-verified dim/comment color instead, a better
     semantic fit for de-emphasized metadata lines anyway), and `color.diff.new`/
-    `old` and `color.status.added`/`changed`/`deleted` (green/red/cyan --
-    see _generate_diff_colorblind_palette's docstring for why status.deleted
-    stays cyan rather than red, even though diff.old is now red).
+    `old` and `color.status.added`/`changed` (green/red -- see
+    _generate_diff_palette's docstring for why status.changed is the nudged
+    orange, not red, even though diff.old is red). `color.status` has no
+    `deleted` slot in git itself -- the deleted signal lives only in
+    gitDecoration.deletedResourceForeground on the VS Code side (raw_cyan).
     `color.branch.current`/`local`, `color.diff.frag`/`newMoved`, and
     `color.status.untracked` are untouched: no defect, or (untracked) matches
     the vendor's own accepted default.
     """
-    p = _generate_diff_colorblind_palette(dp_dir, variant)
+    p = _generate_diff_palette(dp_dir, variant)
     if not p:
         return None
     meta = _dracula_dim_color(dp_dir, variant, p["fg"], p["bg"])
@@ -1543,8 +1545,7 @@ def _generate_git_native_colorblind_gitconfig(dp_dir: str, variant: str) -> str 
     old = "{p['raw_removed']}"
 [color "status"]
     added = "{p['raw_added']}"
-    changed = "{p['raw_removed']}"
-    deleted = "{p['raw_cyan']}"
+    changed = "{p['raw_modified']}"
 """
 
 
@@ -1566,7 +1567,7 @@ def _generate_git_native_colorblind_gitconfig(dp_dir: str, variant: str) -> str 
 # file added/modified/deleted) -- green/cyan, NOT green/red, because orange
 # is reserved for "modified" (gitDecoration.modifiedResourceForeground is left
 # untouched at the vendor's own default, which already IS orange -- see
-# _generate_diff_colorblind_palette's docstring) and modified/deleted co-occur
+# _generate_diff_palette's docstring) and modified/deleted co-occur
 # in the same Source Control view, so deleted can't be red without risking a
 # clash with removed elsewhere in the same session.
 _VSCODE_DIFF_LINE_KEYS_ADDED = (
@@ -1591,13 +1592,13 @@ _VSCODE_FILE_STATE_KEYS = (
 
 
 def _generate_vscode_diff_colorcustomizations(dp_dir: str, variant: str) -> str | None:
-    """Generate a workbench.colorCustomizations fragment for colorblind-safe diffs.
+    """Generate a workbench.colorCustomizations fragment for diff colors.
 
     VS Code composites color-customization values live over the underlying
     syntax-highlighted text, so the *Background keys need alpha, not a
     pre-composited opaque hex -- unlike the terminal (delta), which has no
     compositing and needs the opposite (see
-    _generate_diff_colorblind_palette). Text-role keys (gitDecoration.*,
+    _generate_diff_palette). Text-role keys (gitDecoration.*,
     scmGraph.*) stay opaque since nothing is drawn on top of them.
 
     Theme-scoped (``"[Dracula Pro]"``/``"[Dracula Pro (Alucard)]"``) rather
@@ -1617,8 +1618,8 @@ def _generate_vscode_diff_colorcustomizations(dp_dir: str, variant: str) -> str 
     "workbench.colorCustomizations" object each app's settings.json.tmpl
     already has (or opens, for Positron, which has none).
     """
-    dark = _generate_diff_colorblind_palette(dp_dir, variant)
-    light = _generate_diff_colorblind_palette(dp_dir, "alucard")
+    dark = _generate_diff_palette(dp_dir, variant)
+    light = _generate_diff_palette(dp_dir, "alucard")
     if not dark or not light:
         return None
 

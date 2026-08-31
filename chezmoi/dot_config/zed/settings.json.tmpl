@@ -6,14 +6,54 @@
 {{- if $dpProInstalled -}}
 {{-   $dpDarkTheme = "Dracula Pro" -}}
 {{-   if and $dpv (ne $dpv "pro") -}}
-{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title $dpv) -}}
+{{-     $dpDarkTheme = printf "Dracula Pro (%s)" (title (replace "-" " " $dpv)) -}}
 {{-   end -}}
 {{-   $dpLightTheme = "Dracula Pro (Alucard)" -}}
 {{- end -}}
 {
+  "agent": {
+    "favorite_models": [
+      {
+        "provider": "zed.dev",
+        "model": "claude-opus-5"
+      },
+      {
+        "provider": "zed.dev",
+        "model": "claude-sonnet-5"
+      }
+    ],
+    "profiles": {
+      "plan": {
+        "name": "Plan",
+        "tools": {
+          "read_file": true,
+          "grep": true,
+          "terminal": false,
+          "edit_file": false
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {},
+        "default_model": {
+          "provider": "zed.dev",
+          "model": "claude-opus-5"
+        }
+      },
+      "write": {
+        "default_model": {
+          "provider": "zed.dev",
+          "model": "claude-sonnet-5"
+        }
+      }
+    }
+  },
   "theme": {
     "mode": "system",
     "dark": "{{ $dpDarkTheme }}",
     "light": "{{ $dpLightTheme }}"
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+    "anthropic_retention": false
   }
 }

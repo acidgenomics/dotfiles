@@ -1,5 +1,6 @@
 .install/
 .koopa*
+chezmoistate*.boltdb
 etc/vscode/*/node_modules/
 etc/vscode/*/out/
 etc/vscode/*/package-lock.json

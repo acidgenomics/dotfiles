@@ -36,6 +36,20 @@ _DRACULA_VARIANT_NAMES = {
     "alucard": "Dracula Pro Alucard",
 }
 
+# variant -> vendor .tmTheme filename under themes/sublime/. Single source of
+# truth: this table used to be copy-pasted separately into the bat-symlink
+# block and _tmtheme_colors, and had already drifted apart in spirit (same
+# keys, no shared definition) -- see lessons.md on duplicated tables.
+_TMTHEME_NAME_MAP = {
+    "pro": "Dracula Pro.tmTheme",
+    "blade": "Dracula Pro (Blade).tmTheme",
+    "buffy": "Dracula Pro (Buffy).tmTheme",
+    "lincoln": "Dracula Pro (Lincoln).tmTheme",
+    "morbius": "Dracula Pro (Morbius).tmTheme",
+    "van-helsing": "Dracula Pro (Van Helsing).tmTheme",
+    "alucard": "Dracula Pro (Alucard).tmTheme",
+}
+
 
 def _add_config_link(source: str, name: str) -> None:
     config_dir = os.path.join(xdg_config_home(), "koopa")
@@ -1110,27 +1124,37 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
         if alucard_btop:
             with open(os.path.join(btop_themes, "dracula-pro-alucard.theme"), "w") as fh:
                 fh.write(alucard_btop)
-    # Bat: symlink Pro .tmTheme files into ~/.config/bat/themes/ and rebuild cache.
-    _tmtheme_name_map = {
-        "pro": "Dracula Pro.tmTheme",
-        "blade": "Dracula Pro (Blade).tmTheme",
-        "buffy": "Dracula Pro (Buffy).tmTheme",
-        "lincoln": "Dracula Pro (Lincoln).tmTheme",
-        "morbius": "Dracula Pro (Morbius).tmTheme",
-        "van-helsing": "Dracula Pro (Van Helsing).tmTheme",
-        "alucard": "Dracula Pro (Alucard).tmTheme",
-    }
+    # Bat: write Pro .tmTheme files into ~/.config/bat/themes/ and rebuild cache.
+    # Comment scope is patched for contrast (see
+    # _generate_dracula_pro_comment_fixed_tmtheme's docstring) rather than
+    # symlinked verbatim from upstream, so this also affects plain `bat
+    # <file>` rendering, not just delta's diff view.
     bat_themes = os.path.join(home, ".config", "bat", "themes")
     sublime_src = os.path.join(dp_dir, "themes", "sublime")
     if os.path.isdir(sublime_src):
         os.makedirs(bat_themes, exist_ok=True)
-        dark_fname = _tmtheme_name_map.get(variant, "Dracula Pro.tmTheme")
-        dark_tmtheme = os.path.join(sublime_src, dark_fname)
-        if os.path.isfile(dark_tmtheme):
-            ln(dark_tmtheme, os.path.join(bat_themes, "Dracula Pro.tmTheme"))
-        alucard_tmtheme = os.path.join(sublime_src, "Dracula Pro (Alucard).tmTheme")
-        if os.path.isfile(alucard_tmtheme):
-            ln(alucard_tmtheme, os.path.join(bat_themes, "Dracula Pro (Alucard).tmTheme"))
+        for theme_variant, dest_name in (
+            (variant, "Dracula Pro.tmTheme"),
+            ("alucard", "Dracula Pro (Alucard).tmTheme"),
+        ):
+            dest = os.path.join(bat_themes, dest_name)
+            fixed_xml = _generate_dracula_pro_comment_fixed_tmtheme(dp_dir, theme_variant)
+            # Earlier koopa versions symlinked dest to the upstream file.
+            # Writing through a stale symlink would corrupt that upstream
+            # copy, so clear it first -- rm() unlinks the symlink itself,
+            # never the file it points to.
+            if os.path.lexists(dest):
+                rm(dest)
+            if fixed_xml:
+                with open(dest, "w") as fh:
+                    fh.write(fixed_xml)
+            else:
+                # Fall back to the unmodified vendor file (missing source
+                # or no Comment scope entry to patch).
+                src_fname = _TMTHEME_NAME_MAP.get(theme_variant, dest_name)
+                src = os.path.join(sublime_src, src_fname)
+                if os.path.isfile(src):
+                    ln(src, dest)
         bat_bin = shutil.which("bat")
         if bat_bin:
             subprocess.run([bat_bin, "cache", "--build"], capture_output=True)
@@ -1513,6 +1537,52 @@ def _generate_delta_diff_colors_gitconfig(dp_dir: str, variant: str) -> str | No
     plus-style = syntax "{palette['added_bg']}"
     minus-style = syntax "{palette['removed_bg']}"
 """
+
+
+def _generate_dracula_pro_comment_fixed_tmtheme(dp_dir: str, variant: str) -> str | None:
+    """Patch the vendor .tmTheme's Comment scope to a contrast-corrected color.
+
+    delta's plus-style/minus-style above use `syntax "<bg>"`: keep every
+    syntax-theme foreground color, just swap the background. Dracula Pro's
+    own Comment scope color is tuned for its plain editor background alone
+    and paints straight onto delta's added/removed diff tints unreadable --
+    see _fix_comment_contrast's docstring for the measured ratios. There is
+    no delta setting to override one syntax-theme token in isolation, so the
+    caller writes this back under the theme's own vendor name/filename,
+    replacing the unmodified upstream copy in ~/.config/bat/themes/. Same
+    name deliberately, matching theme.gitconfig.tmpl's syntax-theme setting
+    unchanged -- the tradeoff is that plain `bat <file>` picks up the same
+    paler comment color, not just delta's diff view.
+
+    Returns the patched .tmTheme XML text, or None if the vendor theme or
+    its Comment scope entry can't be found.
+    """
+    fname = _TMTHEME_NAME_MAP.get(variant, "Dracula Pro.tmTheme")
+    path = os.path.join(dp_dir, "themes", "sublime", fname)
+    if not os.path.isfile(path):
+        return None
+    palette = _generate_diff_palette(dp_dir, variant)
+    if not palette:
+        return None
+    with open(path, "rb") as fh:
+        data = plistlib.load(fh)
+    comment_entry = next(
+        (
+            item
+            for item in data["settings"]
+            if "comment" in (s.strip() for s in item.get("scope", "").split(","))
+        ),
+        None,
+    )
+    if comment_entry is None or "foreground" not in comment_entry.get("settings", {}):
+        return None
+    fixed_fg = _fix_comment_contrast(
+        comment_entry["settings"]["foreground"],
+        palette["bg"],
+        [palette["bg"], palette["added_bg"], palette["removed_bg"]],
+    )
+    comment_entry["settings"]["foreground"] = fixed_fg
+    return plistlib.dumps(data, fmt=plistlib.FMT_XML).decode()
 
 
 def _generate_git_native_diff_gitconfig(dp_dir: str, variant: str) -> str | None:
@@ -2398,16 +2468,7 @@ def _contrast_ratio(hex_a: str, hex_b: str) -> float:
 
 def _tmtheme_colors(dp_dir: str, variant: str) -> dict[str, str] | None:
     """Parse key colors from a Dracula Pro .tmTheme for the given variant."""
-    name_map = {
-        "pro": "Dracula Pro.tmTheme",
-        "blade": "Dracula Pro (Blade).tmTheme",
-        "buffy": "Dracula Pro (Buffy).tmTheme",
-        "lincoln": "Dracula Pro (Lincoln).tmTheme",
-        "morbius": "Dracula Pro (Morbius).tmTheme",
-        "van-helsing": "Dracula Pro (Van Helsing).tmTheme",
-        "alucard": "Dracula Pro (Alucard).tmTheme",
-    }
-    fname = name_map.get(variant, "Dracula Pro.tmTheme")
+    fname = _TMTHEME_NAME_MAP.get(variant, "Dracula Pro.tmTheme")
     path = os.path.join(dp_dir, "themes", "sublime", fname)
     if not os.path.isfile(path):
         return None
@@ -2610,6 +2671,66 @@ def _darken_for_light_bg(hexcolor: str, bg: str = "#fafafa", min_ratio: float = 
             hi = mid
     r, g, b = colorsys.hls_to_rgb(h, lo, s_light)
     return f"#{int(r * 255):02X}{int(g * 255):02X}{int(b * 255):02X}"
+
+
+def _fix_comment_contrast(
+    comment_hex: str, plain_bg: str, backgrounds: list[str], min_ratio: float = 4.5
+) -> str:
+    """Push a comment foreground's lightness until every background clears min_ratio.
+
+    Dracula Pro's Comment scope color is tuned against its own plain editor
+    background only, never against delta's added/removed diff-line tints --
+    confirmed failing badly on the dark variant (2.2:1 added, 1.42:1 removed,
+    both well under the 4.5:1 body-text bar _generate_diff_palette already
+    holds `fg` to). There's no delta setting to override one syntax-theme
+    token in isolation, so the caller patches the whole .tmTheme with just
+    this color corrected -- see _generate_dracula_pro_comment_fixed_tmtheme.
+
+    Same hue/saturation-preserving binary search as _darken_for_light_bg, but
+    against a list of backgrounds at once (context, added, removed all need
+    to pass with one static color) and in whichever direction the theme
+    already leans: dark-theme comments must lighten to gain contrast,
+    light-theme comments must darken. Direction is inferred by comparing the
+    comment color's own luminance against plain_bg, not hardcoded, since this
+    runs for both the dark and Alucard (light) variants.
+    """
+    h, l, s = _hex_to_hls(comment_hex)
+    lighten = _relative_luminance(comment_hex) >= _relative_luminance(plain_bg)
+
+    def _candidate(lightness: float) -> str:
+        r, g, b = colorsys.hls_to_rgb(h, lightness, s)
+        return f"#{int(round(r * 255)):02X}{int(round(g * 255)):02X}{int(round(b * 255)):02X}"
+
+    def _passes(lightness: float) -> bool:
+        candidate = _candidate(lightness)
+        return all(_contrast_ratio(candidate, bg) >= min_ratio for bg in backgrounds)
+
+    if lighten:
+        # Smallest lightening that still clears every background.
+        lo, hi = l, 1.0
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            if _passes(mid):
+                hi = mid
+            else:
+                lo = mid
+        result = _candidate(hi)
+    else:
+        # Largest (least-darkened) lightness that still clears every background.
+        lo, hi = 0.0, l
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            if _passes(mid):
+                lo = mid
+            else:
+                hi = mid
+        result = _candidate(lo)
+    for bg in backgrounds:
+        assert _contrast_ratio(result, bg) >= min_ratio, (
+            f"[comment-contrast] {result} vs {bg}: "
+            f"{_contrast_ratio(result, bg):.2f}:1 < {min_ratio}:1"
+        )
+    return result
 
 
 def _nudge_hue_toward(hexcolor: str, target_hex: str, min_hue_deg: float) -> str:

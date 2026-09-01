@@ -25,3 +25,26 @@ files carry filename prefixes/suffixes instead of a `.sh` extension — a plain
 catches non-shell templates (JSON, YAML, TOML config); this rule governs shell
 indentation only — data-format templates follow the `.editorconfig` 2-space
 sections instead.
+
+## One-Liners
+
+Never use a semicolon to join a control-flow keyword onto the same line as
+its condition. Put `then`, `do`, and `else` on their own line, every time:
+
+    if [[ -f "$file" ]]
+    then
+        ...
+    fi
+
+    for x in "${list[@]}"
+    do
+        ...
+    done
+
+    while IFS= read -r line
+    do
+        ...
+    done
+
+Do not write `if ...; then` or `for/while ...; do` as a single line, even for
+a short condition.

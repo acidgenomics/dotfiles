@@ -111,6 +111,12 @@ Useful global environment variables:
 - `DFT_BACKGROUND`: dark, light.
 - `DFT_DISPLAY`: side-by-side, side-by-side-show-both, inline.
 
+The `difft` alias (in `alias`) drives `git diff` through `diff.external`, not
+`git difftool`. `difftool` always stages both blob sides into fresh
+`git-blob-*` temp files first, so the tool it calls never sees the real repo
+path. `diff.external` calls `difft` directly with the real path as its first
+argument, which `difft` supports natively (see `difft --help`).
+
 See also:
 
 - https://difftastic.wilfred.me.uk/git.html

@@ -13,7 +13,7 @@
     contrib = shortlog --email --no-merges --numbered --summary
     d = diff
     dev = checkout -B develop origin/develop
-    difft = difftool --tool=difftastic
+    difft = -c diff.external=difft diff
     f = fetch
     fa = fetch --all
     ff = pull --ff-only

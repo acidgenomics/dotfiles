@@ -1,12 +1,22 @@
 {{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
 {{- $dpvNorm := $dpv -}}
 {{- if or (not $dpv) (eq $dpv "pro") -}}{{- $dpvNorm = "pro" -}}{{- end -}}
-{{- $dpSrc := stat (joinPath .chezmoi.homeDir ".config" "doom" "themes" "dracula-pro-alucard-theme.el") -}}
+{{- $dpThemeDir := joinPath .chezmoi.homeDir ".config" "doom" "themes" -}}
+{{- $dpSrc := stat (joinPath $dpThemeDir "dracula-pro-alucard-theme.el") -}}
 {{- $dpDark := "dracula" -}}
 {{- $dpLight := "spacemacs-light" -}}
+{{- $dpDarkEntry := "dracula" -}}
+{{- $dpLightEntry := "spacemacs-light" -}}
 {{- if $dpSrc -}}
 {{-   $dpDark = printf "dracula-pro-%s" $dpvNorm -}}
 {{-   $dpLight = "dracula-pro-alucard" -}}
+{{- /* Never published to any ELPA/MELPA archive -- private local files under
+       $dpThemeDir. :location points custom-theme-load-path straight at them;
+       see the matching spacemacs-theme-name-to-package override below, which
+       stops Spacemacs's package sync from also trying (and failing) to fetch
+       them as "<name>-theme" from an archive. */ -}}
+{{-   $dpDarkEntry = printf "(%s :location \"%s\")" $dpDark $dpThemeDir -}}
+{{-   $dpLightEntry = printf "(%s :location \"%s\")" $dpLight $dpThemeDir -}}
 {{- end -}}
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;;
@@ -144,6 +154,7 @@ This function should only modify configuration layer settings."
    '(
      (org :location built-in)         ;; use Emacs built-in org; NonGNU ELPA blocked
      (transient :location built-in)   ;; Emacs 29 built-in; avoids GNU ELPA compat dep
+     spinner  ;; force-install up front; as a lazy transient dep of rustic/paradox/lsp-julia it errors "unavailable"
      auto-dark
      polymode
      poly-R
@@ -186,11 +197,11 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-themes
    '(
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
-     {{ $dpLight }}
-     {{ $dpDark }}
+     {{ $dpLightEntry }}
+     {{ $dpDarkEntry }}
 {{- else }}
-     {{ $dpDark }}
-     {{ $dpLight }}
+     {{ $dpDarkEntry }}
+     {{ $dpLightEntry }}
 {{- end }}
      spacemacs-dark
      )
@@ -279,6 +290,16 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Corporate network blocks GNU ELPA and NonGNU ELPA; use MELPA only.
   (setq configuration-layer-elpa-archives
         '(("melpa" . "https://melpa.org/packages/")))
+{{- if $dpSrc }}
+  ;; {{ $dpDark }}/{{ $dpLight }} are private local files, never published to
+  ;; any ELPA/MELPA archive. Map them to no package so Spacemacs's package
+  ;; sync doesn't try (and fail) to fetch "{{ $dpDark }}-theme"/
+  ;; "{{ $dpLight }}-theme"; `:location' on the `dotspacemacs-themes' entries
+  ;; above still points `custom-theme-load-path' at the real files.
+  (setq spacemacs-theme-name-to-package
+        (append '(({{ $dpDark }} . nil) ({{ $dpLight }} . nil))
+                spacemacs-theme-name-to-package))
+{{- end }}
   ;; Store elpa packages outside the managed app tree so they survive reinstalls.
   (setq configuration-layer--elpa-root-directory
         (expand-file-name "spacemacs/elpa/"

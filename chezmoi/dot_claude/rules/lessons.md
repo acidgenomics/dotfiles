@@ -8,6 +8,13 @@
 Never rename with a `YYYY-MM-DD-` prefix — the VS Code plan UI requires the exact
 filename. Date prefixes apply only to manually created docs.
 
+## Session Reports: `reports/YYYY/MM/DD/<slug>.md` at the Repo Root
+
+Write session reports to `reports/YYYY/MM/DD/<slug>.md`, not `.claude/reports/`. The
+date lives in the path, so the filename carries no date prefix. Never save a report to
+`.claude/plans/` — those are implementation blueprints, not deliverables. Both
+`reports/` and `.claude/reports/` are gitignored globally.
+
 ## JSON Formatting
 
 Always 2-space indentation. Never 4 spaces.

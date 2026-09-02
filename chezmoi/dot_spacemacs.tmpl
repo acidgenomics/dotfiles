@@ -154,7 +154,7 @@ This function should only modify configuration layer settings."
    '(
      (org :location built-in)         ;; use Emacs built-in org; NonGNU ELPA blocked
      (transient :location built-in)   ;; Emacs 29 built-in; avoids GNU ELPA compat dep
-     spinner  ;; force-install up front; as a lazy transient dep of rustic/paradox/lsp-julia it errors "unavailable"
+     (spinner :location built-in)  ;; vendored; see dotspacemacs/user-init below -- no MELPA entry exists
      auto-dark
      polymode
      poly-R
@@ -287,9 +287,28 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Redirect auto-generated custom variables away from .spacemacs so the
   ;; tracked dotfile is never modified by Emacs itself.
   (setq custom-file "~/.config/spacemacs/custom.el")
+  ;; The vendored Dracula Pro theme .el files (symlinked from
+  ;; ~/.local/share/dracula-pro/, never rewritten by koopa -- see
+  ;; theme-colors.md) ship with no lexical-binding cookie. That's licensed
+  ;; upstream content, not something to patch in place; suppress just this
+  ;; one warning class instead. warning-suppress-types only hides the
+  ;; popup and still logs to *Warnings*, which Spacemacs's own layout hooks
+  ;; can resurface -- warning-suppress-log-types stops the logging itself.
+  (setq warning-suppress-log-types '((files missing-lexbind-cookie)))
   ;; Corporate network blocks GNU ELPA and NonGNU ELPA; use MELPA only.
   (setq configuration-layer-elpa-archives
         '(("melpa" . "https://melpa.org/packages/")))
+  ;; spinner.el is published only to GNU ELPA (no MELPA entry), which the
+  ;; line above blocks; rustic/paradox/lsp-julia all declare it as a real
+  ;; dependency and would otherwise fail "Package spinner is unavailable"
+  ;; on every sync. Load the vendored copy (see dot_config/spacemacs/vendor/
+  ;; spinner/) directly, and tell package.el it's already satisfied -- the
+  ;; same :location built-in trick used for org/transient above, applied to
+  ;; a package that Emacs doesn't actually ship.
+  (let ((dir (expand-file-name "vendor/spinner/" "~/.config/spacemacs/")))
+    (add-to-list 'load-path dir)
+    (push (cons 'spinner (version-to-list "1.7.3")) package--builtin-versions)
+    (require 'spinner))
 {{- if $dpSrc }}
   ;; {{ $dpDark }}/{{ $dpLight }} are private local files, never published to
   ;; any ELPA/MELPA archive. Map them to no package so Spacemacs's package

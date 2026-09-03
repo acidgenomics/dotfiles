@@ -1,6 +1,6 @@
 # """
 # ripgrep configuration.
-# Updated 2023-05-15.
+# Updated 2026-09-02.
 #
 # @seealso
 # - https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md
@@ -31,5 +31,8 @@
 --max-columns=150
 --max-filesize=10M
 --no-follow
---no-ignore
 --one-file-system
+
+# Do not add '--no-ignore' here. It disables .gitignore in every repo, so a bare
+# 'rg' walks every ignored tree (measured at 702,003 files in the koopa prefix,
+# versus 1,226 with .gitignore active). Use '-u'/'-uu'/'-uuu' per command instead.

@@ -8,6 +8,41 @@
 # https://github.com/acidgenomics/dotfiles/
 # """
 
+__koopa_profile_upgrade_shell() {
+    # """
+    # Hand off an interactive POSIX 'sh' login shell to Bash.
+    #
+    # Some managed hosts (e.g. shared HPC/Slurm login nodes) don't let a user
+    # change their own login shell away from a minimal POSIX 'sh' (dash,
+    # ksh93). koopa's POSIX activation path still works there, but skips
+    # completions and other Bash/Zsh-only configuration. When this is an
+    # interactive session that isn't already Bash or Zsh, and Bash is on
+    # 'PATH', hand off to Bash so activation runs at full capability. Bash
+    # re-reads this file as a login shell, and the checks below then skip the
+    # handoff, since 'BASH_VERSION' is set.
+    #
+    # Set 'KOOPA_NO_SHELL_UPGRADE=1' to opt out and stay on the POSIX path.
+    # """
+    case "$-" in
+        *i*) ;;
+        *) return 0 ;;
+    esac
+    [ -z "${BASH_VERSION:-}" ] || return 0
+    [ -z "${ZSH_VERSION:-}" ] || return 0
+    [ "${KOOPA_NO_SHELL_UPGRADE:-0}" -eq 1 ] && return 0
+    __kvar_bash="$(command -v bash 2>/dev/null)"
+    if [ -z "$__kvar_bash" ]
+    then
+        return 0
+    fi
+    # shellcheck disable=SC2093
+    # If 'exec' itself fails (e.g. a race between the check above and this
+    # line), fall through so the interactive session still has a shell.
+    exec "$__kvar_bash" -l
+    unset -v __kvar_bash
+    return 0
+}
+
 __koopa_activate_user_profile() {
     # """
     # Activate koopa shell for current user.
@@ -31,4 +66,5 @@ __koopa_activate_user_profile() {
     return 0
 }
 
+__koopa_profile_upgrade_shell
 __koopa_activate_user_profile

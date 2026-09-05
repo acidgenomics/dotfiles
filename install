@@ -2271,6 +2271,11 @@ def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
 # (--background-secondary from base-20, --text-muted from base-70, etc.), so
 # generating the ramp covers far more UI than listing each semantic role by
 # hand. bg itself is step "00" and fg is step "100" (added separately below).
+# Blended with _hsl_lerp(), not _hex_lerp() -- bg (dark purple-navy) and fg
+# (pale, near-white) sit ~185 degrees apart in hue, and a raw RGB blend
+# between hues that far apart desaturates fast: base-20, which backs the
+# sidebar (--background-secondary), measured S=0.08 versus bg's own
+# S=0.14, reading as flat grey instead of a tinted background.
 _OBSIDIAN_RAMP_STEPS = {
     "05": 0.03, "10": 0.06, "20": 0.10, "25": 0.13, "30": 0.16, "35": 0.20,
     "40": 0.25, "50": 0.36, "60": 0.50, "70": 0.66,
@@ -2320,6 +2325,30 @@ def _hex_to_rgb_triplet(hexcolor: str) -> str:
     return f"{r}, {g}, {b}"
 
 
+def _hsl_lerp(c1: str, c2: str, t: float) -> str:
+    """Interpolate two hex colors in HSL space, along the shortest hue path.
+
+    Unlike _hex_lerp() (raw RGB), this keeps each step's saturation close to
+    a straight blend of the two endpoints' own saturation, instead of
+    crossing the desaturated midpoint a raw RGB blend produces between two
+    far-apart hues. See the _OBSIDIAN_RAMP_STEPS comment for why the
+    Obsidian base ramp needs this and most other _hex_lerp() call sites
+    (single-hue-family blends) don't.
+    """
+    h1, l1, s1 = _hex_to_hls(c1)
+    h2, l2, s2 = _hex_to_hls(c2)
+    delta = h2 - h1
+    if delta > 0.5:
+        delta -= 1.0
+    elif delta < -0.5:
+        delta += 1.0
+    h = (h1 + delta * t) % 1.0
+    lum = l1 + (l2 - l1) * t
+    sat = s1 + (s2 - s1) * t
+    r, g, b = colorsys.hls_to_rgb(h, lum, sat)
+    return f"#{round(r * 255):02X}{round(g * 255):02X}{round(b * 255):02X}"
+
+
 def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
     """Derive one mode's worth of Obsidian CSS variables from a Vim palette."""
     p = _parse_vim_palette(dp_dir, variant)
@@ -2329,7 +2358,7 @@ def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
     accent = p["purple"]
     ramp: dict[str, str] = {"--color-base-00": bg, "--color-base-100": fg}
     for step, frac in _OBSIDIAN_RAMP_STEPS.items():
-        ramp[f"--color-base-{step}"] = _hex_lerp(bg, fg, frac)
+        ramp[f"--color-base-{step}"] = _hsl_lerp(bg, fg, frac)
     hues = {
         "red": p["red"],
         "orange": p["orange"],

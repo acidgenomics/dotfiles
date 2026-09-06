@@ -2270,12 +2270,11 @@ def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
 # toward fg (1.0). Obsidian derives most of its chrome from this ramp
 # (--background-secondary from base-20, --text-muted from base-70, etc.), so
 # generating the ramp covers far more UI than listing each semantic role by
-# hand. bg itself is step "00" and fg is step "100" (added separately below).
-# Blended with _hsl_lerp(), not _hex_lerp() -- bg (dark purple-navy) and fg
-# (pale, near-white) sit ~185 degrees apart in hue, and a raw RGB blend
-# between hues that far apart desaturates fast: base-20, which backs the
-# sidebar (--background-secondary), measured S=0.08 versus bg's own
-# S=0.14, reading as flat grey instead of a tinted background.
+# hand. bg itself is step "00" and fg is step "100" (added separately below);
+# the intermediate steps are built by _obsidian_ramp_step(), which holds hue
+# fixed at a palette anchor rather than blending bg's hue toward fg's -- see
+# that function's docstring for why a straight bg-to-fg hue blend is wrong
+# here.
 _OBSIDIAN_RAMP_STEPS = {
     "05": 0.03, "10": 0.06, "20": 0.10, "25": 0.13, "30": 0.16, "35": 0.20,
     "40": 0.25, "50": 0.36, "60": 0.50, "70": 0.66,
@@ -2318,6 +2317,28 @@ _OBSIDIAN_AA_TEXT_VARS = {
 }
 _OBSIDIAN_FAINT_VARS = {"--color-base-50", "--callout-quote"}
 
+# --color-base-70 (--text-muted / --nav-item-color, the idle sidebar
+# folder/file text) gets a stronger floor than the rest of its set. The bare
+# 4.5:1 AA minimum is legally readable but reads as washed-out grey against
+# the sidebar -- confirmed against a live screenshot. 6.0:1 is clearly
+# legible rather than merely technically compliant, while staying below
+# 7:1: pushed that far, base-70 closes in on --color-base-100 (the
+# active/hover text) and the idle/active hierarchy starts to collapse.
+# --color-base-50 (--text-faint, meant to be the faintest tier) stays at
+# 2.0:1 -- its natural ramp position sits close enough to --color-base-60
+# that a stronger floor pushes it past base-60's own luminance, breaking
+# the ramp's required monotonicity.
+_OBSIDIAN_STRONG_FLOOR = {"--color-base-70": 6.0}
+
+# Real Obsidian surfaces an AA/faint token can render over, not just the
+# mode's plain content bg (base-00): --background-primary-alt (base-10),
+# --background-secondary (base-20, the whole left sidebar), and
+# --background-secondary-alt / --background-modifier-border (base-30).
+# _obsidian_color_vars() re-tunes every token above against all four before
+# returning; _assert_obsidian_contrast() re-checks the same four as a
+# regression guard.
+_OBSIDIAN_SURFACE_STEPS = ("00", "10", "20", "30")
+
 
 def _hex_to_rgb_triplet(hexcolor: str) -> str:
     """Format a hex color as a bare "R, G, B" triplet for rgba()/rgb()."""
@@ -2325,28 +2346,72 @@ def _hex_to_rgb_triplet(hexcolor: str) -> str:
     return f"{r}, {g}, {b}"
 
 
-def _hsl_lerp(c1: str, c2: str, t: float) -> str:
-    """Interpolate two hex colors in HSL space, along the shortest hue path.
+def _obsidian_ramp_step(bg: str, fg: str, anchor: str, frac: float) -> str:
+    """Blend one ramp step at a fixed anchor hue, not bg-to-fg's own hue arc.
 
-    Unlike _hex_lerp() (raw RGB), this keeps each step's saturation close to
-    a straight blend of the two endpoints' own saturation, instead of
-    crossing the desaturated midpoint a raw RGB blend produces between two
-    far-apart hues. See the _OBSIDIAN_RAMP_STEPS comment for why the
-    Obsidian base ramp needs this and most other _hex_lerp() call sites
-    (single-hue-family blends) don't.
+    A straight HSL blend from bg's hue to fg's (the obvious approach) picks
+    whichever direction around the hue wheel is numerically shortest, with
+    no regard for what's in between. For "pro" that path runs from bg's
+    blue-purple (H=245.5) forward to fg's warm off-white (H=60), and the
+    short way around crosses magenta/red on the way: at frac=0.66
+    (--color-base-70) it lands at H=0.0 -- reading as pink, not purple.
+    Alucard's bg and fg are both true grey (S=0.0, an undefined hue), so a
+    blend between them has no hue to carry at all and comes out flat; worse,
+    treating that undefined hue as a real endpoint can pick an arbitrary
+    wrap direction, landing intermediate steps in magenta too.
+
+    Neither matches what the palette itself does: Dracula Pro's own
+    "comment", "selection", and "purple" roles all cluster at H~230-252 in
+    every variant -- muted/in-between chrome stays in that hue family
+    rather than drifting toward fg. Holding hue fixed at ``anchor``'s (the
+    variant's own named "selection" role, a real vendor color, not an
+    invented tint) for every step reproduces that directly, and sidesteps
+    the wrap-direction question entirely. Lightness still blends from bg's
+    own toward fg's; saturation blends from bg's own toward anchor's, so a
+    step near bg (low frac) stays close to bg's own saturation instead of
+    jumping straight to anchor's.
     """
-    h1, l1, s1 = _hex_to_hls(c1)
-    h2, l2, s2 = _hex_to_hls(c2)
-    delta = h2 - h1
-    if delta > 0.5:
-        delta -= 1.0
-    elif delta < -0.5:
-        delta += 1.0
-    h = (h1 + delta * t) % 1.0
-    lum = l1 + (l2 - l1) * t
-    sat = s1 + (s2 - s1) * t
-    r, g, b = colorsys.hls_to_rgb(h, lum, sat)
+    _, bg_l, bg_s = _hex_to_hls(bg)
+    _, fg_l, _ = _hex_to_hls(fg)
+    anchor_h, _, anchor_s = _hex_to_hls(anchor)
+    lum = bg_l + (fg_l - bg_l) * frac
+    sat = bg_s + (anchor_s - bg_s) * frac
+    r, g, b = colorsys.hls_to_rgb(anchor_h, lum, sat)
     return f"#{round(r * 255):02X}{round(g * 255):02X}{round(b * 255):02X}"
+
+
+def _fix_obsidian_surface_contrast(ramp: dict[str, str]) -> None:
+    """Re-tune every AA/faint token so it also clears its floor on real surfaces.
+
+    _obsidian_color_vars() derives each token against only the mode's plain
+    content background; Obsidian's own var() chain composites --text-muted,
+    --text-faint, tag/link hues, and --nav-item-color-highlighted over the
+    sidebar and panel surfaces in _OBSIDIAN_SURFACE_STEPS too. Confirmed
+    failing there even though the base-00-only check passed:
+    --color-base-70 measured 4.12:1 pro / 3.72:1 alucard against
+    --color-base-30, both under the 4.5:1 AA floor, and several hues
+    (--color-accent, --color-purple, every Alucard hue) failed the same way.
+
+    Reuses _fix_comment_contrast()'s hue/saturation-preserving lightness
+    search against a list of backgrounds instead of one bespoke fix per
+    token. A token that already clears every surface converges back to
+    (within float rounding of) its own starting value, so this is safe to
+    run unconditionally rather than only on the tokens known to fail today.
+    """
+    bg = ramp["--color-base-00"]
+    surfaces = [ramp[f"--color-base-{step}"] for step in _OBSIDIAN_SURFACE_STEPS]
+    for token in _OBSIDIAN_AA_TEXT_VARS:
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 4.5)
+        ramp[token] = _fix_comment_contrast(ramp[token], bg, surfaces, min_ratio=floor)
+    for token in _OBSIDIAN_FAINT_VARS:
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 2.0)
+        ramp[token] = _fix_comment_contrast(ramp[token], bg, surfaces, min_ratio=floor)
+    # The named hues' "-rgb" siblings, and --text-highlight-bg's own rgba()
+    # wash, must track whatever the fix above landed on for yellow -- not
+    # the pre-fix value they were originally computed from.
+    for name in ("red", "orange", "yellow", "green", "cyan", "purple", "pink", "blue"):
+        ramp[f"--color-{name}-rgb"] = _hex_to_rgb_triplet(ramp[f"--color-{name}"])
+    ramp["--text-highlight-bg"] = f"rgba({ramp['--color-yellow-rgb']}, 0.4)"
 
 
 def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
@@ -2358,7 +2423,7 @@ def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
     accent = p["purple"]
     ramp: dict[str, str] = {"--color-base-00": bg, "--color-base-100": fg}
     for step, frac in _OBSIDIAN_RAMP_STEPS.items():
-        ramp[f"--color-base-{step}"] = _hsl_lerp(bg, fg, frac)
+        ramp[f"--color-base-{step}"] = _obsidian_ramp_step(bg, fg, p["selection"], frac)
     hues = {
         "red": p["red"],
         "orange": p["orange"],
@@ -2393,22 +2458,35 @@ def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
     for name, hexvalue in hues.items():
         ramp[f"--color-{name}"] = hexvalue
         ramp[f"--color-{name}-rgb"] = _hex_to_rgb_triplet(hexvalue)
+    _fix_obsidian_surface_contrast(ramp)
     return ramp
 
 
 def _assert_obsidian_contrast(v: dict[str, str], variant: str) -> None:
-    """Check WCAG contrast for one mode's Obsidian variable set."""
-    bg = v["--color-base-00"]
+    """Check WCAG contrast for one mode's Obsidian variable set.
+
+    Checks every AA/faint token against each of _OBSIDIAN_SURFACE_STEPS, not
+    only the plain content background -- _fix_obsidian_surface_contrast()
+    already corrects for this before the generated ramp is returned, so this
+    is the regression guard, not the fix itself.
+    """
+    surfaces = [v[f"--color-base-{step}"] for step in _OBSIDIAN_SURFACE_STEPS]
     for token in _OBSIDIAN_AA_TEXT_VARS:
-        ratio = _contrast_ratio(v[token], bg)
-        assert ratio >= 4.5, (
-            f"[obsidian-theme:{variant}] {token} contrast {ratio:.2f}:1 < 4.5:1 AA"
-        )
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 4.5)
+        for surface in surfaces:
+            ratio = _contrast_ratio(v[token], surface)
+            assert ratio >= floor, (
+                f"[obsidian-theme:{variant}] {token} vs {surface} "
+                f"contrast {ratio:.2f}:1 < {floor}:1"
+            )
     for token in _OBSIDIAN_FAINT_VARS:
-        ratio = _contrast_ratio(v[token], bg)
-        assert ratio >= 2.0, (
-            f"[obsidian-theme:{variant}] {token} contrast {ratio:.2f}:1 < 2.0:1"
-        )
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 2.0)
+        for surface in surfaces:
+            ratio = _contrast_ratio(v[token], surface)
+            assert ratio >= floor, (
+                f"[obsidian-theme:{variant}] {token} vs {surface} "
+                f"contrast {ratio:.2f}:1 < {floor}:1"
+            )
     on_accent_ratio = _contrast_ratio(v["--text-on-accent"], v["--color-accent"])
     assert on_accent_ratio >= 4.5, (
         f"[obsidian-theme:{variant}] --text-on-accent vs --color-accent "

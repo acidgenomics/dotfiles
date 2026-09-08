@@ -1027,10 +1027,11 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     # Appearance toggle switches modes natively, so unlike every other app
     # above this needs no KOOPA_COLOR_MODE branching. Vaults are per-vault,
     # not a fixed config dir, so this is symlinked into every vault found in
-    # Obsidian's own registry, not a single hardcoded path. Never touch
-    # .obsidian/appearance.json -- Obsidian owns and rewrites that file on
-    # every settings change; picking "Dracula Pro" stays a one-time manual
-    # step in the app, same as any other community theme.
+    # Obsidian's own registry, not a single hardcoded path. appearance.json
+    # is owned by Obsidian and rewritten wholesale on every settings change,
+    # so selecting the theme is a targeted two-key read-modify-write via
+    # _select_obsidian_dracula_pro_theme(), skipped entirely while Obsidian
+    # is running to avoid racing that in-memory write-back.
     obsidian_css = _generate_obsidian_dracula_pro_theme(dp_dir, variant)
     if obsidian_css:
         obsidian_staging = os.path.join(
@@ -1043,11 +1044,14 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
             fh.write(obsidian_css)
         with open(manifest_path, "w") as fh:
             fh.write(_generate_obsidian_manifest())
+        obsidian_running = _is_obsidian_running()
         for obsidian_dir in _obsidian_vault_dirs(home):
             theme_dir = os.path.join(obsidian_dir, "themes", "Dracula Pro")
             mkdir(theme_dir)
             ln(css_path, os.path.join(theme_dir, "theme.css"))
             ln(manifest_path, os.path.join(theme_dir, "manifest.json"))
+            if not obsidian_running:
+                _select_obsidian_dracula_pro_theme(obsidian_dir)
     # Zsh: generate palette files sourced at runtime by .zshrc.
     zsh_config = os.path.join(home, ".config", "zsh")
     if os.path.isdir(zsh_config):
@@ -2266,33 +2270,148 @@ def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
 # toward fg (1.0). Obsidian derives most of its chrome from this ramp
 # (--background-secondary from base-20, --text-muted from base-70, etc.), so
 # generating the ramp covers far more UI than listing each semantic role by
-# hand. bg itself is step "00" and fg is step "100" (added separately below).
+# hand. bg itself is step "00" and fg is step "100" (added separately below);
+# the intermediate steps are built by _obsidian_ramp_step(), which holds hue
+# fixed at a palette anchor rather than blending bg's hue toward fg's -- see
+# that function's docstring for why a straight bg-to-fg hue blend is wrong
+# here.
 _OBSIDIAN_RAMP_STEPS = {
     "05": 0.03, "10": 0.06, "20": 0.10, "25": 0.13, "30": 0.16, "35": 0.20,
     "40": 0.25, "50": 0.36, "60": 0.50, "70": 0.66,
 }
 
-# Stable emission order for the generated theme.css blocks.
+# Stable emission order for the generated theme.css blocks. The "-rgb"
+# triplet siblings feed Obsidian's own rgba()/color-mix() consumers (e.g.
+# --background-modifier-error-rgb), which fall back to a stock hue if a
+# theme only supplies the hex form.
 _OBSIDIAN_VAR_ORDER = (
     "--color-base-00", "--color-base-05", "--color-base-10", "--color-base-20",
     "--color-base-25", "--color-base-30", "--color-base-35", "--color-base-40",
     "--color-base-50", "--color-base-60", "--color-base-70", "--color-base-100",
     "--color-accent", "--color-accent-1", "--color-accent-2",
-    "--color-red", "--color-orange", "--color-yellow", "--color-green",
-    "--color-cyan", "--color-purple", "--color-pink", "--color-blue",
-    "--text-on-accent", "--text-selection",
+    "--color-red", "--color-red-rgb",
+    "--color-orange", "--color-orange-rgb",
+    "--color-yellow", "--color-yellow-rgb",
+    "--color-green", "--color-green-rgb",
+    "--color-cyan", "--color-cyan-rgb",
+    "--color-purple", "--color-purple-rgb",
+    "--color-pink", "--color-pink-rgb",
+    "--color-blue", "--color-blue-rgb",
+    "--text-on-accent", "--text-selection", "--text-highlight-bg",
+    "--callout-quote",
 )
 
 # Contrast requirements checked against --color-base-00 (the mode's bg).
 # --color-base-50 only backs --text-faint in Obsidian's own var() chain, so
-# it gets a lower floor than the AA text tokens.
+# it gets a lower floor than the AA text tokens. --callout-quote sits next
+# to it: the vim "comment" role it's built from measures 3.56:1 on "pro"
+# itself (documented range 3.5-5.6:1 across variants, see the koopa-theming
+# skill), below the 4.5:1 floor the other callout hues clear -- matching
+# Obsidian's own stock #9e9e9e, which is deliberately muted rather than a
+# vivid semantic color like --callout-info/--callout-warning.
 _OBSIDIAN_AA_TEXT_VARS = {
     "--color-base-70", "--color-base-100", "--color-accent",
     "--color-accent-1", "--color-accent-2", "--color-red", "--color-orange",
     "--color-yellow", "--color-green", "--color-cyan", "--color-purple",
     "--color-pink", "--color-blue",
 }
-_OBSIDIAN_FAINT_VARS = {"--color-base-50"}
+_OBSIDIAN_FAINT_VARS = {"--color-base-50", "--callout-quote"}
+
+# --color-base-70 (--text-muted / --nav-item-color, the idle sidebar
+# folder/file text) gets a stronger floor than the rest of its set. The bare
+# 4.5:1 AA minimum is legally readable but reads as washed-out grey against
+# the sidebar -- confirmed against a live screenshot. 6.0:1 is clearly
+# legible rather than merely technically compliant, while staying below
+# 7:1: pushed that far, base-70 closes in on --color-base-100 (the
+# active/hover text) and the idle/active hierarchy starts to collapse.
+# --color-base-50 (--text-faint, meant to be the faintest tier) stays at
+# 2.0:1 -- its natural ramp position sits close enough to --color-base-60
+# that a stronger floor pushes it past base-60's own luminance, breaking
+# the ramp's required monotonicity.
+_OBSIDIAN_STRONG_FLOOR = {"--color-base-70": 6.0}
+
+# Real Obsidian surfaces an AA/faint token can render over, not just the
+# mode's plain content bg (base-00): --background-primary-alt (base-10),
+# --background-secondary (base-20, the whole left sidebar), and
+# --background-secondary-alt / --background-modifier-border (base-30).
+# _obsidian_color_vars() re-tunes every token above against all four before
+# returning; _assert_obsidian_contrast() re-checks the same four as a
+# regression guard.
+_OBSIDIAN_SURFACE_STEPS = ("00", "10", "20", "30")
+
+
+def _hex_to_rgb_triplet(hexcolor: str) -> str:
+    """Format a hex color as a bare "R, G, B" triplet for rgba()/rgb()."""
+    r, g, b = int(hexcolor[1:3], 16), int(hexcolor[3:5], 16), int(hexcolor[5:7], 16)
+    return f"{r}, {g}, {b}"
+
+
+def _obsidian_ramp_step(bg: str, fg: str, anchor: str, frac: float) -> str:
+    """Blend one ramp step at a fixed anchor hue, not bg-to-fg's own hue arc.
+
+    A straight HSL blend from bg's hue to fg's (the obvious approach) picks
+    whichever direction around the hue wheel is numerically shortest, with
+    no regard for what's in between. For "pro" that path runs from bg's
+    blue-purple (H=245.5) forward to fg's warm off-white (H=60), and the
+    short way around crosses magenta/red on the way: at frac=0.66
+    (--color-base-70) it lands at H=0.0 -- reading as pink, not purple.
+    Alucard's bg and fg are both true grey (S=0.0, an undefined hue), so a
+    blend between them has no hue to carry at all and comes out flat; worse,
+    treating that undefined hue as a real endpoint can pick an arbitrary
+    wrap direction, landing intermediate steps in magenta too.
+
+    Neither matches what the palette itself does: Dracula Pro's own
+    "comment", "selection", and "purple" roles all cluster at H~230-252 in
+    every variant -- muted/in-between chrome stays in that hue family
+    rather than drifting toward fg. Holding hue fixed at ``anchor``'s (the
+    variant's own named "selection" role, a real vendor color, not an
+    invented tint) for every step reproduces that directly, and sidesteps
+    the wrap-direction question entirely. Lightness still blends from bg's
+    own toward fg's; saturation blends from bg's own toward anchor's, so a
+    step near bg (low frac) stays close to bg's own saturation instead of
+    jumping straight to anchor's.
+    """
+    _, bg_l, bg_s = _hex_to_hls(bg)
+    _, fg_l, _ = _hex_to_hls(fg)
+    anchor_h, _, anchor_s = _hex_to_hls(anchor)
+    lum = bg_l + (fg_l - bg_l) * frac
+    sat = bg_s + (anchor_s - bg_s) * frac
+    r, g, b = colorsys.hls_to_rgb(anchor_h, lum, sat)
+    return f"#{round(r * 255):02X}{round(g * 255):02X}{round(b * 255):02X}"
+
+
+def _fix_obsidian_surface_contrast(ramp: dict[str, str]) -> None:
+    """Re-tune every AA/faint token so it also clears its floor on real surfaces.
+
+    _obsidian_color_vars() derives each token against only the mode's plain
+    content background; Obsidian's own var() chain composites --text-muted,
+    --text-faint, tag/link hues, and --nav-item-color-highlighted over the
+    sidebar and panel surfaces in _OBSIDIAN_SURFACE_STEPS too. Confirmed
+    failing there even though the base-00-only check passed:
+    --color-base-70 measured 4.12:1 pro / 3.72:1 alucard against
+    --color-base-30, both under the 4.5:1 AA floor, and several hues
+    (--color-accent, --color-purple, every Alucard hue) failed the same way.
+
+    Reuses _fix_comment_contrast()'s hue/saturation-preserving lightness
+    search against a list of backgrounds instead of one bespoke fix per
+    token. A token that already clears every surface converges back to
+    (within float rounding of) its own starting value, so this is safe to
+    run unconditionally rather than only on the tokens known to fail today.
+    """
+    bg = ramp["--color-base-00"]
+    surfaces = [ramp[f"--color-base-{step}"] for step in _OBSIDIAN_SURFACE_STEPS]
+    for token in _OBSIDIAN_AA_TEXT_VARS:
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 4.5)
+        ramp[token] = _fix_comment_contrast(ramp[token], bg, surfaces, min_ratio=floor)
+    for token in _OBSIDIAN_FAINT_VARS:
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 2.0)
+        ramp[token] = _fix_comment_contrast(ramp[token], bg, surfaces, min_ratio=floor)
+    # The named hues' "-rgb" siblings, and --text-highlight-bg's own rgba()
+    # wash, must track whatever the fix above landed on for yellow -- not
+    # the pre-fix value they were originally computed from.
+    for name in ("red", "orange", "yellow", "green", "cyan", "purple", "pink", "blue"):
+        ramp[f"--color-{name}-rgb"] = _hex_to_rgb_triplet(ramp[f"--color-{name}"])
+    ramp["--text-highlight-bg"] = f"rgba({ramp['--color-yellow-rgb']}, 0.4)"
 
 
 def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
@@ -2304,44 +2423,70 @@ def _obsidian_color_vars(dp_dir: str, variant: str) -> dict[str, str] | None:
     accent = p["purple"]
     ramp: dict[str, str] = {"--color-base-00": bg, "--color-base-100": fg}
     for step, frac in _OBSIDIAN_RAMP_STEPS.items():
-        ramp[f"--color-base-{step}"] = _hex_lerp(bg, fg, frac)
+        ramp[f"--color-base-{step}"] = _obsidian_ramp_step(bg, fg, p["selection"], frac)
+    hues = {
+        "red": p["red"],
+        "orange": p["orange"],
+        "yellow": p["yellow"],
+        "green": p["green"],
+        "cyan": p["cyan"],
+        "purple": p["purple"],
+        "pink": p["pink"],
+        # Dracula Pro has no distinct blue role; split the difference
+        # between purple and cyan, same approach as the Claude theme's
+        # synthesized indigo.
+        "blue": _hex_lerp(p["purple"], p["cyan"], 0.5),
+    }
     ramp.update({
         "--color-accent": accent,
         # accent-1/accent-2 are Obsidian's own hover/secondary accent slots.
         "--color-accent-1": _hex_lerp(accent, fg, 0.20),
         "--color-accent-2": _hex_lerp(accent, p["pink"], 0.35),
-        "--color-red": p["red"],
-        "--color-orange": p["orange"],
-        "--color-yellow": p["yellow"],
-        "--color-green": p["green"],
-        "--color-cyan": p["cyan"],
-        "--color-purple": p["purple"],
-        "--color-pink": p["pink"],
-        # Dracula Pro has no distinct blue role; split the difference
-        # between purple and cyan, same approach as the Claude theme's
-        # synthesized indigo.
-        "--color-blue": _hex_lerp(p["purple"], p["cyan"], 0.5),
         # bg on the accent clears AA in every variant; fg on the accent does
         # not (measured 2.89:1 pro / 2.64:1 alucard, both below 4.5:1).
         "--text-on-accent": bg,
         "--text-selection": p["selection"],
+        # Obsidian's own default is a hardcoded stock yellow wash
+        # (rgba(255, 208, 0, 0.4)); derive it from the palette instead.
+        "--text-highlight-bg": f"rgba({_hex_to_rgb_triplet(hues['yellow'])}, 0.4)",
+        # Obsidian's own default is a hardcoded grey (#9e9e9e). The vim
+        # "comment" role is this palette's own muted tone -- see the
+        # _OBSIDIAN_FAINT_VARS comment above for why this stays out of the
+        # AA text set.
+        "--callout-quote": p["comment"],
     })
+    for name, hexvalue in hues.items():
+        ramp[f"--color-{name}"] = hexvalue
+        ramp[f"--color-{name}-rgb"] = _hex_to_rgb_triplet(hexvalue)
+    _fix_obsidian_surface_contrast(ramp)
     return ramp
 
 
 def _assert_obsidian_contrast(v: dict[str, str], variant: str) -> None:
-    """Check WCAG contrast for one mode's Obsidian variable set."""
-    bg = v["--color-base-00"]
+    """Check WCAG contrast for one mode's Obsidian variable set.
+
+    Checks every AA/faint token against each of _OBSIDIAN_SURFACE_STEPS, not
+    only the plain content background -- _fix_obsidian_surface_contrast()
+    already corrects for this before the generated ramp is returned, so this
+    is the regression guard, not the fix itself.
+    """
+    surfaces = [v[f"--color-base-{step}"] for step in _OBSIDIAN_SURFACE_STEPS]
     for token in _OBSIDIAN_AA_TEXT_VARS:
-        ratio = _contrast_ratio(v[token], bg)
-        assert ratio >= 4.5, (
-            f"[obsidian-theme:{variant}] {token} contrast {ratio:.2f}:1 < 4.5:1 AA"
-        )
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 4.5)
+        for surface in surfaces:
+            ratio = _contrast_ratio(v[token], surface)
+            assert ratio >= floor, (
+                f"[obsidian-theme:{variant}] {token} vs {surface} "
+                f"contrast {ratio:.2f}:1 < {floor}:1"
+            )
     for token in _OBSIDIAN_FAINT_VARS:
-        ratio = _contrast_ratio(v[token], bg)
-        assert ratio >= 2.0, (
-            f"[obsidian-theme:{variant}] {token} contrast {ratio:.2f}:1 < 2.0:1"
-        )
+        floor = _OBSIDIAN_STRONG_FLOOR.get(token, 2.0)
+        for surface in surfaces:
+            ratio = _contrast_ratio(v[token], surface)
+            assert ratio >= floor, (
+                f"[obsidian-theme:{variant}] {token} vs {surface} "
+                f"contrast {ratio:.2f}:1 < {floor}:1"
+            )
     on_accent_ratio = _contrast_ratio(v["--text-on-accent"], v["--color-accent"])
     assert on_accent_ratio >= 4.5, (
         f"[obsidian-theme:{variant}] --text-on-accent vs --color-accent "
@@ -2440,6 +2585,59 @@ def _obsidian_vault_dirs(home: str) -> list[str]:
         if os.path.isdir(obsidian_dir):
             dirs.append(obsidian_dir)
     return dirs
+
+
+def _is_obsidian_running() -> bool:
+    """Check whether Obsidian is currently running.
+
+    A running instance holds its own in-memory copy of appearance.json and
+    overwrites the file wholesale on its next settings change, so a write
+    here would race it. Treat "can't tell" (no pgrep) as "running" -- skip
+    the one-time convenience write rather than risk corrupting the file.
+    """
+    name = "Obsidian" if is_macos() else "obsidian"
+    pgrep = shutil.which("pgrep")
+    if not pgrep:
+        return True
+    result = subprocess.run([pgrep, "-x", name], capture_output=True)
+    return result.returncode == 0
+
+
+def _select_obsidian_dracula_pro_theme(obsidian_dir: str) -> None:
+    """Select the generated theme and follow the OS light/dark setting.
+
+    appearance.json is owned by Obsidian and rewritten wholesale on every
+    settings change in the app, so this only ever sets the two keys below
+    and leaves every other key (fonts, translucency, etc.) untouched --
+    the same targeted read-modify-write discipline as
+    _configure_claude_code(). Callers must skip this while Obsidian is
+    running; see _is_obsidian_running().
+    """
+    appearance_json = os.path.join(obsidian_dir, "appearance.json")
+    data: dict = {}
+    if os.path.isfile(appearance_json):
+        try:
+            with open(appearance_json) as fh:
+                data = json.load(fh)
+        except (OSError, ValueError):
+            return
+        if not isinstance(data, dict):
+            return
+    changed = False
+    if data.get("cssTheme") != "Dracula Pro":
+        data["cssTheme"] = "Dracula Pro"
+        changed = True
+    # "system" tracks macOS/OS appearance natively -- the generated
+    # theme.css already carries a genuine .theme-light (alucard) block, so
+    # this needs no KOOPA_COLOR_MODE branching on the koopa side.
+    if data.get("theme") != "system":
+        data["theme"] = "system"
+        changed = True
+    if not changed:
+        return
+    with open(appearance_json, "w") as fh:
+        json.dump(data, fh, indent=2)
+        fh.write("\n")
 
 
 def _wcag_relative_luminance(hexcolor: str) -> float:

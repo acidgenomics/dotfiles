@@ -1,4 +1,12 @@
 {
+  "files.watcherExclude": {
+    "**/.mypy_cache/**": true,
+    "**/.pytest_tmp/**": true,
+    "**/.ruff_cache/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/node_modules/**": true
+  },
   "python.analysis.autoSearchPaths": false,
 {{- if lookPath "conda" }}
   "python.condaPath": "{{ lookPath "conda" }}",
@@ -6,5 +14,6 @@
 {{- if stat (joinPath .chezmoi.homeDir ".venv" "bin" "python3") }}
   "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.venv/bin/python3",
 {{- end }}
+  "search.followSymlinks": false,
   "terminal.integrated.stickyScroll.enabled": false
 }

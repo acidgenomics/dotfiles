@@ -8,12 +8,15 @@
 Never rename with a `YYYY-MM-DD-` prefix — the VS Code plan UI requires the exact
 filename. Date prefixes apply only to manually created docs.
 
-## Session Reports: `reports/YYYY/MM/DD/<slug>.md` at the Repo Root
+## Session Reports: `~/Documents/bucket/YYYY/MM/DD/<slug>.md` (Obsidian Vault)
 
-Write session reports to `reports/YYYY/MM/DD/<slug>.md`, not `.claude/reports/`. The
-date lives in the path, so the filename carries no date prefix. Never save a report to
-`.claude/plans/` — those are implementation blueprints, not deliverables. Both
-`reports/` and `.claude/reports/` are gitignored globally.
+Write session reports into the Obsidian vault, not a repo `reports/` or
+`.claude/reports/` directory — both are gitignored, so a report saved there
+is invisible to git and to every other engineer. The date lives in the
+path, so the filename carries no date prefix. Add YAML frontmatter with
+`type: report` (plus `title`, `date`, and any ticket/status the report
+carries) so a vault index can filter on it. Never save a report to
+`.claude/plans/` — those are implementation blueprints, not deliverables.
 
 ## JSON Formatting
 

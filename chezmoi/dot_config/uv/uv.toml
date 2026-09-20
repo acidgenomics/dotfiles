@@ -1,0 +1,4 @@
+# Dependency cooldown: only resolve packages uploaded at least 14 days ago.
+# A downstream chezmoi tree may overwrite this file when its index does not
+# publish upload-time metadata, since uv then rejects every candidate.
+exclude-newer = "P14D"

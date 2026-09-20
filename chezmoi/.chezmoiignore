@@ -21,6 +21,7 @@ Library/
 {{- if lstat (joinPath .chezmoi.homeDir ".config" "koopa" "dotfiles-work") }}
 .claude/settings.json
 .config/pip/pip.conf
+.config/uv/uv.toml
 .config/zed/settings.json
 .npmrc
 {{- end }}

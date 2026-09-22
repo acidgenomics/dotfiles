@@ -7,7 +7,28 @@ cursor-style-blink = false
 font-family = "JetBrainsMonoNL Nerd Font Mono"
 font-size = 16
 link-url = false
+{{- /*
+  macOS 27 Golden Gate breaks the "tabs" titlebar style: Apple renamed the
+  AppKit view "NSTitlebarAccessoryClipView" to
+  "NSTitlebarAccessoryContainerView", so Ghostty's tab layout code returns
+  early and tabs collapse. Fixed upstream in PR ghostty-org/ghostty#13069,
+  but no stable release carries it yet (stable is still 1.3.1).
+  Tracking: https://github.com/ghostty-org/ghostty/issues/13001
+            https://github.com/ghostty-org/ghostty/issues/13070
+  A stable "tabs" style also loses theme color on macOS 27 even on tip
+  builds (issue #14103 is still open), so fall back to "transparent"
+  there instead of chasing the tip channel.
+  Revert this gate once #13069 ships in a stable release AND #14103 closes.
+*/ -}}
+{{- $macosMajor := 0 -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $macosMajor = atoi (splitList "." (output "sw_vers" "-productVersion" | trim) | first) -}}
+{{- end -}}
+{{- if ge $macosMajor 27 }}
+macos-titlebar-style = transparent
+{{- else }}
 macos-titlebar-style = tabs
+{{- end }}
 {{- $ghosttyThemesDir := joinPath .chezmoi.homeDir ".config/ghostty/themes" -}}
 {{- $dpv := env "KOOPA_DRACULA_PRO_VARIANT" -}}
 {{- $darkTheme := "Dracula" -}}

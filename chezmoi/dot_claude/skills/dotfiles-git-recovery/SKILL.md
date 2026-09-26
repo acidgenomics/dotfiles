@@ -1,5 +1,5 @@
 ---
-name: git-recovery
+name: dotfiles-git-recovery
 description: >-
   Diagnose and recover from common git branch/state accidents — wrong-branch
   reset, git alias side effects, untracked-file checkout collisions, and stash cleanup.

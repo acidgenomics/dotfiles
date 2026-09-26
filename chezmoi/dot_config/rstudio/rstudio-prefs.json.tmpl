@@ -20,7 +20,7 @@
     "default_encoding": "UTF-8",
     "diagnostics_on_save": false,
     "doc_outline_show": "sections_and_chunks",
-{{- $dpSrc := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro/themes/sublime/Dracula Pro.tmTheme") -}}
+{{- $dpSrc := stat (joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "dracula-pro/themes/sublime/dracula-pro.tmTheme") -}}
 {{- if eq (env "KOOPA_COLOR_MODE") "light" }}
 {{-   if $dpSrc }}
     "editor_theme": "Dracula Pro Alucard",

@@ -1,5 +1,5 @@
 ---
-name: todo-org
+name: dotfiles-todo-org
 description: >-
   Org-mode todo.org conventions for project task tracking. Use when the user
   pastes a `** TODO` heading, asks about project TODOs or plans, or when

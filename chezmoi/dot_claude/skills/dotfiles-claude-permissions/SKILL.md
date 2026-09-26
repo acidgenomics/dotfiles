@@ -1,5 +1,5 @@
 ---
-name: claude-permissions
+name: dotfiles-claude-permissions
 description: >-
   Claude Code permission system internals — protected paths, permission modes,
   allow/ask/deny rule precedence, and the PreToolUse permissionDecision hook
@@ -142,5 +142,5 @@ writes.
 
 ## See also
 
-- `maintain-claude-config` — where a new rule/hook/skill belongs; token budgets;
+- `dotfiles-maintain-claude-config` — where a new rule/hook/skill belongs; token budgets;
   the two-tree chezmoi ownership model for `~/.claude`.

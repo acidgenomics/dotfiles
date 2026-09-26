@@ -1,5 +1,5 @@
 ---
-name: workflow-guidance
+name: dotfiles-workflow-guidance
 description: >-
   Workflow orchestration guidance — plan mode etiquette, subagent discipline,
   session hygiene, and git commit conventions. Use when asked about plan mode,
@@ -18,8 +18,10 @@ light. Enter plan mode for architectural decisions or non-obvious tradeoffs.
 ## Operating Principles
 
 - **Subagents**: use liberally to keep the main context clean. One task per agent.
-- **Self-improvement**: after any correction, update `.claude/rules/lessons.md`
-  (project-level only; `~/.claude/rules/lessons.md` is user-curated).
+- **Self-improvement**: after any correction, update the project's lessons rule:
+  `.claude/rules/<prefix>-lessons.md` if the repo prefixes its rules, else
+  `.claude/rules/lessons.md` (project-level only; `~/.claude/rules/dotfiles-lessons.md`
+  is user-curated).
 - **Verification**: never mark done without proof. Run tests, check logs.
 - **Bug fixing**: given a bug report, just fix it.
 - **Elegance**: for non-trivial changes, ask "is there a more elegant way?"

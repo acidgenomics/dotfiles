@@ -1,5 +1,5 @@
 ---
-name: git-history-surgery
+name: dotfiles-git-history-surgery
 description: >-
   Rewrite git history safely with git filter-repo. Use when removing
   secrets or sensitive files from commits, rewriting author/committer emails

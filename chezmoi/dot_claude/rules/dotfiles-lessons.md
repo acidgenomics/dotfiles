@@ -1,7 +1,8 @@
 # Lessons
 
 > Cross-project patterns. Edit the chezmoi source, not ~/.claude directly.
-> Per-project lessons: .claude/rules/lessons.md within the repo.
+> Per-project lessons: the repo's `.claude/rules/<prefix>-lessons.md` (or
+> `lessons.md` if the repo does not prefix its rules).
 
 ## Plan Files: Use System-Generated Names As-Is
 
@@ -31,13 +32,13 @@ research. GitHub surfaces implementation details absent from web sources.
 
 Use `mktemp` (respects `$TMPDIR`). In Python: `tempfile.mkstemp()`. Delete immediately.
 
-> Git-history surgery: use the `git-history-surgery` skill.
+> Git-history surgery: use the `dotfiles-git-history-surgery` skill.
 
 ## Path-Scoped Rule Globs Must Account for chezmoi Filename Prefixes
 
 A `paths:`-scoped rule in `~/.claude/rules/` matching `**/*.sh` silently covers
 **zero** chezmoi shell sources: they are named `dot_zprofile-work.tmpl`,
-`dot_bashrc-work`, `install` — no `.sh` suffix. `shell.md` carried the correct
+`dot_bashrc-work`, `install` — no `.sh` suffix. `dotfiles-shell.md` carried the correct
 4-space rule for months while every file it mattered for went unmatched. A
 rule that never fires looks identical to a rule that does not exist. When
 adding a path-scoped rule, test the globs against actual `git ls-files` output

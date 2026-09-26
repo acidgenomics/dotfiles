@@ -1,7 +1,7 @@
 ---
-name: maintain-claude-config
+name: dotfiles-maintain-claude-config
 description: >-
-  Guide for maintaining and optimizing Claude Code configuration — CLAUDE.md,
+  Guide for maintaining and optimizing Claude Code configuration: CLAUDE.md,
   rules files, hooks, and skills. Use when auditing instruction bloat, deciding
   where a new rule belongs, or pruning stale content.
 ---
@@ -80,16 +80,31 @@ satisfy every reader):
   newline, silently spending 1 char of the budget for nothing.
 - **Avoid stray `key: value` patterns inside the description body.** A naive
   non-block-scalar extractor can misread a colon-space as a nested YAML mapping.
-  A correctly-formed `>-` block scalar sidesteps this — ordinary prose colons
+  A correctly-formed `>-` block scalar sidesteps this: ordinary prose colons
   ("Use when: X, Y, or Z") are safe once the block-scalar form is used.
+- **Name**: lowercase letters and digits joined by single hyphens, at most 64
+  characters, equal to the skill's directory name, and starting with the prefix
+  of the tree that owns it (see Naming and Ownership below).
+- **Trigger phrase**: the description must say when to load the skill, using one
+  of "Use when", "Use after", "Use before", "Use to", "Use this", or "Whenever".
+  A CLI reads the description to decide when to load the skill body; without a
+  trigger phrase, it has nothing to match against.
+- **Body size**: about 600 lines is a soft ceiling, not a hard rule. Shrink by
+  moving reference detail into a sibling file in the skill directory, not by
+  summarizing it away.
 
-Verify any skill tree with the validator (checks frontmatter shape and length,
-not prose):
+Verify any skill tree with the validator (checks frontmatter shape, length,
+naming, and the trigger phrase, not prose):
 
 ```sh
-koopa develop check-skills                        # koopa's own two skill trees
+koopa develop check-skills                        # koopa's own default skill trees
 koopa develop check-skills <path/to/skills/dir>    # any other tree, e.g. a work repo
 ```
+
+Point it at a source tree (a repo's own `.claude/skills`), not at a deployed
+directory shared by several trees (for example `~/.claude/skills`): the
+prefix check infers each root's shared prefix by majority, so a minority
+tree's skills would be flagged as outliers there.
 
 ### Cross-CLI discovery: the `.agents/skills` convention
 
@@ -183,21 +198,32 @@ the gated total.
 The combined `all` output is the true per-session token cost before the first prompt.
 Use `--scope global` to see only the global `~/.claude/` tree (pre-2026-07 behavior).
 
-## Slimming a Bloated `lessons.md` (migration pattern)
+## Slimming a Bloated Lessons File (migration pattern)
 
-When a project `lessons.md` exceeds ~200 lines, apply this triage to each lesson:
+When a project lessons file (`<prefix>-lessons.md`, or `lessons.md` if the
+repo does not prefix its rules) exceeds ~200 lines, apply this triage to
+each lesson:
 
 1. **Subsystem gotcha / how-to reference** → fold the full content verbatim into
-   the matching skill under a `## Lessons (Migrated from rules/lessons.md)` section.
-   Replace the lessons.md entry with a 1-line pointer:
-   `- **Title** → see \`skill-name\` skill.`
-2. **Universal behavioral rule** (short, fires without a specific file open) →
-   keep in lessons.md, trimmed to 1–2 sentences.
-3. Never delete institutional knowledge — only move it to the skill that owns the
-   subsystem. If no matching skill exists, keep it (trimmed) in lessons.md.
+   the owning skill's `## Gotchas` section (or a similarly named topical
+   heading, matching that skill's own convention). Replace the lessons-file
+   entry with a 1-line pointer: `- **Title**: see the \`skill-name\` skill.`
+2. **Path-bound lesson** (fires only when a matching file is open) → move it
+   into the matching path-scoped rule instead. No pointer is needed; the rule
+   loads on its own when that file opens.
+3. **Universal behavioral rule** (short, fires without a specific file open) →
+   keep in the lessons file, trimmed to 1 or 2 sentences.
+4. Never delete institutional knowledge, only move it to the skill or rule that
+   owns the subsystem. If neither exists, keep it (trimmed) in the lessons file.
 
-This pattern routinely achieves 70–80% token reduction on a bloated lessons.md
-while preserving all knowledge in skill files that load on-demand.
+Do not keep a skills index or a path-scoped-rules index table in an
+always-loaded file. Claude Code already lists every skill's description, and
+it already loads a `paths:`-scoped rule on its own when a matching file
+opens, so an index in `CLAUDE.md` or the lessons file only repeats what the
+tool itself already surfaces, at always-loaded token cost.
+
+This pattern routinely achieves 70-80% token reduction on a bloated lessons
+file while preserving all knowledge in skill files that load on-demand.
 
 ## Priority Moves for This Config
 
@@ -208,30 +234,32 @@ while preserving all knowledge in skill files that load on-demand.
 
 ### Completed moves
 
-1. **Hook: never-install enforcement** — `~/.claude/hooks/guard-installs.sh`. Done.
+1. **Hook: never-install enforcement**: `~/.claude/hooks/guard-installs.sh`. Done.
 
-2. **Path-scope `python.md`** — `paths: ["**/*.py", "**/pyproject.toml"]`. Done.
+2. **Path-scope `dotfiles-python.md`**: `paths: ["**/*.py", "**/pyproject.toml"]`. Done.
 
-3. **Path-scope environment-specific rules** — GHA, IaC, cloud-platform rules
+3. **Path-scope environment-specific rules**: GHA, IaC, cloud-platform rules
    path-scoped to their relevant file patterns. Done.
 
-4. **Migrate bulky `lessons.md` entries to skills** — apply the triage pattern above
-   whenever a project lessons.md exceeds 200 lines.
+4. **Migrate bulky lessons-file entries to skills**: apply the triage pattern above
+   whenever a project lessons file exceeds 200 lines.
+
+5. **Migrate `dotfiles-workflow.md` to a skill**: it was entirely procedure and
+   reference, never a hard behavioral constraint. Now a ~10-line stub with a
+   pointer to the `dotfiles-workflow-guidance` skill. Done.
 
 ### Remaining items
 
-5. **Migrate `workflow.md` (107 lines) to a skill** — entirely procedure/reference,
-   never a hard behavioral constraint. Keep as a ~10-line stub + skill pointer.
-
-6. **Audit and prune `coding.md`, `thinking.md`, `security.md`** — apply the test:
-   "would removing this instruction change Claude's behavior?" Delete where no.
+6. **Audit and prune `dotfiles-coding.md`, `dotfiles-thinking.md`, `dotfiles-security.md`**:
+   apply the test, "would removing this instruction change Claude's behavior?"
+   Delete where the answer is no.
 
 ### Bottom line
 
-- **Hooks** → behavioral enforcement (never-install, git denies, env-file guard)
-- **Skills** → procedures, reference, domain knowledge
-- **`paths:`-scoped rules** → language/framework/project-type conventions
-- **Unconditional rules** → short, universal, things Claude would get wrong without them
+- **Hooks**: behavioral enforcement (never-install, git denies, env-file guard)
+- **Skills**: procedures, reference, domain knowledge
+- **`paths:`-scoped rules**: language/framework/project-type conventions
+- **Unconditional rules**: short, universal, things Claude would get wrong without them
 
 ## Cross-tree Ownership (chezmoiignore Pattern)
 
@@ -255,9 +283,37 @@ This config spans two chezmoi trees. The public koopa tree cedes ownership of
 - Work-specific rules, hooks, and settings stay in the work tree. Nothing work-specific
   ever enters koopa.
 
+## Naming and Ownership
+
+Every file this tree deploys into `~/.claude/rules/` or `~/.claude/skills/` must
+carry a prefix that names the tree that owns it. The prefix stops two trees from
+silently writing to the same bare filename.
+
+| Layer | Location | Owner | Prefix |
+|---|---|---|---|
+| User-global, public | `~/.claude/{rules,skills}/` | this public dotfiles tree (main tree) | `dotfiles-` |
+| User-global, other private/work trees | same directories | that tree's own install | its own distinct prefix (not `dotfiles-`) |
+| Project | `<repo>/.claude/{rules,skills}/` | that repo | `<repo-name>-`, e.g. `koopa-` |
+| Project lessons file | `<repo>/.claude/rules/<repo-name>-lessons.md`, or `lessons.md` if the repo does not prefix its rules | that repo | the repo's own prefix, if it has one |
+| Local, unmanaged | any unprefixed name under `~/.claude/` | the user, not any managed tree | none |
+
+**The invariant:** a managed tree must only ever deploy files whose name carries
+its own prefix into `~/.claude/rules/` or `~/.claude/skills/`. This is what keeps
+two trees, or a tree and the user, from silently colliding on the same bare
+filename.
+
+This tree's prefix is `dotfiles-`, not something like `personal-`, because the
+prefix names the tree or repo that owns and deploys the file. This tree is the
+shared public dotfiles repo, not a personal one, so `dotfiles-` is correct where
+`personal-` would not be.
+
+`.chezmoiremove` may list an unprefixed legacy filename only for a one-time
+migration off an old, no-longer-prefixed name. It is never an ongoing pattern:
+remove the entry once the migration lands.
+
 ## See also
 
-- `claude-permissions` — protected paths, permission modes, allow/ask/deny
+- `dotfiles-claude-permissions` — protected paths, permission modes, allow/ask/deny
   precedence, PreToolUse `permissionDecision` contract, and the carve-out hook
   for `.claude/` writes. Use when debugging unexpected permission prompts.
 
@@ -276,7 +332,7 @@ After editing, deploy with a targeted apply:
 ```sh
 chezmoi apply \
   --source=~/.local/share/koopa/opt/dotfiles/chezmoi \
-  ~/.claude/rules/lessons.md    # or whichever file changed
+  ~/.claude/rules/dotfiles-lessons.md    # or whichever file changed
 ```
 
 Do NOT run `koopa configure user dotfiles` from inside a long-running agent

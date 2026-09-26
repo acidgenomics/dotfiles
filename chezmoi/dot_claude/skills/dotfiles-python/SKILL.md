@@ -1,5 +1,5 @@
 ---
-name: python
+name: dotfiles-python
 description: >-
   Python virtual environment lessons — why moving a project directory breaks
   .venv/bin/activate's hardcoded absolute path, and why direnv's PATH_add is

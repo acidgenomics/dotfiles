@@ -1,5 +1,5 @@
 {{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
-{{- $vimPalette := joinPath $dataHome "dracula-pro" "themes" "vim" "autoload" "dracula_pro.vim" -}}
+{{- $vimPalette := joinPath $dataHome "dracula-pro" "themes" "vim" "autoload" "dracula-pro.vim" -}}
 {{- $koopaMarketplace := joinPath $dataHome "koopa" ".claude-plugin" "marketplace.json" -}}
 {
   "alwaysThinkingEnabled": true,

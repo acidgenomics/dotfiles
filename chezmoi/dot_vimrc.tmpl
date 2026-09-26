@@ -397,7 +397,7 @@ if !g:is_nvim
         Plug 'rakr/vim-one'
         Plug 'vim-airline/vim-airline-themes'
     else
-        if !isdirectory(join([themes_home, 'dracula_pro'], '/'))
+        if !filereadable(join([themes_home, 'dracula_pro', 'colors', 'dracula-pro.vim'], '/'))
             Plug 'dracula/vim', { 'as': 'dracula' }
         endif
     endif
@@ -581,22 +581,22 @@ endif
 " Colorscheme is set here for Vim 8; Neovim sets it via lazy.nvim (ui.lua).
 if !g:is_nvim
     if g:koopa_color_mode == 'light' || has('gui_running')
-        if isdirectory(join([themes_home, 'dracula_pro'], '/'))
+        if filereadable(join([themes_home, 'dracula_pro', 'colors', 'dracula-pro.vim'], '/'))
             packadd! dracula_pro
-            colorscheme dracula_pro_alucard
+            colorscheme dracula-pro-alucard
             let g:airline_theme='dracula_pro'
         elseif isdirectory(join([vim_plug_home, 'vim-one'], '/'))
             colorscheme one
             let g:airline_theme='one'
         endif
     else
-        if isdirectory(join([themes_home, 'dracula_pro'], '/'))
+        if filereadable(join([themes_home, 'dracula_pro', 'colors', 'dracula-pro.vim'], '/'))
             packadd! dracula_pro
             let s:dracula_variant = $KOOPA_DRACULA_PRO_VARIANT
             if s:dracula_variant == '' || s:dracula_variant == 'pro'
-                colorscheme dracula_pro
+                colorscheme dracula-pro
             else
-                execute 'colorscheme dracula_pro_' .. substitute(s:dracula_variant, '-', '_', 'g')
+                execute 'colorscheme dracula-pro-' .. s:dracula_variant
             endif
             let g:airline_theme='dracula_pro'
         elseif isdirectory(join([vim_plug_home, 'dracula'], '/'))
@@ -613,20 +613,24 @@ if !g:is_nvim && has('macunix')
         let g:koopa_color_mode = a:mode
         if a:mode ==# 'light' || has('gui_running')
             set background=light
-            if isdirectory(join([g:themes_home, 'dracula_pro'], '/'))
-                colorscheme dracula_pro_alucard
+            if filereadable(join([g:themes_home, 'dracula_pro', 'colors', 'dracula-pro.vim'], '/'))
+                colorscheme dracula-pro-alucard
+                " Theme name stays 'dracula_pro': the vendor's own airline
+                " theme file defines g:airline#themes#dracula_pro#palette,
+                " so koopa ships a 'dracula_pro.vim' shim under a separate
+                " pack dir to give airline that exact file name to find.
                 silent! AirlineTheme dracula_pro
             elseif isdirectory(join([g:vim_plug_home, 'vim-one'], '/'))
                 colorscheme one
             endif
         else
             set background=dark
-            if isdirectory(join([g:themes_home, 'dracula_pro'], '/'))
+            if filereadable(join([g:themes_home, 'dracula_pro', 'colors', 'dracula-pro.vim'], '/'))
                 let s:v = $KOOPA_DRACULA_PRO_VARIANT
                 if s:v ==# '' || s:v ==# 'pro'
-                    colorscheme dracula_pro
+                    colorscheme dracula-pro
                 else
-                    execute 'colorscheme dracula_pro_' .. substitute(s:v, '-', '_', 'g')
+                    execute 'colorscheme dracula-pro-' .. s:v
                 endif
                 silent! AirlineTheme dracula_pro
             elseif isdirectory(join([g:vim_plug_home, 'dracula'], '/'))

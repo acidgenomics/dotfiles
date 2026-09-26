@@ -36,19 +36,18 @@ _DRACULA_VARIANT_NAMES = {
     "alucard": "Dracula Pro Alucard",
 }
 
-# variant -> vendor .tmTheme filename under themes/sublime/. Single source of
-# truth: this table used to be copy-pasted separately into the bat-symlink
-# block and _tmtheme_colors, and had already drifted apart in spirit (same
-# keys, no shared definition) -- see lessons.md on duplicated tables.
-_TMTHEME_NAME_MAP = {
-    "pro": "Dracula Pro.tmTheme",
-    "blade": "Dracula Pro (Blade).tmTheme",
-    "buffy": "Dracula Pro (Buffy).tmTheme",
-    "lincoln": "Dracula Pro (Lincoln).tmTheme",
-    "morbius": "Dracula Pro (Morbius).tmTheme",
-    "van-helsing": "Dracula Pro (Van Helsing).tmTheme",
-    "alucard": "Dracula Pro (Alucard).tmTheme",
-}
+def _dracula_pro_file_name(variant: str, ext: str) -> str:
+    """Return a vendor bundle file name for a variant, in the 2.2.3+ layout.
+
+    Dracula Pro 2.2.3 renamed every bundle file to a lowercase-hyphen name:
+    ``dracula-pro<ext>`` for the base "pro" variant, ``dracula-pro-<variant><ext>``
+    for the others (the vendor's own variant slugs, e.g. "van-helsing", are
+    already hyphenated). Single source of truth for every place that used to
+    look this up in its own copy-pasted name table.
+    """
+    if variant == "pro":
+        return f"dracula-pro{ext}"
+    return f"dracula-pro-{variant}{ext}"
 
 
 def _add_config_link(source: str, name: str) -> None:
@@ -62,6 +61,60 @@ def _add_config_link(source: str, name: str) -> None:
     ln(source, dest)
 
 
+def _prune_dangling_bundle_links(directory: str, dp_dir: str) -> None:
+    """Remove symlinks in `directory` that point into `dp_dir` but no longer resolve.
+
+    A vendor rename (or a variant the vendor drops) leaves the *old* named
+    symlink in place forever: `ln()` only ever repairs the *new* name, since
+    the generator branch that once created the old one has moved on to a
+    different source path and never revisits it.
+    """
+    if not os.path.isdir(directory):
+        return
+    dp_real = os.path.realpath(dp_dir)
+    for entry in os.listdir(directory):
+        path = os.path.join(directory, entry)
+        if not os.path.islink(path):
+            continue
+        if not os.path.realpath(path).startswith(dp_real + os.sep):
+            continue
+        if not os.path.exists(path):
+            rm(path)
+
+
+def _vsix_extension_matches(vsix: str, installed_dir: str) -> bool:
+    """Check whether an installed extension directory matches a VSIX's payload.
+
+    Compares every file under the VSIX's ``extension/`` prefix byte for
+    byte, except ``package.json``, which is compared after dropping the
+    ``__metadata`` key VS Code adds on install. The VSIX's top-level
+    ``.vsixmanifest`` is not part of ``extension/``, so it is skipped too.
+    """
+    with zipfile.ZipFile(vsix) as zf:
+        names = [
+            n for n in zf.namelist() if n.startswith("extension/") and not n.endswith("/")
+        ]
+        for name in names:
+            rel = name[len("extension/"):]
+            installed_path = os.path.join(installed_dir, rel)
+            source_bytes = zf.read(name)
+            if not os.path.isfile(installed_path):
+                return False
+            if rel == "package.json":
+                source_pkg = json.loads(source_bytes)
+                source_pkg.pop("__metadata", None)
+                with open(installed_path, "rb") as fh:
+                    installed_pkg = json.load(fh)
+                installed_pkg.pop("__metadata", None)
+                if source_pkg != installed_pkg:
+                    return False
+                continue
+            with open(installed_path, "rb") as fh:
+                if fh.read() != source_bytes:
+                    return False
+    return True
+
+
 def _install_vscode_extension(
     vsix: str,
     prefix: str,
@@ -69,7 +122,7 @@ def _install_vscode_extension(
     code: str,
     label: str,
 ) -> None:
-    """Install a VSIX extension if not already at the current version."""
+    """Install a VSIX extension if missing, outdated, or changed with no version bump."""
     with zipfile.ZipFile(vsix) as zf:
         pkg = json.loads(zf.read("extension/package.json"))
     source_version = pkg["version"]
@@ -86,11 +139,21 @@ def _install_vscode_extension(
                     int(x) for x in installed_version.split(".")
                 ):
                     installed_version = ver
-    if installed_version != source_version:
-        if installed_version is not None:
+    needs_install = installed_version != source_version
+    if not needs_install:
+        # Same version string, but the vendor sometimes ships a content fix
+        # with no version bump (e.g. Dracula Pro's "important fixes for
+        # Visual Studio Code" release) -- compare the payload, not just the
+        # version, so that kind of release still gets picked up.
+        installed_dir = os.path.join(ext_dir, prefix + installed_version)
+        if not _vsix_extension_matches(vsix, installed_dir):
+            needs_install = True
+            print(f"Reinstalling {label} {source_version} (content changed).")
+    if needs_install:
+        if installed_version is not None and installed_version != source_version:
             print(f"Upgrading {label}: {installed_version} → {source_version}")
         subprocess.run(
-            [code, "--install-extension", vsix],
+            [code, "--install-extension", vsix, "--force"],
             capture_output=True,
             check=True,
         )
@@ -115,6 +178,29 @@ def _positron_cli(home: str) -> str | None:
             "Contents", "Resources", "app", "bin", "code",
         ),
         "/Applications/Positron.app/Contents/Resources/app/bin/code",
+    ]
+    for path in candidates:
+        if os.path.isfile(path) and os.access(path, os.X_OK):
+            return path
+    return None
+
+
+def _vscode_cli(home: str) -> str | None:
+    """Return path to the VS Code CLI binary, or None if not installed.
+
+    `code` is not always on PATH -- the "Shell Command: Install 'code'
+    command in PATH" step is a manual, opt-in action inside VS Code itself.
+    Fall back to the app bundle CLI, mirroring `_positron_cli`.
+    """
+    on_path = shutil.which("code")
+    if on_path:
+        return on_path
+    candidates = [
+        os.path.join(
+            home, "Applications", "Visual Studio Code.app",
+            "Contents", "Resources", "app", "bin", "code",
+        ),
+        "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
     ]
     for path in candidates:
         if os.path.isfile(path) and os.access(path, os.X_OK):
@@ -655,7 +741,7 @@ def _configure_koopa_color_mode_sync(home: str) -> None:
     ext_name = pkg["name"]
     dir_prefix = f"{publisher}.{ext_name}-"
     targets: list[tuple[str, str]] = []
-    code = shutil.which("code")
+    code = _vscode_cli(home)
     if code:
         targets.append((code, os.path.join(home, ".vscode", "extensions")))
     code_server = shutil.which("code-server")
@@ -680,17 +766,58 @@ def _configure_koopa_color_mode_sync(home: str) -> None:
         )
 
 
+def _warn_on_missing_dracula_pro_sources(dp_dir: str) -> None:
+    """Print a warning for each required vendor file this bundle is missing.
+
+    Every generator below guards with `os.path.isfile`/`os.path.isdir` and
+    skips silently when a source is absent, so a vendor rename (as in
+    2.2.3) reports success from `koopa configure user dotfiles` while most
+    themes go stale. This surfaces that at configure time instead.
+    """
+    required = (
+        os.path.join(dp_dir, "themes", "ghostty", "pro"),
+        os.path.join(dp_dir, "themes", "vim", "autoload", "dracula-pro.vim"),
+        os.path.join(dp_dir, "themes", "sublime", "dracula-pro.tmTheme"),
+        os.path.join(dp_dir, "themes", "zed", "dracula-pro.json"),
+        os.path.join(dp_dir, "themes", "visual-studio-code", "dracula-pro.vsix"),
+        os.path.join(dp_dir, "themes", "jetbrains", "dracula-pro.zip"),
+    )
+    for path in required:
+        if not os.path.exists(path):
+            print(f"Dracula Pro: expected bundle file not found: '{path}'.")
+
+
 def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     """Pre-chezmoi: vim pack, Ghostty theme links, VS Code extension install."""
     dp_dir = os.path.join(xdg_data, "dracula-pro")
     if not os.path.isdir(dp_dir):
         return
+    _warn_on_missing_dracula_pro_sources(dp_dir)
     # Vim/Neovim: symlink theme pack so nvim detects it at runtime.
     vim_src = os.path.join(dp_dir, "themes", "vim")
     vim_themes = os.path.join(home, ".vim", "pack", "theme", "start")
     mkdir(vim_themes)
     if os.path.isdir(vim_src):
         ln(vim_src, os.path.join(vim_themes, "dracula_pro"))
+        # vim-airline names its theme after the file under
+        # autoload/airline/themes/, but the vendor ships that file as
+        # "dracula-pro.vim" while it still defines the palette variable
+        # "g:airline#themes#dracula_pro#palette" inside it -- a vendor
+        # naming bug (see koopa-theming skill). A shim under a separate
+        # pack directory gives airline a "dracula_pro.vim" file name to
+        # find, so ":AirlineTheme dracula_pro" (and vimrc's own
+        # g:airline_theme='dracula_pro') resolves. The vendor file defines
+        # only script-local `s:` functions, so re-sourcing it under a
+        # second file name is harmless.
+        airline_shim_dir = os.path.join(
+            vim_themes, "dracula_pro_airline", "autoload", "airline", "themes",
+        )
+        mkdir(airline_shim_dir)
+        airline_vendor_file = os.path.join(
+            vim_src, "autoload", "airline", "themes", "dracula-pro.vim"
+        )
+        if os.path.isfile(airline_vendor_file):
+            ln(airline_vendor_file, os.path.join(airline_shim_dir, "dracula_pro.vim"))
     # Ghostty: generate each variant theme file into ~/.config/ghostty/themes/,
     # rewriting ANSI slot 8 to a readable dim color (see
     # _generate_ghostty_dracula_pro_theme). Not a symlink: Ghostty, and any
@@ -721,7 +848,7 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     )
     if os.path.isfile(vsix):
         dp_prefix = "dracula-theme-pro.theme-dracula-pro-"
-        code = shutil.which("code")
+        code = _vscode_cli(home)
         if code:
             _install_vscode_extension(
                 vsix, dp_prefix,
@@ -829,6 +956,7 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     emacs_src = os.path.join(dp_dir, "themes", "emacs")
     if os.path.isdir(emacs_src):
         mkdir(doom_themes)
+        _prune_dangling_bundle_links(doom_themes, dp_dir)
         for el_file in os.listdir(emacs_src):
             if el_file.endswith(".el"):
                 ln(
@@ -838,15 +966,16 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     # iTerm: symlink selected variant into ~/.config/koopa/iterm-themes/ so it
     # survives a dotfiles reinstall (the old etc/ staging dir lived inside the
     # wiped prefix and was gitignored, causing it to disappear on every reinstall).
-    iterm_src_name = _dracula_iterm_name(variant)
+    iterm_src_name = _dracula_pro_file_name(variant, ".itermcolors")
     iterm_src = os.path.join(dp_dir, "themes", "iterm", iterm_src_name)
     if os.path.isfile(iterm_src):
         iterm_staging = os.path.join(xdg_config_home(), "koopa", "iterm-themes")
         mkdir(iterm_staging)
+        _prune_dangling_bundle_links(iterm_staging, dp_dir)
         ln(iterm_src, os.path.join(iterm_staging, "dracula-pro.itermcolors"))
     # Terminal.app: symlink selected variant into ~/.config/koopa/terminal-themes/
     # for the same reason (stable location outside the reinstallable prefix).
-    terminal_src_name = _dracula_terminal_name(variant)
+    terminal_src_name = _dracula_pro_file_name(variant, ".terminal")
     terminal_src = os.path.join(
         dp_dir, "themes", "terminal-app", terminal_src_name
     )
@@ -855,6 +984,7 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
             xdg_config_home(), "koopa", "terminal-themes"
         )
         mkdir(terminal_staging)
+        _prune_dangling_bundle_links(terminal_staging, dp_dir)
         ln(terminal_src, os.path.join(terminal_staging, "dracula-pro.terminal"))
     # Xcode: symlink all variant .xccolortheme files into Xcode's theme dir.
     if is_macos():
@@ -864,26 +994,31 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
         xcode_src = os.path.join(dp_dir, "themes", "xcode")
         if os.path.isdir(xcode_src):
             mkdir(xcode_themes)
+            _prune_dangling_bundle_links(xcode_themes, dp_dir)
             for f in os.listdir(xcode_src):
                 if f.endswith(".xccolortheme"):
                     ln(
                         os.path.join(xcode_src, f),
                         os.path.join(xcode_themes, f),
                     )
-    # Zed: symlink theme JSON into ~/.config/zed/themes/.
+    # Zed: symlink theme JSON into ~/.config/zed/themes/. Destination name
+    # stays the pre-2.2.3 "dracula_pro.json" -- zed/settings.json.tmpl stats
+    # that exact name.
     zed_themes = os.path.join(home, ".config", "zed", "themes")
-    zed_src = os.path.join(dp_dir, "themes", "zed", "dracula_pro.json")
+    zed_src = os.path.join(dp_dir, "themes", "zed", "dracula-pro.json")
     if os.path.isfile(zed_src):
         mkdir(zed_themes)
+        _prune_dangling_bundle_links(zed_themes, dp_dir)
         ln(zed_src, os.path.join(zed_themes, "dracula_pro.json"))
-    # Firefox: symlink all variant .xpi dirs into ~/.config/koopa/firefox-themes/.
+    # Firefox: symlink all variant .xpi files into ~/.config/koopa/firefox-themes/.
     firefox_staging = os.path.join(xdg_config_home(), "koopa", "firefox-themes")
     firefox_src = os.path.join(dp_dir, "themes", "firefox")
     if os.path.isdir(firefox_src):
         mkdir(firefox_staging)
+        _prune_dangling_bundle_links(firefox_staging, dp_dir)
         for entry in os.listdir(firefox_src):
             src = os.path.join(firefox_src, entry)
-            if os.path.isdir(src):
+            if entry.endswith(".xpi") and os.path.isfile(src):
                 ln(src, os.path.join(firefox_staging, entry))
     # Google Chrome: symlink variant dir into ~/.config/koopa/chrome-themes/.
     chrome_staging = os.path.join(xdg_config_home(), "koopa", "chrome-themes")
@@ -971,6 +1106,7 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     notepad_src = os.path.join(dp_dir, "themes", "notepad-plus-plus")
     if os.path.isdir(notepad_src):
         mkdir(notepad_staging)
+        _prune_dangling_bundle_links(notepad_staging, dp_dir)
         for f in os.listdir(notepad_src):
             if f.endswith(".xml"):
                 ln(
@@ -1155,7 +1291,7 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
             else:
                 # Fall back to the unmodified vendor file (missing source
                 # or no Comment scope entry to patch).
-                src_fname = _TMTHEME_NAME_MAP.get(theme_variant, dest_name)
+                src_fname = _dracula_pro_file_name(theme_variant, ".tmTheme")
                 src = os.path.join(sublime_src, src_fname)
                 if os.path.isfile(src):
                     ln(src, dest)
@@ -1284,12 +1420,11 @@ def _parse_vim_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
     with the base autoload file and then apply variant overrides.
     """
     vim_dir = os.path.join(dp_dir, "themes", "vim")
-    paths = [os.path.join(vim_dir, "autoload", "dracula_pro.vim")]
+    paths = [os.path.join(vim_dir, "autoload", "dracula-pro.vim")]
     if variant != "pro":
-        # Variant keys are hyphenated (e.g. "van-helsing"); the shipped Vim
-        # colorscheme filenames use an underscore.
-        slug = variant.replace("-", "_")
-        paths.append(os.path.join(vim_dir, "colors", f"dracula_pro_{slug}.vim"))
+        paths.append(
+            os.path.join(vim_dir, "colors", _dracula_pro_file_name(variant, ".vim"))
+        )
     if not all(os.path.isfile(path) for path in paths):
         return None
     palette: dict[str, str] = {}
@@ -1561,7 +1696,7 @@ def _generate_dracula_pro_comment_fixed_tmtheme(dp_dir: str, variant: str) -> st
     Returns the patched .tmTheme XML text, or None if the vendor theme or
     its Comment scope entry can't be found.
     """
-    fname = _TMTHEME_NAME_MAP.get(variant, "Dracula Pro.tmTheme")
+    fname = _dracula_pro_file_name(variant, ".tmTheme")
     path = os.path.join(dp_dir, "themes", "sublime", fname)
     if not os.path.isfile(path):
         return None
@@ -2666,7 +2801,7 @@ def _contrast_ratio(hex_a: str, hex_b: str) -> float:
 
 def _tmtheme_colors(dp_dir: str, variant: str) -> dict[str, str] | None:
     """Parse key colors from a Dracula Pro .tmTheme for the given variant."""
-    fname = _TMTHEME_NAME_MAP.get(variant, "Dracula Pro.tmTheme")
+    fname = _dracula_pro_file_name(variant, ".tmTheme")
     path = os.path.join(dp_dir, "themes", "sublime", fname)
     if not os.path.isfile(path):
         return None
@@ -2961,7 +3096,7 @@ def _nudge_hue_toward(hexcolor: str, target_hex: str, min_hue_deg: float) -> str
 
 def _parse_fleet_palette(dp_dir: str, variant: str) -> dict[str, str] | None:
     """Parse the NAME:HEX palette block from a Fleet experimental theme JSON."""
-    fname = "dracula-pro.json" if variant == "pro" else f"dracula-pro_{variant}.json"
+    fname = _dracula_pro_file_name(variant, ".json")
     path = os.path.join(
         dp_dir, "themes", "jetbrains", "experimental", "fleet", fname
     )
@@ -3224,32 +3359,6 @@ def _sync_systemd_user_agent(unit: str) -> None:
             f"Warning: 'systemctl --user enable --now {unit}' exited"
             f" {result.returncode}."
         )
-
-
-def _dracula_iterm_name(variant: str) -> str:
-    names = {
-        "pro": "Dracula Pro.itermcolors",
-        "blade": "Dracula Pro (Blade).itermcolors",
-        "buffy": "Dracula Pro (Buffy).itermcolors",
-        "lincoln": "Dracula Pro (Lincoln).itermcolors",
-        "morbius": "Dracula Pro (Morbius).itermcolors",
-        "van-helsing": "Dracula Pro (Van Helsing).itermcolors",
-        "alucard": "Dracula Pro (Alucard).itermcolors",
-    }
-    return names.get(variant, "Dracula Pro.itermcolors")
-
-
-def _dracula_terminal_name(variant: str) -> str:
-    names = {
-        "pro": "Dracula Pro.terminal",
-        "blade": "Dracula Pro (Blade).terminal",
-        "buffy": "Dracula Pro (Buffy).terminal",
-        "lincoln": "Dracula Pro (Lincoln).terminal",
-        "morbius": "Dracula Pro (Morbius).terminal",
-        "van-helsing": "Dracula Pro (Van Helsing).terminal",
-        "alucard": "Dracula Pro (Alucard).terminal",
-    }
-    return names.get(variant, "Dracula Pro.terminal")
 
 
 def _configure_age(xdg_config: str) -> None:

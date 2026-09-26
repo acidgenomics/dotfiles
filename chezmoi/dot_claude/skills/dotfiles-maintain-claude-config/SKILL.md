@@ -66,7 +66,7 @@ description: >-
   One or more lines of prose describing what the skill covers and when to use it.
 ```
 
-**Never** plain `>` and **never** an inline scalar. Two related constraints
+**Never** plain `>` and **never** an inline scalar. Related constraints
 (Claude Code itself has no such limit, but a skill tree shared across tools must
 satisfy every reader):
 

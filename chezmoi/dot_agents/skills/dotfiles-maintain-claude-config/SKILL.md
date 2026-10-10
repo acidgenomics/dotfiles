@@ -101,8 +101,8 @@ koopa develop check-skills                        # koopa's own default skill tr
 koopa develop check-skills <path/to/skills/dir>    # any other tree, e.g. a work repo
 ```
 
-Point it at a source tree (a repo's own `.claude/skills`), not at a deployed
-directory shared by several trees (for example `~/.claude/skills`): the
+Point it at a source tree (a repo's own `.agents/skills`), not at a deployed
+directory shared by several trees (for example `~/.agents/skills`): the
 prefix check infers each root's shared prefix by majority, so a minority
 tree's skills would be flagged as outliers there.
 
@@ -111,25 +111,31 @@ tree's skills would be flagged as outliers there.
 The Agent Skills format is an open standard (originally from Anthropic,
 spec at agentskills.io) that Codex CLI, Gemini CLI, and Copilot CLI all read
 directly — same `SKILL.md` files, no format changes needed beyond the frontmatter
-rules above. Each tool also honors a shared `.agents/skills` alias directory in
-addition to its own native path:
+rules above. `.agents/skills` (and `.agents/rules` for path-scoped rules) is the
+canonical, real directory; nothing is named after one vendor's own discovery
+path. `.claude/skills` and `.claude/rules` are symlink aliases onto it, kept only
+because Claude Code has no native `.agents/` path of its own:
 
-| Tool | Native path(s) | Also honors `.agents/skills`? |
+| Tool | Native path(s) | Reads `.agents/skills`? |
 |---|---|---|
-| Claude Code | `.claude/skills/`, `~/.claude/skills/` | n/a (this is the source) |
+| Claude Code | `.claude/skills/`, `~/.claude/skills/` | No — reached only via the `.claude/skills -> .agents/skills` symlink |
 | Codex CLI | `.codex/skills/` (walking up to repo root), `~/.codex/skills/` | Yes |
 | Gemini CLI | `.gemini/skills/`, `~/.gemini/skills/` | Yes — wins over `.gemini/skills` at the same tier |
 | Copilot CLI | `.github/skills/`, `.claude/skills/`, `~/.copilot/skills/` | Yes |
 | Antigravity CLI (`agy`) | Unconfirmed — no public doc page found; changelog confirms native skill support exists | Unconfirmed — no evidence either way |
 
-Both this repo's `.agents/skills` (git-tracked symlink → `.claude/skills/`) and the
-user-global `~/.agents/skills` (chezmoi-managed symlink → `~/.claude/skills/`,
-source `dot_agents/symlink_skills.tmpl`) already exist, so Codex, Gemini CLI, and
-Copilot CLI all see this skill tree with zero extra work. Antigravity is an
-accepted gap, not a pending task: its config root is `~/.gemini/config/`, not
-`~/.gemini/skills/`, and confirming its exact skill-discovery path requires an
-authenticated `agy` session — this machine has no Antigravity login, so the path
-stays unverified here. Re-check only if Antigravity auth becomes available.
+`.agents/{skills,rules}` are the real directories, both in a project repo
+(git-tracked, e.g. this koopa checkout's own `.agents/skills -> ... ` adapter
+pattern) and user-global (`~/.agents/{skills,rules}`, chezmoi-managed, source
+`dot_agents/{skills,rules}/`). `.claude/{skills,rules}` are symlink aliases onto
+them: `../.agents/skills` and `../.agents/rules` in a repo, and chezmoi
+`dot_claude/symlink_skills` / `dot_claude/symlink_rules` globally. So Codex,
+Gemini CLI, Copilot CLI, and Claude Code (via the alias) all read one tree with
+zero duplication. Antigravity is an accepted gap, not a pending task: its config
+root is `~/.gemini/config/`, not `~/.gemini/skills/`, and confirming its exact
+skill-discovery path requires an authenticated `agy` session — this machine has
+no Antigravity login, so the path stays unverified here. Re-check only if
+Antigravity auth becomes available.
 
 ## The Iteration Loop (Boris Cherny / Anthropic official)
 
@@ -285,20 +291,21 @@ This config spans two chezmoi trees. The public koopa tree cedes ownership of
 
 ## Naming and Ownership
 
-Every file this tree deploys into `~/.claude/rules/` or `~/.claude/skills/` must
-carry a prefix that names the tree that owns it. The prefix stops two trees from
-silently writing to the same bare filename.
+Every file this tree deploys into `~/.agents/rules/` or `~/.agents/skills/`
+(aliased as `~/.claude/rules/` / `~/.claude/skills/`) must carry a prefix that
+names the tree that owns it. The prefix stops two trees from silently writing
+to the same bare filename.
 
 | Layer | Location | Owner | Prefix |
 |---|---|---|---|
-| User-global, public | `~/.claude/{rules,skills}/` | this public dotfiles tree (main tree) | `dotfiles-` |
+| User-global, public | `~/.agents/{rules,skills}/` (aliased as `~/.claude/{rules,skills}/`) | this public dotfiles tree (main tree) | `dotfiles-` |
 | User-global, other private/work trees | same directories | that tree's own install | its own distinct prefix (not `dotfiles-`) |
-| Project | `<repo>/.claude/{rules,skills}/` | that repo | `<repo-name>-`, e.g. `koopa-` |
-| Project lessons file | `<repo>/.claude/rules/<repo-name>-lessons.md`, or `lessons.md` if the repo does not prefix its rules | that repo | the repo's own prefix, if it has one |
-| Local, unmanaged | any unprefixed name under `~/.claude/` | the user, not any managed tree | none |
+| Project | `<repo>/.agents/{rules,skills}/` (aliased as `<repo>/.claude/{rules,skills}/`) | that repo | `<repo-name>-`, e.g. `koopa-` |
+| Project lessons file | `<repo>/.agents/rules/<repo-name>-lessons.md`, or `lessons.md` if the repo does not prefix its rules | that repo | the repo's own prefix, if it has one |
+| Local, unmanaged | any unprefixed name under `~/.agents/` | the user, not any managed tree | none |
 
 **The invariant:** a managed tree must only ever deploy files whose name carries
-its own prefix into `~/.claude/rules/` or `~/.claude/skills/`. This is what keeps
+its own prefix into `~/.agents/rules/` or `~/.agents/skills/`. This is what keeps
 two trees, or a tree and the user, from silently colliding on the same bare
 filename.
 
@@ -325,14 +332,16 @@ This user's configuration lives in chezmoi at:
 ```
 (or equivalently `~/.config/koopa/dotfiles/chezmoi/dot_claude/`).
 
-The deployed targets are `~/.claude/`. **Always edit the chezmoi source**, not
-the deployed copy — it will be overwritten on the next `chezmoi apply`.
+The deployed targets are `~/.claude/` and `~/.agents/`. **Always edit the chezmoi
+source**, not the deployed copy — it will be overwritten on the next `chezmoi apply`.
 
-After editing, deploy with a targeted apply:
+After editing, deploy with a targeted apply. Target the real managed path
+(`~/.agents/...`), not the `~/.claude/...` alias — `~/.claude/rules` and
+`~/.claude/skills` are symlinks, not individually managed targets:
 ```sh
 chezmoi apply \
   --source=~/.local/share/koopa/opt/dotfiles/chezmoi \
-  ~/.claude/rules/dotfiles-lessons.md    # or whichever file changed
+  ~/.agents/rules/dotfiles-lessons.md    # or whichever file changed
 ```
 
 Do NOT run `koopa configure user dotfiles` from inside a long-running agent

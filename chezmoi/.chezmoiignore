@@ -4,8 +4,8 @@
 */*/*/*.md
 !.claude/*.md
 !.claude/output-styles/*.md
-!.claude/rules/*.md
-!.claude/skills/**/*.md
+!.agents/rules/*.md
+!.agents/skills/**/*.md
 !.codex/AGENTS.md
 !.gemini/GEMINI.md
 {{- if ne .chezmoi.os "linux" }}

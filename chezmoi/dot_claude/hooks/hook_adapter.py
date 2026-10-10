@@ -266,6 +266,39 @@ def read_targets(payload: dict) -> list[FileTarget]:
     return []
 
 
+def read_commands(payload: dict) -> list[str]:
+    """Every shell command string this call would run.
+
+    Mirrors read_targets()'s toolCalls[] unwrapping, but for the `command`
+    field a Bash-matcher hook reads instead of a file-edit field: reading
+    `tool_input.command` directly sees nothing at all for Copilot's batched
+    parallel-call shape, and silently allows a command it should have
+    blocked. Unlike read_targets, this never raises: it returns an empty
+    list for anything it cannot read, so a caller decides its own policy.
+    """
+    if "tool_input" in payload:
+        tool_input = payload["tool_input"]
+        if isinstance(tool_input, dict):
+            command = tool_input.get("command")
+            return [command] if isinstance(command, str) else []
+        return []
+
+    if "toolCalls" in payload:
+        tool_calls = payload["toolCalls"]
+        if not isinstance(tool_calls, list):
+            return []
+        commands: list[str] = []
+        for call in tool_calls:
+            if not isinstance(call, dict):
+                continue
+            args = call.get("args")
+            if isinstance(args, dict):
+                commands.extend(read_commands({"tool_input": args}))
+        return commands
+
+    return []
+
+
 def targets_or_deny(raw: str) -> list[FileTarget]:
     """PreToolUse entry point. Exit 0 on absent input, exit 2 on unreadable input."""
     payload = load_payload(raw)

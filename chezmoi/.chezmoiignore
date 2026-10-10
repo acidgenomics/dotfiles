@@ -8,6 +8,7 @@
 !.agents/skills/**/*.md
 !.codex/AGENTS.md
 !.gemini/GEMINI.md
+**/__pycache__
 {{- if ne .chezmoi.os "linux" }}
 .local/share/code-server-posit/
 .local/share/code-server/

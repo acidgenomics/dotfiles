@@ -1,6 +1,6 @@
 # Lessons
 
-> Cross-project patterns. Edit the chezmoi source, not ~/.claude directly.
+> Cross-project patterns. Edit the chezmoi source, not ~/.agents or ~/.claude directly.
 > Per-project lessons: the repo's `.claude/rules/<prefix>-lessons.md` (or
 > `lessons.md` if the repo does not prefix its rules).
 

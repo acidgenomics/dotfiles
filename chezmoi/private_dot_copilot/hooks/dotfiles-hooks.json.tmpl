@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"{{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"{{ .chezmoi.homeDir }}/.claude/hooks/guard-broad-scan.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -19,11 +19,11 @@
   "effortLevel": "xhigh",
   "enabledPlugins": {
     "astral@astral-sh": true,
-    "claude-code-setup@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": false,
 {{- if stat $koopaMarketplace }}
     "koopa@koopa": true,
 {{- end }}
-    "pyright-lsp@claude-plugins-official": true
+    "pyright-lsp@claude-plugins-official": false
   },
   "env": {
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
@@ -170,7 +170,7 @@
     "ask": [
       "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)"
     ],
-    "defaultMode": "plan",
+    "defaultMode": "auto",
     "deny": [
       "Bash(git add*)",
       "Bash(git commit*)",

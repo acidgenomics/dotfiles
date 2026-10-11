@@ -137,6 +137,20 @@ skill-discovery path requires an authenticated `agy` session — this machine ha
 no Antigravity login, so the path stays unverified here. Re-check only if
 Antigravity auth becomes available.
 
+## Path-Scoped Rule Globs and chezmoi Filename Prefixes
+
+A `paths:`-scoped rule matching `**/*.sh` silently covers **zero** chezmoi shell sources: they
+are named `dot_zprofile-work.tmpl`, `dot_bashrc-work`, `install`, with no `.sh` suffix.
+`dotfiles-shell.md` carried the correct 4-space rule for months while every file it mattered
+for went unmatched. A rule that never fires looks identical to a rule that does not exist.
+
+- Test every glob against real `git ls-files` output before trusting it.
+- Mirror the convention into `.editorconfig` (declarative, editor-visible), not prose alone.
+- An `.editorconfig` section glob matches on **basename** for a bare pattern, so extension-less
+  files need explicit brace lists (`{install,dot_profile*,...}`).
+- A child `.editorconfig` must **omit** `root=true` to override one property while inheriting
+  the rest from a parent.
+
 ## The Iteration Loop (Boris Cherny / Anthropic official)
 
 1. Run `/init` on a new project to generate a starter CLAUDE.md.

@@ -2,6 +2,13 @@
 # PreToolUse hook: block software install commands.
 # Covers language package managers, system package managers, koopa, and network installers.
 # Fail-OPEN: infrastructure errors defer to normal permission flow (exit 0, no output).
+#
+# It blocks a command that RUNS an install, not text that mentions one. Matching
+# the raw command text cannot tell the two apart, so it also blocked commit
+# messages, `grep` patterns, and heredocs holding documentation. The decision now
+# comes from guard_installs_scan.py, which reads the command the way a shell does.
+# When that scanner is missing or cannot decide, the text patterns below decide
+# instead, exactly as this guard worked before.
 set -uo pipefail
 
 command -v jq >/dev/null 2>&1 || exit 0
@@ -42,10 +49,32 @@ _matches_install() {
     return 1
 }
 
-if _matches_install "$cmd"
-then
+_block() {
     printf '%s\n' '{"decision":"block","reason":"Software installs are not allowed. Surface the command or koopa app name and let the user install it."}' >&2
     exit 2
+}
+
+scanner="$(dirname "${BASH_SOURCE[0]}")/guard_installs_scan.py"
+
+if command -v python3 >/dev/null 2>&1 && [[ -f "$scanner" ]]
+then
+    # -E and -s ignore the environment and user site packages; unlike -I they
+    # keep the scanner's own folder importable.
+    printf '%s' "$cmd" | python3 -E -s "$scanner"
+    # 0 = no install, 10 = install found, anything else = could not decide.
+    case $? in
+        0)
+            exit 0
+            ;;
+        10)
+            _block
+            ;;
+    esac
+fi
+
+if _matches_install "$cmd"
+then
+    _block
 fi
 
 exit 0

@@ -93,7 +93,15 @@
         "matcher": "Bash",
         "hooks": [
           { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh" },
-          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-broad-scan.sh" }
+          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-broad-scan.sh" },
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.claude/hooks/guard_rm.py" },
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.claude/hooks/guard_zsh_traps.py" }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.claude/hooks/guard_tmp.py" }
         ]
       }
     ]
@@ -166,7 +174,6 @@
       "Bash(git push*)",
       "Bash(git rebase*)",
       "Bash(git reset*)",
-      "Bash(rm -rf *)",
       "Edit(**/.env*)",
       "Edit(.env*)",
       "Read(**/.env*)",

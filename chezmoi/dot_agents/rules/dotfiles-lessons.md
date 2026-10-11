@@ -4,72 +4,12 @@
 > Per-project lessons: the repo's `.agents/rules/<prefix>-lessons.md` (or
 > `lessons.md` if the repo does not prefix its rules).
 
-## Plan Files: Use System-Generated Names As-Is
-
-Never rename with a `YYYY-MM-DD-` prefix — the VS Code plan UI requires the exact
-filename. Date prefixes apply only to manually created docs.
-
-## Session Reports: `~/Documents/bucket/YYYY/MM/DD/<slug>.md` (Obsidian Vault)
-
-Write session reports into the Obsidian vault, not a repo `reports/` or
-`.claude/reports/` directory — both are gitignored, so a report saved there
-is invisible to git and to every other engineer. The date lives in the
-path, so the filename carries no date prefix. Add YAML frontmatter with
-`type: report` (plus `title`, `date`, and any ticket/status the report
-carries) so a vault index can filter on it. Never save a report to
-`.claude/plans/` — those are implementation blueprints, not deliverables.
-
-## JSON Formatting
-
-Always 2-space indentation. Never 4 spaces.
-
-## Deep Research: Always Include GitHub Code Search
-
-Run a second parallel workflow targeting GitHub code search alongside web
-research. GitHub surfaces implementation details absent from web sources.
-
-## Never Use `/tmp` for Sensitive Files
-
-Use `mktemp` (respects `$TMPDIR`). In Python: `tempfile.mkstemp()`. Delete immediately.
-
-> Git-history surgery: use the `dotfiles-git-history-surgery` skill.
-
-## Path-Scoped Rule Globs Must Account for chezmoi Filename Prefixes
-
-A `paths:`-scoped rule in `~/.agents/rules/` matching `**/*.sh` silently covers
-**zero** chezmoi shell sources: they are named `dot_zprofile-work.tmpl`,
-`dot_bashrc-work`, `install` — no `.sh` suffix. `dotfiles-shell.md` carried the correct
-4-space rule for months while every file it mattered for went unmatched. A
-rule that never fires looks identical to a rule that does not exist. When
-adding a path-scoped rule, test the globs against actual `git ls-files` output
-before trusting it, and mirror the convention into `.editorconfig`
-(declarative, editor-visible) rather than relying on prose alone.
-
-Two nuances: an `.editorconfig` section glob matches on **basename** for a
-bare pattern, so extension-less files need explicit brace lists
-(`{install,dot_profile*,...}`); and a child `.editorconfig` must **omit**
-`root=true` to override one property while inheriting the rest from a parent.
-
-## Never Reach for a Tool Outside the Current Project Without Asking
-
-Don't invoke a binary from an unrelated project's venv/node_modules, or trigger any
-download (even a "just this once" browser/model/dependency fetch), to unblock a
-verification step. Surface the missing capability and the command that would add it
-— e.g. as a koopa app — and let the user decide whether to install it. This applies
-even when the target directory is technically outside the project being worked on
-(a different repo's `.venv`) and even when the install is small: the violation is
-installing without asking, not the size or exact location of what got installed.
-
-## SKILL.md Descriptions Must Be Compatible with Both Claude Code and Copilot CLI
-
-Always use `description: >-` (folded-strip block scalar). Never inline (`description: ...`
-on one line) and never plain `>` (folded adds a trailing `\n`, pushing parsed length to
-`raw + 1`). Rules:
-
-- Keep raw description text ≤1023 chars. Copilot CLI enforces a 1024-char limit on the
-  parsed value; `>-` makes parsed == raw, so 1023 raw == 1023 parsed — safely under.
-- Never put `key: value` patterns (colon-space) inside the description text. Copilot's
-  YAML parser treats them as mapping entries and rejects the file. Block scalar sidesteps
-  the ambiguity entirely.
-- A single skill over the limit causes Copilot to reject the **entire** `.agents/skills/`
-  directory load ("Failed to load N skills") — it is not a per-skill failure.
+- **Plan files: keep the system-generated name as-is.** The VS Code plan UI needs the exact filename. Date prefixes apply only to manually created docs.
+- **Session reports go to `~/Documents/bucket/YYYY/MM/DD/<slug>.md` (Obsidian vault),** not a repo `reports/` or `.claude/reports/` (gitignored, so invisible to git). No date prefix in the filename. Add YAML frontmatter with `type: report`, `title`, `date`. Never save a report to `.claude/plans/`.
+- **JSON uses 2-space indentation, never 4.**
+- **Deep research: run a second parallel workflow on GitHub code search** alongside web research. It surfaces implementation details absent from web sources.
+- **Never use `/tmp` for sensitive files.** Use `mktemp` (respects `$TMPDIR`); in Python `tempfile.mkstemp()`. Delete immediately.
+- **Never reach for a tool outside the current project without asking.** Don't invoke a binary from another project's venv/node_modules or trigger any download (even a small one) to unblock verification. Surface the missing capability and the command that would add it, and let the user decide. The violation is installing without asking, not the size or location.
+- **Path-scoped rule globs must account for chezmoi filename prefixes** (`dot_`, `.tmpl`, extension-less `install`). Test globs against `git ls-files` and mirror the convention into `.editorconfig`. → `koopa-maintain-claude-config` skill.
+- **SKILL.md `description:` uses `>-` and stays at most 1023 chars.** → `koopa-maintain-claude-config` skill.
+- **Git-history surgery:** use the `koopa-git-history-surgery` skill.

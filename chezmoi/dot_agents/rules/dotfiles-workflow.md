@@ -7,4 +7,4 @@ After any correction, update the project's lessons rule:
 is user-curated).
 
 > For plan mode etiquette, operating principles, session hygiene, and git commit
-> conventions, invoke the `dotfiles-workflow-guidance` skill.
+> conventions, invoke the `koopa-workflow-guidance` skill.

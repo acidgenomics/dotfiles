@@ -11,7 +11,7 @@
 
 - Assume all CLI tools are available on PATH; never use `.venv` paths to invoke
   them.
-- Never install software or packages — enforced by `guard-installs.sh`; surface
+- Never install software or packages — enforced by the koopa plugin's install guard; surface
   the command or koopa app name and stop.
 - Never override or ignore configuration in `pyproject.toml`.
 

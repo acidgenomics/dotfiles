@@ -3,35 +3,40 @@
 # non-allowlisted destinations (public repos, vendor platforms, partner TREs,
 # external-company repos).
 #
-# Token lists are read from private git config so this public file stays
-# token-free. No-op on any machine where the config keys are unset.
+# Keyword lists are read from private git config so this public file stays
+# keyword-free. No-op on any machine where the config keys are unset.
 #
-#   koopa.restrictedTokens          checked in staged file paths AND content
-#   koopa.restrictedTokensContentOnly  checked in staged content ONLY
+#   koopa.keywords         checked in staged file paths AND content
+#   koopa.contentKeywords  checked in staged content ONLY
 #     (use for identifiers that appear in every local absolute path and
 #      would false-positive on filename matching)
+#   koopa.allowedRemotes   remotes where the keywords are legitimate
 #
 # Mirrors the identity guard in pre-push: exits 0 immediately when the
-# config keys are absent, and defers for allowlisted corporate remotes.
+# config keys are absent, and defers for allowed remotes.
+#
+# The old key names (koopa.restrictedTokens, koopa.restrictedTokensContentOnly,
+# koopa.corpRemoteAllowlist) are still read as deprecated aliases for one
+# release, so a machine with an older private config keeps working.
 
-tokens=$(git config --get-all koopa.restrictedTokens 2>/dev/null || true)
-tokens_co=$(git config --get-all koopa.restrictedTokensContentOnly 2>/dev/null || true)
+tokens=$( { git config --get-all koopa.keywords; git config --get-all koopa.restrictedTokens; } 2>/dev/null || true)
+tokens_co=$( { git config --get-all koopa.contentKeywords; git config --get-all koopa.restrictedTokensContentOnly; } 2>/dev/null || true)
 [ -n "$tokens" ] || [ -n "$tokens_co" ] || exit 0
 
-# Defer for allowlisted (corporate) remotes — tokens are legitimate there.
+# Defer for allowed remotes — the keywords are legitimate there.
 origin=$(git remote get-url origin 2>/dev/null || true)
-for a in $(git config --get-all koopa.corpRemoteAllowlist 2>/dev/null || true)
+for a in $( { git config --get-all koopa.allowedRemotes; git config --get-all koopa.corpRemoteAllowlist; } 2>/dev/null || true)
 do
     case "$origin" in *"$a"*) exit 0 ;; esac
 done
 
-# Word-boundary wrappers (mirrors guard-public-leak.sh _wb_match).
+# Word-boundary wrappers (mirrors guard_keywords _wb_match).
 wbpre='(^|[^[:alnum:]])('
 wbsuf=')([^[:alnum:]]|$)'
 
 fail=0
 
-# 1. Staged file paths — restrictedTokens only.
+# 1. Staged file paths — koopa.keywords only.
 if [ -n "$tokens" ]
 then
     pat=$(printf '%s' "$tokens" | tr '\n' '|' | sed 's/|$//')

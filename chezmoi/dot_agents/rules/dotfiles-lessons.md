@@ -1,7 +1,7 @@
 # Lessons
 
 > Cross-project patterns. Edit the chezmoi source, not ~/.agents or ~/.claude directly.
-> Per-project lessons: the repo's `.claude/rules/<prefix>-lessons.md` (or
+> Per-project lessons: the repo's `.agents/rules/<prefix>-lessons.md` (or
 > `lessons.md` if the repo does not prefix its rules).
 
 ## Plan Files: Use System-Generated Names As-Is
@@ -36,7 +36,7 @@ Use `mktemp` (respects `$TMPDIR`). In Python: `tempfile.mkstemp()`. Delete immed
 
 ## Path-Scoped Rule Globs Must Account for chezmoi Filename Prefixes
 
-A `paths:`-scoped rule in `~/.claude/rules/` matching `**/*.sh` silently covers
+A `paths:`-scoped rule in `~/.agents/rules/` matching `**/*.sh` silently covers
 **zero** chezmoi shell sources: they are named `dot_zprofile-work.tmpl`,
 `dot_bashrc-work`, `install` — no `.sh` suffix. `dotfiles-shell.md` carried the correct
 4-space rule for months while every file it mattered for went unmatched. A
@@ -71,5 +71,5 @@ on one line) and never plain `>` (folded adds a trailing `\n`, pushing parsed le
 - Never put `key: value` patterns (colon-space) inside the description text. Copilot's
   YAML parser treats them as mapping entries and rejects the file. Block scalar sidesteps
   the ambiguity entirely.
-- A single skill over the limit causes Copilot to reject the **entire** `.claude/skills/`
+- A single skill over the limit causes Copilot to reject the **entire** `.agents/skills/`
   directory load ("Failed to load N skills") — it is not a per-skill failure.

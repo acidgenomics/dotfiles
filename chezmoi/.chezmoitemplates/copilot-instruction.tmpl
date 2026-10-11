@@ -1,0 +1,17 @@
+{{- /*
+  Copilot CLI user instruction generated from ~/.agents/rules/<name>.md.
+  Copilot reads only *.instructions.md files with an applyTo frontmatter
+  key. The rule keeps its own paths: globs (Claude format); this partial
+  turns them into a comma-joined applyTo, or "**" when the rule has none.
+  Called as: {{ template "copilot-instruction.tmpl" "<rule-name>" }}
+*/ -}}
+{{- $src := include (printf "dot_agents/rules/%s.md" .) -}}
+{{- $fm := regexFind "(?s)\\A---\\n.*?\\n---\\n" $src -}}
+{{- $globs := list -}}
+{{- range regexFindAll "\"[^\"]+\"" $fm -1 -}}
+{{- $globs = append $globs (trimAll "\"" .) -}}
+{{- end -}}
+---
+applyTo: "{{ if $globs }}{{ join "," $globs }}{{ else }}**{{ end }}"
+---
+{{ regexReplaceAll "(?s)\\A---\\n.*?\\n---\\n" $src "" -}}

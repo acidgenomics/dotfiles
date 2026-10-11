@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-_HOOKS_DIR = Path(__file__).parent.parent / "chezmoi" / "dot_claude" / "hooks"
+_HOOKS_DIR = Path(__file__).parent.parent / "chezmoi" / "dot_agents" / "hooks"
 sys.path.insert(0, str(_HOOKS_DIR))
 # Keep bytecode out of the chezmoi source tree, which chezmoi would otherwise see.
 sys.dont_write_bytecode = True
@@ -182,3 +182,88 @@ def test_hook_fails_toward_no_decision_on_bad_input(stdin: str, tmpdir_root: str
         [sys.executable, str(_GUARD)], input=stdin, capture_output=True, text=True, env=env
     )
     assert (result.returncode, result.stdout) == (0, "")
+
+
+MORE_DENIED = [
+    "echo hi >| /tmp/x",
+    "echo hi >|/tmp/x",
+    "curl -o/tmp/x http://h",
+    "tar -xf a.tar -C/tmp",
+    "tar -xf a.tar -C /tmp",
+    "tar --directory=/tmp -xf a.tar",
+    "tar -czf /tmp/a.tgz dir",
+    "tar czf /tmp/a.tgz dir",
+    "unzip a.zip -d /tmp/out",
+    "TMPDIR=/tmp mktemp -d",
+    "D=/tmp; mkdir $D/x",
+    "D=/tmp/w; touch ${D}/f",
+    "D=/tmp; cd $D",
+    "git clone http://h/r /tmp/r",
+    "sed -i s/a/b/ /tmp/f",
+    "sort -o /tmp/out in.txt",
+    "timeout 5 touch /tmp/x",
+    "poetry run python -c \"open('/tmp/x', 'w').write('a')\"",
+    "pixi run python -c \"import os; os.rename('a', '/tmp/b')\"",
+    "python3 -c \"df.to_excel('/tmp/x.xlsx')\"",
+    "python3 -c \"urllib.request.urlretrieve(u, '/tmp/x')\"",
+    "python3 -c \"zipfile.ZipFile('a').extractall('/tmp/x')\"",
+]
+
+MORE_PASSES = [
+    "sort /tmp/f",
+    "awk '{print $1}' /tmp/f",
+    "sed s/a/b/ /tmp/f",
+    "cut -d, -f1 /tmp/f",
+    "tar -tf /tmp/a.tar",
+    "tar -xf /tmp/a.tar",
+    "unzip -l /tmp/a.zip",
+    "unzip /tmp/a.zip",
+    "python3 /tmp/x.py",
+    "bash /tmp/x.sh",
+    "source /tmp/env.sh",
+    "git -C /tmp log",
+    "git -C /tmp status",
+    "timeout 5 cat /tmp/x",
+    "sudo -u root cat /tmp/x",
+    "nice -n 5 ls /tmp",
+    "FOO=/tmp/x cat $FOO",
+    "python3 -c \"print(open('/tmp/x').read())\"",
+    'python3 -c "# write notes to /tmp\nprint(1)"',
+    "poetry run python -c \"print(open('/tmp/x').read())\"",
+]
+
+
+@pytest.mark.parametrize("template", MORE_DENIED)
+def test_more_denied(template: str, tmpdir_root: str) -> None:
+    assert decide_bash(template, tmpdir_root), template
+
+
+@pytest.mark.parametrize("template", MORE_PASSES)
+def test_more_passes(template: str, tmpdir_root: str) -> None:
+    assert decide_bash(template, tmpdir_root) is None, template
+
+
+def test_hook_reads_a_batched_copilot_payload(tmpdir_root: str) -> None:
+    payload = {"toolCalls": [{"args": {"command": "ls"}}, {"args": {"command": "touch /tmp/x"}}]}
+    assert _hook(payload, tmpdir_root).returncode == 2
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"tool_name": "create", "tool_input": {"path": "/tmp/x", "file_text": "a"}},
+        {"tool_name": "NotebookEdit", "tool_input": {"notebook_path": "/tmp/n.ipynb"}},
+        {"toolCalls": [{"toolName": "edit", "args": {"path": "/tmp/x", "new_str": "a"}}]},
+        {
+            "tool_name": "apply_patch",
+            "tool_input": "*** Begin Patch\n*** Add File: /tmp/x\n+a\n*** End Patch",
+        },
+    ],
+)
+def test_hook_denies_copilot_shaped_file_writes(payload: dict, tmpdir_root: str) -> None:
+    assert _hook(payload, tmpdir_root).returncode == 2
+
+
+def test_hook_does_not_deny_a_copilot_read(tmpdir_root: str) -> None:
+    payload = {"tool_name": "view", "tool_input": {"path": "/tmp/x"}}
+    assert _hook(payload, tmpdir_root).returncode == 0

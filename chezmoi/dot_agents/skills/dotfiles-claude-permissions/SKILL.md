@@ -5,7 +5,8 @@ description: >-
   allow/ask/deny rule precedence, and the PreToolUse permissionDecision hook
   contract. Use when debugging unexpected permission prompts, understanding why
   Edit(.claude/**) or Bash(*) allow rules have no effect on .claude/ writes,
-  or reasoning about acceptEdits vs plan vs bypassPermissions mode tradeoffs.
+  reasoning about acceptEdits vs plan vs bypassPermissions mode tradeoffs, or a
+  headless claude -p call that hangs with no output.
 ---
 
 # Claude Code Permission System
@@ -38,6 +39,21 @@ rules are evaluated, so a blocking hook wins over an allow rule.
 † `acceptEdits` Bash auto-approvals: `mkdir`, `touch`, `rm`, `rmdir`, `mv`, `cp`,
 `sed` — for paths inside the working directory or `additionalDirectories` only.
 Protected paths (see below) still prompt in every mode except `bypassPermissions`.
+
+### Headless `claude -p` hangs when `defaultMode` is `plan`
+
+With `permissions.defaultMode: "plan"` in `settings.json`, a bare `claude -p "..."` hangs
+with no output at all (not even `--debug` prints anything), so it looks like an auth,
+network, or policy problem. It is not. Headless mode starts in plan mode with nobody to
+approve a plan. Found by bisecting a copy of `settings.json` in a clean
+`CLAUDE_CONFIG_DIR`: dropping only `permissions.defaultMode` fixed it, while dropping
+`allow`, `ask`, `deny`, hooks, or `awsAuthRefresh` did not.
+
+**Fix:** pass a mode on every headless call and keep `defaultMode` as is for interactive
+sessions, for example `claude -p "..." --permission-mode default` (or `acceptEdits` when
+the call must write files). Wrap scripted calls in a hard limit
+(`perl -e 'alarm 90; exec @ARGV' claude -p ...`), since macOS has no `timeout`.
+Intermittent `API Error: 503` from Bedrock is a separate, temporary problem.
 
 ## Protected paths — the key insight
 
@@ -134,11 +150,33 @@ suppress the protected-path prompt. The safety check runs outside the hook's rea
 config-level escape hatch for file edits. There is no workaround for Bash `mkdir`
 into `.claude/`.
 
-The `guard-claude-allow.sh` hook deployed on this machine (`~/.claude/hooks/`) is
+The `guard-claude-allow.sh` hook deployed on this machine (`~/.agents/hooks/`) is
 **ineffective for protected-path writes**. It correctly emits `allow` JSON (unit
 tests pass), but Claude Code ignores that decision for protected paths. The hook
 can be left in place harmlessly or removed — it provides no benefit for `.claude/`
 writes.
+
+### ✓ Verified (Claude Code, 2026-10-11): `~/.claude/{rules,skills,hooks}` are symlink aliases, and edits through them are still gated
+
+`~/.claude/rules` (and `skills`, `hooks`) are symlinks to `~/.agents/*`. Two headless
+`claude -p --permission-mode acceptEdits` Write probes ran from a scratch directory:
+
+| Path written | Result |
+|---|---|
+| `~/.agents/rules/_probe_headless_a.md` | ✗ blocked, pending a prompt (outside the working directories) |
+| `~/.claude/rules/_probe_headless_b.md` | ✗ blocked: "sensitive file", and it "resolves through a symlink" to `~/.agents/rules/...` |
+
+**Conclusion:** the protected-path check uses the lexical `.claude` path, and the
+working-directory check uses the resolved `.agents` path, so the alias is gated twice.
+Despite the `Edit(**)` allow, a write to `~/.agents/rules` from an unrelated directory
+was blocked pending a prompt (not tested from inside the dotfiles repo). No `ask` twin
+was added for rules or skills.
+`~/.agents/hooks` has an explicit `ask` rule on top of that, because hooks are the
+guards themselves.
+
+**Rule syntax:** use `Edit(path)` for ask, allow and deny rules. A `Write(path)` rule is
+rejected with "not matched by file permission checks"; Edit rules cover all file-editing
+tools. `Edit(//**/*lessons.md)` is redundant with `Edit(**)`.
 
 ## See also
 

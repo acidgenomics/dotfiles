@@ -5,6 +5,7 @@
 !.claude/*.md
 !.claude/output-styles/*.md
 !.agents/rules/*.md
+!.copilot/instructions/*.md
 !.agents/skills/**/*.md
 !.codex/AGENTS.md
 !.gemini/GEMINI.md

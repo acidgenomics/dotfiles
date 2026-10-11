@@ -1,8 +1,8 @@
 ---
 name: dotfiles-maintain-claude-config
 description: >-
-  Guide for maintaining and optimizing Claude Code configuration: CLAUDE.md,
-  rules files, hooks, and skills. Use when auditing instruction bloat, deciding
+  Guide for maintaining and optimizing Claude Code configuration (CLAUDE.md,
+  rules files, hooks, and skills). Use when auditing instruction bloat, deciding
   where a new rule belongs, or pruning stale content.
 ---
 
@@ -171,7 +171,7 @@ regardless of what Claude decides.
         "matcher": "Bash",
         "hooks": [{
           "type": "command",
-          "command": "bash ~/.claude/hooks/guard-installs.sh"
+          "command": "bash ~/.agents/hooks/guard-installs.sh"
         }]
       }
     ]
@@ -188,21 +188,26 @@ exit 2
 ## Auditing Token Usage with `koopa app claude audit-tokens`
 
 The command reports approximate token cost for always-loaded Claude config.
-Token estimate: `len(text) // 4` (chars, not bytes).
+Token estimate: `len(text) // 3` (chars, not bytes), calibrated against a live
+`/context` reading; the common `// 4` English-prose figure undercounts Markdown
+with arrows, dashes, and code.
 
 **Flags:**
 - `--scope {all,global,project}` — default `all`; scan global `~/.claude/`, the
   current project's `.claude/`, or both. Project root is auto-discovered by walking
-  up from CWD looking for a `.claude/` subdir or `.git/`.
+  up from CWD looking for a `.claude/` or `.agents/` subdir, or `.git/`.
 - `--project-dir PATH` — explicit project root, skips CWD discovery.
 - `--max-tokens N` — exit 1 if combined always-loaded tokens exceed N.
 
 **What "always-loaded" means:** `CLAUDE.md` + all `rules/**/*.md` files without
 `paths:` frontmatter. Path-scoped files are reported separately but excluded from
-the gated total.
+the gated total. Rules are read from the canonical `.agents/rules` first, then from
+the `.claude/rules` alias (a symlink to it). Each file appears once, under its
+`.agents/rules/...` path.
 
 The combined `all` output is the true per-session token cost before the first prompt.
-Use `--scope global` to see only the global `~/.claude/` tree (pre-2026-07 behavior).
+Use `--scope global` to see only the global tree (`~/.claude/CLAUDE.md` plus the
+rules under `~/.agents/rules`), or `--scope project` for only the current project.
 
 ## Slimming a Bloated Lessons File (migration pattern)
 
@@ -234,13 +239,18 @@ file while preserving all knowledge in skill files that load on-demand.
 ## Priority Moves for This Config
 
 **Token targets:**
-- Global always-loaded: ~2,161 tokens (stable)
+- Global always-loaded: ≤6,000 tokens. Measured ~5,500 across 13 files on 2026-10-11;
+  run `koopa app claude audit-tokens --scope global` for the current figure.
+- Project always-loaded (CLAUDE.md plus unscoped rules): ≤4,000 tokens.
 - Any project `lessons.md`: ≤200 lines / ≤3,000 tokens
-- Combined (global + project): target ≤8,000 tokens
+- Combined (global + project): ≤10,000 tokens. Gate it with
+  `koopa app claude audit-tokens --max-tokens 10000`.
+- A large project with many unscoped rules can exceed the project budget several times
+  over. Slim it by moving lessons entries into skills.
 
 ### Completed moves
 
-1. **Hook: never-install enforcement**: `~/.claude/hooks/guard-installs.sh`. Done.
+1. **Hook: never-install enforcement**: `~/.agents/hooks/guard-installs.sh`. Done.
 
 2. **Path-scope `dotfiles-python.md`**: `paths: ["**/*.py", "**/pyproject.toml"]`. Done.
 
@@ -331,6 +341,12 @@ This user's configuration lives in chezmoi at:
 ~/.local/share/koopa/opt/dotfiles/chezmoi/dot_claude/
 ```
 (or equivalently `~/.config/koopa/dotfiles/chezmoi/dot_claude/`).
+
+Hook scripts are the exception: they live in `chezmoi/dot_agents/hooks/` (public
+tree) and the work tree's `chezmoi/dot_agents/hooks/`, both deploying into one flat
+`~/.agents/hooks/` directory (`~/.claude/hooks` is a chezmoi `dot_claude/symlink_hooks` alias
+onto it). `settings.json.tmpl` and the Copilot hook templates
+point at that path.
 
 The deployed targets are `~/.claude/` and `~/.agents/`. **Always edit the chezmoi
 source**, not the deployed copy — it will be overwritten on the next `chezmoi apply`.

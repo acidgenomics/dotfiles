@@ -23,9 +23,9 @@ explicitly:
   The tool already ran; a PostToolUse hook cannot undo it, so it only skips
   its own side effect rather than erroring.
 
-Deployed from the public dotfiles tree to `~/.claude/hooks/hook_adapter.py`.
+Deployed from the public dotfiles tree to `~/.agents/hooks/hook_adapter.py`.
 Hooks in the private work tree import it from that deployed path (both trees
-land in the same flat `~/.claude/hooks/` directory), so this module must stay
+land in the same flat `~/.agents/hooks/` directory), so this module must stay
 free of anything tree-specific.
 """
 
@@ -33,6 +33,15 @@ import json
 import os
 import sys
 from dataclasses import dataclass
+
+# The macOS system `python3` (/usr/bin/python3) is 3.9 and cannot evaluate the
+# `X | None` annotations below. Stop with a readable message instead of an
+# import-time TypeError. Exit 1 is non-blocking, like the crash it replaces.
+if sys.version_info < (3, 10):
+    sys.exit(
+        f"hook_adapter: Python 3.10 or newer is required, found {sys.version.split()[0]} "
+        f"({sys.executable}). Put a newer python3 first on PATH."
+    )
 
 _ADD = "*** Add File: "
 _UPDATE = "*** Update File: "

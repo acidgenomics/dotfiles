@@ -26,8 +26,8 @@ caller can fail closed or defer, whichever its policy says.
 Known limits: variable indirection (`$CMD arg`), `$'...'` quoting, and text built
 at run time and handed to a shell through process substitution are not resolved.
 
-Compatible with Python 3.9. Hooks run under whichever `python3` comes first on
-PATH, and macOS ships 3.9.
+Needs Python 3.10 or newer. Hooks run under whichever `python3` comes first on
+PATH, so the system `python3` that macOS ships (3.9) must not come first.
 """
 
 import re
@@ -118,6 +118,73 @@ INTERPRETERS = frozenset(
 )
 _PYTHON = re.compile(r"^python[0-9.]*$")
 ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+
+
+# Options of each wrapper that take a value in the next word. A wrapper missing
+# here, or an option missing from its set, is read as a flag with no value.
+VALUE_OPTS = {
+    "sudo": frozenset(
+        [
+            "-u",
+            "-g",
+            "-C",
+            "-h",
+            "-p",
+            "-r",
+            "-t",
+            "-U",
+            "-D",
+            "-R",
+            "-T",
+            "--user",
+            "--group",
+            "--close-from",
+            "--host",
+            "--prompt",
+            "--role",
+            "--type",
+            "--other-user",
+            "--chdir",
+            "--chroot",
+            "--command-timeout",
+        ]
+    ),
+    "doas": frozenset({"-u", "-C"}),
+    "env": frozenset({"-u", "-C", "-S", "-P", "--unset", "--chdir", "--split-string"}),
+    "nice": frozenset({"-n", "--adjustment"}),
+    "ionice": frozenset(
+        ["-c", "-n", "-p", "-P", "-u", "--class", "--classdata", "--pid", "--pgid", "--uid"]
+    ),
+    "stdbuf": frozenset({"-i", "-o", "-e", "--input", "--output", "--error"}),
+    "xargs": frozenset(
+        [
+            "-a",
+            "-d",
+            "-E",
+            "-I",
+            "-L",
+            "-l",
+            "-n",
+            "-P",
+            "-s",
+            "--arg-file",
+            "--delimiter",
+            "--eof",
+            "--replace",
+            "--max-lines",
+            "--max-args",
+            "--max-procs",
+            "--max-chars",
+        ]
+    ),
+    "timeout": frozenset({"-k", "-s", "--kill-after", "--signal"}),
+    "flock": frozenset({"-w", "-E", "--timeout", "--conflict-exit-code"}),
+    "exec": frozenset({"-a"}),
+    "caffeinate": frozenset({"-t", "-w"}),
+    "time": frozenset({"-f", "-o", "--format", "--output"}),
+}
+# Positional words a wrapper takes before the command it runs.
+POSITIONALS = {"timeout": 1, "flock": 1}
 
 
 class ParseError(Exception):
@@ -519,3 +586,38 @@ def walk(command):
     out = []
     _walk(command, 0, out)
     return out
+
+
+def skip_options(argv, i, wrapper):
+    """Return the index after the options and assignments that follow a wrapper word."""
+    value_opts = VALUE_OPTS.get(wrapper, frozenset())
+    while i < len(argv):
+        word = argv[i]
+        if word == "--":
+            return i + 1
+        if "=" in word and not word.startswith("-"):
+            i += 1  # `env NAME=value cmd`
+        elif word.startswith("--"):
+            i += 2 if word in value_opts else 1
+        elif word.startswith("-") and len(word) > 1:
+            letters = word[1:]
+            takes_value = False
+            for pos, letter in enumerate(letters):
+                if "-" + letter in value_opts:
+                    takes_value = pos == len(letters) - 1  # `-n5` carries its value
+                    break
+            i += 2 if takes_value else 1
+        else:
+            return i
+    return i
+
+
+def command_index(argv):
+    """Return the index of the command word that really runs, looking past wrappers."""
+    i = 0
+    while i < len(argv):
+        name = base(argv[i])
+        if name not in WRAPPERS and name != "busybox":
+            return i
+        i = skip_options(argv, i + 1, name) + POSITIONALS.get(name, 0)
+    return None

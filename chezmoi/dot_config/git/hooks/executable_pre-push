@@ -20,7 +20,7 @@ z=0000000000000000000000000000000000000000
 refs=$(cat)
 
 domains=$(git config --get-all koopa.corpEmailDomains)
-allow=$(git config --get-all koopa.corpRemoteAllowlist)
+allow=$( { git config --get-all koopa.allowedRemotes; git config --get-all koopa.corpRemoteAllowlist; } 2>/dev/null)
 
 if [ -n "$domains" ]
 then

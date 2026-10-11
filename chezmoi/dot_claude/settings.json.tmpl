@@ -95,7 +95,8 @@
           { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.agents/hooks/guard-installs.sh" },
           { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.agents/hooks/guard-broad-scan.sh" },
           { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_rm.py" },
-          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_zsh_traps.py" }
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_zsh_traps.py" },
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_hook_writes.py" }
         ]
       },
       {
@@ -167,8 +168,7 @@
       "mcp__tooluniverse__*"
     ],
     "ask": [
-      "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)",
-      "Write(/{{ .chezmoi.homeDir }}/.agents/hooks/**)"
+      "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)"
     ],
     "defaultMode": "plan",
     "deny": [

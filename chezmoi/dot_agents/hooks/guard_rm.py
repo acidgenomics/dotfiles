@@ -13,9 +13,14 @@ Decisions:
   (symlinks followed) to a place strictly inside $TMPDIR. $TMPDIR itself never
   qualifies. A path may start with `$TMPDIR` or `${TMPDIR}`; any other variable,
   a glob, a `~`, or a `..` makes the hook decline.
-* deny: a recursive and forced `rm` (any flag order, any wrapper such as `sudo`
-  or `xargs`) whose targets are not all inside $TMPDIR. This keeps what the old
-  deny rule did and closes its flag-order gap.
+* deny: a recursive and forced `rm` whose targets are not all inside $TMPDIR. The
+  `rm` may sit behind any wrapper (`sudo -u root`, `nice -n 5`, `xargs -n 1`,
+  `timeout 5`), or behind `find -exec`, `-execdir`, `-ok`, or `-okdir`. `find ...
+  -delete` is denied the same way unless every search root is inside $TMPDIR. A
+  glob or a variable in a target counts as outside, because the hook cannot
+  resolve it. A `cd` or a `TMPDIR=` assignment earlier in the command also puts
+  the targets outside, since the hook cannot follow either. This keeps what the
+  old deny rule did and closes its flag-order gap.
 * no decision (exit 0, no output): everything else, so the normal permission
   flow runs. The hook never decides when it cannot parse or inspect the call,
   except that unparsable text which clearly looks like `rm -rf` is still denied.
@@ -24,7 +29,8 @@ Which temp files are fair game is a behavior rule, not something a hook can
 know: delete only what you created in this session.
 
 Deployed from the public dotfiles tree to `~/.agents/hooks/guard_rm.py`.
-Compatible with Python 3.9, which is what macOS ships as `python3`.
+Needs `hook_adapter.py` and `shell_command_scan.py` beside it, and Python 3.10
+or newer.
 """
 
 import json
@@ -32,13 +38,13 @@ import os
 import re
 import sys
 
-from shell_command_scan import ParseError, walk
+from hook_adapter import load_payload, read_commands
+from shell_command_scan import ParseError, command_index, walk
 
 _RM_NAMES = frozenset({"rm", "rmdir"})
-# Commands that run another command; `rm` behind one of these is never auto-allowed.
-_WRAPPERS = frozenset(
-    {"sudo", "doas", "env", "command", "nohup", "time", "nice", "exec", "xargs", "busybox"}
-)
+_NAV = frozenset({"cd", "pushd", "popd"})
+_EXEC_FLAGS = frozenset({"-exec", "-execdir", "-ok", "-okdir"})
+_FIND_EXPR_START = re.compile(r"^(?:-|!$|\()")
 _FLAG_LETTERS = frozenset("rRfivdxPI")
 _LONG_FLAGS = frozenset(
     {"--recursive", "--force", "--verbose", "--dir", "--one-file-system", "--interactive"}
@@ -54,16 +60,29 @@ _DENY_REASON = (
 _ALLOW_REASON = "rm targets resolve inside $TMPDIR."
 
 
-def _rm_index(argv):
-    """Return the index of the `rm`/`rmdir` word, looking past wrappers, else None."""
-    for i, word in enumerate(argv):
-        name = os.path.basename(word)
-        if name in _RM_NAMES:
-            return i
-        if name in _WRAPPERS or word.startswith("-") or "=" in word:
-            continue
-        return None
-    return None
+def _exec_commands(argv):
+    """Return the command words that `find` runs through -exec, -execdir, -ok, or -okdir."""
+    found = []
+    i = 0
+    while i < len(argv):
+        if argv[i] in _EXEC_FLAGS:
+            end = i + 1
+            while end < len(argv) and argv[end] not in (";", "+"):
+                end += 1
+            found.append(argv[i + 1 : end])
+            i = end
+        i += 1
+    return found
+
+
+def _find_roots(args):
+    """Return the search roots of a `find` call (the words before its expression)."""
+    roots = []
+    for word in args:
+        if _FIND_EXPR_START.match(word):
+            break
+        roots.append(word)
+    return roots or ["."]
 
 
 def _strip_redirects(args):
@@ -150,26 +169,68 @@ def _deny_by_text(command):
     return None
 
 
+def _root_ok(path, cwd, raw_tmpdir, root):
+    """True when `path` is $TMPDIR itself or resolves inside it (a `find` search root)."""
+    expanded = path
+    for var in ("${TMPDIR}", "$TMPDIR"):
+        if path == var or path.startswith(var + "/"):
+            expanded = raw_tmpdir.rstrip("/") + path[len(var) :]
+            break
+    if os.path.isabs(expanded) and not _UNSAFE_CHARS.search(expanded):
+        if ".." not in expanded.split("/") and os.path.realpath(expanded) == root:
+            return True
+    return _inside(path, cwd, raw_tmpdir, root)
+
+
+def _find_hits(args):
+    """True when a `find` call deletes: `-delete`, or `-exec rm -rf` and its variants."""
+    if "-delete" in args:
+        return True
+    for words in _exec_commands(args):
+        j = command_index(words)
+        if j is None:
+            continue
+        if os.path.basename(words[j]) in _RM_NAMES:
+            recursive, force, _paths, _harmless = _parse_rm(_strip_redirects(words[j + 1 :])[0])
+            if recursive and force:
+                return True
+        elif _deny_by_text(" ".join(words[j:])):  # `-exec sh -c 'rm -rf {}'`
+            return True
+    return False
+
+
 def decide(command, cwd="", tmpdir=""):
     """Return ("allow" | "deny", reason), or None when the hook has no opinion."""
     try:
         invocations = walk(command)
     except ParseError:
         return _deny_by_text(command)
-    root = _tmp_root(tmpdir)
+    # The hook cannot follow a `TMPDIR=` assignment or a `cd`, so after either it
+    # trusts neither $TMPDIR nor the call's cwd.
+    root = None if re.search(r"(?<![\w$])TMPDIR=", command) else _tmp_root(tmpdir)
+    effective_cwd = cwd
     saw_rm = False
     only_rm = True
     all_allowable = True
     for inv in invocations:
-        i = _rm_index(inv.argv)
-        if i is None:
+        i = command_index(inv.argv)
+        name = os.path.basename(inv.argv[i]) if i is not None else ""
+        if name in _NAV:
+            effective_cwd = ""
+        if name == "find" and _find_hits(inv.argv[i + 1 :]):
+            roots = _find_roots(inv.argv[i + 1 :])
+            if root is None or not all(_root_ok(r, effective_cwd, tmpdir, root) for r in roots):
+                return ("deny", _DENY_REASON)
+        if name not in _RM_NAMES:
             only_rm = False
             continue
         saw_rm = True
         args, redirected = _strip_redirects(inv.argv[i + 1 :])
         recursive, force, paths, harmless = _parse_rm(args)
         inside = (
-            root is not None and bool(paths) and all(_inside(p, cwd, tmpdir, root) for p in paths)
+            root is not None
+            and bool(paths)
+            and all(_inside(p, effective_cwd, tmpdir, root) for p in paths)
         )
         if recursive and force and not inside:
             return ("deny", _DENY_REASON)
@@ -188,24 +249,26 @@ def decide(command, cwd="", tmpdir=""):
 def main():
     """Read the hook payload from stdin and print the decision. Fail toward no decision."""
     try:
-        payload = json.load(sys.stdin)
-        command = payload["tool_input"]["command"]
-        if not isinstance(command, str) or not command.strip():
+        payload = load_payload(sys.stdin.read())
+        if payload is None:
             return 0
-        result = decide(command, payload.get("cwd") or "", os.environ.get("TMPDIR", ""))
+        raw_cwd = payload.get("cwd")
+        cwd = raw_cwd if isinstance(raw_cwd, str) else ""
+        tmpdir = os.environ.get("TMPDIR", "")
+        results = [decide(c, cwd, tmpdir) for c in read_commands(payload) if c.strip()]
     except Exception:
         return 0
-    if result is None:
-        return 0
-    verdict, reason = result
-    if verdict == "deny":
-        print(json.dumps({"decision": "block", "reason": reason}), file=sys.stderr)
+    deny = next((r for r in results if r and r[0] == "deny"), None)
+    if deny:
+        print(json.dumps({"decision": "block", "reason": deny[1]}), file=sys.stderr)
         return 2
+    if not results or not all(r and r[0] == "allow" for r in results):
+        return 0
     output = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "allow",
-            "permissionDecisionReason": reason,
+            "permissionDecisionReason": results[0][1],
         }
     }
     print(json.dumps(output))

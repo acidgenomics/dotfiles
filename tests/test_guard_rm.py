@@ -188,3 +188,93 @@ def test_hook_fails_toward_no_decision_on_bad_input(stdin: str, tree: dict) -> N
         [sys.executable, str(_GUARD)], input=stdin, capture_output=True, text=True, env=env
     )
     assert (result.returncode, result.stdout) == (0, "")
+
+
+BYPASS_DENIED = [
+    "sudo -u root rm -rf /a",
+    "sudo -u root -g wheel rm -rf /a",
+    "nice -n 5 rm -rf /a",
+    "nice -n5 rm -rf /a",
+    "env -u X rm -rf /a",
+    "env A=1 B=2 rm -rf /a",
+    "xargs -n 1 rm -rf",
+    "xargs -0 -n1 rm -rf",
+    "xargs -I {{}} rm -rf {{}}",
+    "timeout 5 rm -rf /a",
+    "timeout -k 2 5 rm -rf /a",
+    "ionice -c 3 rm -rf /a",
+    "stdbuf -o0 rm -rf /a",
+    "flock /x/lock rm -rf /a",
+    "setsid rm -rf /a",
+    "sudo nice -n 5 timeout 9 rm -rf /a",
+    "find /a -exec rm -rf {{}} +",
+    "find /a -exec rm -rf {{}} \\\;",
+    "find /a -ok rm -rf {{}} \\\;",
+    "find /a -name x -delete",
+    "find /a -exec sh -c 'rm -rf {{}}' \\\;",
+    "cd / && rm -rf usr",
+    "pushd /a; rm -rf x",
+    "TMPDIR=/ rm -rf $TMPDIR/x",
+    "export TMPDIR=/; rm -rf $TMPDIR/x",
+    "echo hi | xargs rm -rf",
+]
+
+BYPASS_ALLOWED_STILL = [
+    "find {root}/tmp.abc -name x -delete",
+    "find {root}/tmp.abc -exec rm -rf {{}} +",
+    "find $TMPDIR -type f -exec rm -rf {{}} +",
+]
+
+BYPASS_NO_OPINION = [
+    "find . -name x -exec rm {{}} \\\;",
+    "sudo -u root ls /a",
+    "timeout 5 sleep 1",
+    "xargs -n 1 echo",
+]
+
+
+@pytest.mark.parametrize("template", BYPASS_DENIED)
+def test_wrapper_find_and_cd_bypasses_are_denied(template: str, tree: dict) -> None:
+    command = template.format(**tree)
+    # The payload cwd sits inside $TMPDIR, the case that used to look safe.
+    cwd = os.path.join(tree["root"], "tmp.abc")
+    assert _verdict(_run(command, tree, cwd=cwd)) == "deny", command
+
+
+@pytest.mark.parametrize("template", BYPASS_ALLOWED_STILL)
+def test_find_under_tmpdir_is_not_denied(template: str, tree: dict) -> None:
+    assert _verdict(_run(template.format(**tree), tree)) != "deny"
+
+
+@pytest.mark.parametrize("template", BYPASS_NO_OPINION)
+def test_non_destructive_wrapped_commands_have_no_opinion(template: str, tree: dict) -> None:
+    assert _run(template.format(**tree), tree) is None
+
+
+def _hook_payload(payload: dict, tree: dict) -> subprocess.CompletedProcess:
+    env = {**os.environ, "TMPDIR": tree["root"]}
+    return subprocess.run(
+        [sys.executable, str(_GUARD)],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+
+
+def test_hook_reads_a_batched_copilot_payload(tree: dict) -> None:
+    payload = {
+        "toolCalls": [
+            {"args": {"command": f"rm -rf {tree['root']}/tmp.abc"}},
+            {"args": {"command": "rm -rf /a"}},
+        ]
+    }
+    assert _hook_payload(payload, tree).returncode == 2
+
+
+def test_hook_allows_only_when_every_batched_command_is_allowed(tree: dict) -> None:
+    allowed = {"args": {"command": f"rm -rf {tree['root']}/tmp.abc"}}
+    other = {"args": {"command": "ls"}}
+    assert '"allow"' in _hook_payload({"toolCalls": [allowed, allowed]}, tree).stdout
+    assert _hook_payload({"toolCalls": [allowed, other]}, tree).stdout == ""

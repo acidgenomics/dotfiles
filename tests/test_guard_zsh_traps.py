@@ -316,3 +316,53 @@ def test_hook_emits_a_deny_decision_for_an_unquoted_equals_word() -> None:
     assert result.returncode == 0
     output = json.loads(result.stdout)["hookSpecificOutput"]
     assert output["permissionDecision"] == "deny"
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "echo 'a; for x in $ids; do'",
+        'echo "run: for f in $files; do"',
+        "git commit -m 'fix for x in $ids; do loop'",
+        "for f in $HOME/x/*.sh; do echo $f; done",
+        "for f in $dir/*.txt; do echo $f; done",
+        "for f in $*; do echo $f; done",
+        "for f in $(git -C $L diff --name-only -- src); do echo $f; done",
+        "for f in `ls $dir`; do echo $f; done",
+        "bash -c 'for x in $ids; do echo $x; done'",
+        "bash -lc 'for x in $ids; do echo $x; done'",
+        'sh -c "for x in $ids; do echo $x; done"',
+        "grep -rn x --include=\\*.py .",
+        "echo 'a; time make'; echo $(date)",
+        "echo '$(time make)'",
+    ],
+)
+def test_quoted_text_and_non_scalar_words_pass(command: str) -> None:
+    assert decide(command) is None, command
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "bash -c 'echo ok'; for x in $ids; do echo $x; done",
+        "sh -c 'true' && echo ====== ",
+        "bash -c 'true'; log show --last 1m",
+        "for x in ${ids:-a b}; do echo $x; done",
+        "for x in $1; do echo $x; done",
+        "{ log show --last 1m; }",
+        "if log show --last 1m; then echo ok; fi",
+        "time log show --last 1m",
+        'x="$(cd d; time make)"',
+        "echo $(cd d; time make 2>&1)",
+        "echo $(ls && time make)",
+        'echo "$(for x in $ids; do echo $x; done)"',
+    ],
+)
+def test_traps_outside_a_bash_string_or_in_a_substitution_still_deny(command: str) -> None:
+    assert decide(command) is not None, command
+
+
+def test_glob_reason_shows_the_whole_word() -> None:
+    outcome = decide("grep -rn x --include=*.py .")
+    assert outcome is not None
+    assert "--include=*.py" in outcome[1]

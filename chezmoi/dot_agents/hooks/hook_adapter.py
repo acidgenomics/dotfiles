@@ -34,6 +34,15 @@ import os
 import sys
 from dataclasses import dataclass
 
+# The macOS system `python3` (/usr/bin/python3) is 3.9 and cannot evaluate the
+# `X | None` annotations below. Stop with a readable message instead of an
+# import-time TypeError. Exit 1 is non-blocking, like the crash it replaces.
+if sys.version_info < (3, 10):
+    sys.exit(
+        f"hook_adapter: Python 3.10 or newer is required, found {sys.version.split()[0]} "
+        f"({sys.executable}). Put a newer python3 first on PATH."
+    )
+
 _ADD = "*** Add File: "
 _UPDATE = "*** Update File: "
 _DELETE = "*** Delete File: "

@@ -16,12 +16,15 @@ reading the command is the fix, not remembering the rule.
 5. `time` inside `$( ... )` or backticks: it is a reserved word, so its report goes
    to the shell's stderr and `2>&1` captures nothing.
 
-Every check skips heredoc bodies and `bash -c` / `sh -c` strings (those run in
-bash), and reads only unquoted text. Checks 2 and 3 also skip `[[ ... ]]` and
-`(( ... ))`, where `==` is an operator.
+Every check skips heredoc bodies and the string after `bash -c` / `sh -c` (those
+run in bash; the rest of the command is still checked), and reads only unquoted
+text. Checks 1 and 5 do read a `$( ... )` or backtick body inside double quotes,
+because zsh runs it. Checks 2 and 3 also skip `[[ ... ]]` and `(( ... ))`, where
+`==` is an operator.
 
-Trap 1 denies only a bare scalar `$name` / `${name}` in the `for` word list. These
-still pass, because they work in zsh:
+Trap 1 denies only a word that is a bare scalar in the `for` list: `$name`,
+`${name}`, `${name:-default}`, or `$1`. A word with more text (`$HOME/x/*.sh`) is
+globbed after expansion, so it works. These also pass, because they work in zsh:
 
 - `for x in $(cmd)`: an unquoted command substitution IS word-split.
 - `for x in "${arr[@]}"` and `for x in $@`: array and positional expansions.
@@ -30,6 +33,7 @@ still pass, because they work in zsh:
   or declares it with `typeset -a` / `declare -a` / `local -a`: an array.
 - A loop inside a heredoc body or a `bash -c` / `sh -c` string: those run in
   bash, which splits.
+- A quoted mention of a loop, such as `echo 'for x in $v; do'`.
 
 The decision is `deny`, not `ask`: an `ask` has no one to answer it in an
 unattended session. The reason carries the working replacement.
@@ -57,25 +61,37 @@ _FOR_RE = re.compile(
     re.MULTILINE,
 )
 _HEREDOC_RE = re.compile(r"<<-?\s*(?P<q>['\"]?)(?P<tag>\w+)(?P=q)")
-_BASH_STRING_RE = re.compile(r"\b(?:ba)?sh\s+(?:-\S+\s+)*-c\b")
+_BASH_STRING_RE = re.compile(
+    r"\b(?:ba)?sh\s+(?:-\w+\s+)*?-\w*c\s+(?P<s>\"(?:[^\"\\]|\\.)*\"|'[^']*')"
+)
+_SUBSTITUTION_RE = re.compile(r"\$\([^()]*(?:\([^()]*\)[^()]*)*\)|`[^`]*`")
 _QUOTED_RE = re.compile(r"\"[^\"]*\"|'[^']*'")
-# A bare scalar expansion: `$name` or `${name}`. `$(`, `$@`, `$1`-style
-# positionals, `${name[@]}` and `${(f)name}` do not match.
+# A word that is exactly a scalar expansion: `$name`, `${name}`, `${name:-default}`,
+# or `$1`. `$(`, `$@`, `$*`, `${name[@]}`, `${(f)name}`, and `$HOME/x` do not match.
 _SCALAR_RE = re.compile(
-    r"(?<![\w$])\$(?:(?P<plain>[A-Za-z_]\w*)|\{(?P<braced>[A-Za-z_]\w*)\})(?![\w\[(])"
+    r"^\$(?:(?P<plain>[A-Za-z_]\w*)|\{(?P<braced>[A-Za-z_]\w*)(?::?[-=+?][^}]*)?\}|(?P<digit>[1-9]))$"
 )
 
+# One word of a `for` list. A `${...}`, `$( ... )`, or backtick group is one word, even
+# when it holds spaces or other variables.
+_WORD_RE = re.compile(r"\$\([^()]*(?:\([^()]*\)[^()]*)*\)|\$\{[^}]*\}|`[^`]*`|\S+")
 _COMMENT_RE = re.compile(r"(?m)(?:^|(?<=\s))#.*$")
 # `[[ ... ]]` and `(( ... ))` (also `$(( ... ))`): `==` and `*` are operators there.
 _TEST_RE = re.compile(r"\[\[.*?\]\]|\(\(.*?\)\)", re.DOTALL)
-_OPTION_GLOB_RE = re.compile(r"--(?:include|exclude|exclude-dir|include-dir|glob|iglob)=\S*[*?\[]")
-_FIND_GLOB_RE = re.compile(r"(?:^|\s)-(?:i?name|i?path|i?wholename|i?regex)\s+[^\s;&|]*[*?\[]")
-_RG_GLOB_RE = re.compile(r"(?:^|\s)(?:-g|--glob|--iglob)\s+[^\s;&|]*[*?\[]")
+_GLOB_CHAR = r"(?<!\\)[*?\[]"  # an escaped `\*` is a literal star
+_OPTION_GLOB_RE = re.compile(
+    r"--(?:include|exclude|exclude-dir|include-dir|glob|iglob)=\S*" + _GLOB_CHAR
+)
+_FIND_GLOB_RE = re.compile(
+    r"(?:^|\s)-(?:i?name|i?path|i?wholename|i?regex)\s+[^\s;&|]*" + _GLOB_CHAR
+)
+_RG_GLOB_RE = re.compile(r"(?:^|\s)(?:-g|--glob|--iglob)\s+[^\s;&|]*" + _GLOB_CHAR)
 _FIND_CMD_RE = re.compile(r"\bfind\b")
 _RG_CMD_RE = re.compile(r"\b(?:rg|fd)\b")
-_LOG_RE = re.compile(r"(?:^|[;&|(]|\bthen\b|\bdo\b)\s*log\s+\S", re.MULTILINE)
+_COMMAND_START = r"(?:^|[;&|({!]|\bthen\b|\bdo\b|\bif\b|\bwhile\b|\buntil\b|\btime\b)"
+_LOG_RE = re.compile(_COMMAND_START + r"\s*log\s+\S", re.MULTILINE)
 _LOG_DEFINED_RE = re.compile(r"\blog\s*\(\s*\)|\bfunction\s+log\b|\balias\s+log=")
-_TIME_SUBST_RE = re.compile(r"(?:\$\(|`)\s*(?:\{\s*)?time\s")
+_TIME_RE = re.compile(r"(?:^|[;&|({!]|\bthen\b|\bdo\b)\s*time\s", re.MULTILINE)
 
 _REASON = (
     "zsh does not word-split an unquoted variable, so `for {var} in ${name}` runs the "
@@ -119,6 +135,38 @@ def _strip_heredoc_bodies(command: str) -> str:
     return "\n".join(kept)
 
 
+def _mask_quotes(text: str) -> str:
+    """Blank out quoted strings but keep their length, so positions stay put.
+
+    A double-quoted string keeps its `$( ... )` and backtick bodies, because
+    zsh runs them.
+    """
+
+    def _mask(match: re.Match) -> str:
+        quoted = match.group(0)
+        if quoted[0] == "'":
+            return " " * len(quoted)
+        chars = [" "] * len(quoted)
+        for inner in _SUBSTITUTION_RE.finditer(quoted):
+            chars[inner.start() : inner.end()] = quoted[inner.start() : inner.end()]
+        return "".join(chars)
+
+    return _QUOTED_RE.sub(_mask, text)
+
+
+def _substitution_bodies(text: str) -> list[str]:
+    """Return the text inside every `$( ... )` and backtick pair in *text*."""
+    bodies: list[str] = []
+    for match in re.finditer(r"\$\(", text):
+        depth, end = 1, match.end()
+        while end < len(text) and depth:
+            depth += {"(": 1, ")": -1}.get(text[end], 0)
+            end += 1
+        bodies.append(text[match.end() : end - 1 if depth == 0 else end])
+    bodies.extend(re.findall(r"`([^`]*)`", text))
+    return bodies
+
+
 def _array_names(command: str) -> set[str]:
     """Names the command itself makes arrays, which zsh expands per element."""
     names = set(re.findall(r"\b(\w+)\+?=\(", command))
@@ -134,13 +182,15 @@ def _unquoted_text(scanned: str) -> str:
     return _TEST_RE.sub(" ", text)
 
 
-def _for_loop_reason(scanned: str, _text: str) -> str | None:
+def _for_loop_reason(masked: str, _text: str) -> str | None:
     """Trap 1: `for x in $var` over an unquoted scalar variable."""
-    arrays = _array_names(scanned)
-    for loop in _FOR_RE.finditer(scanned):
-        words = _QUOTED_RE.sub("", loop.group("words"))
-        for var in _SCALAR_RE.finditer(words):
-            name = var.group("plain") or var.group("braced")
+    arrays = _array_names(masked)
+    for loop in _FOR_RE.finditer(masked):
+        for word in _WORD_RE.findall(loop.group("words")):
+            var = _SCALAR_RE.match(word)
+            if var is None:
+                continue
+            name = var.group("plain") or var.group("braced") or var.group("digit")
             if name in arrays:
                 continue
             loop_var = re.search(r"for\s+(\w+)\s+in", loop.group(0))
@@ -166,7 +216,10 @@ def _glob_reason(_scanned: str, text: str) -> str | None:
     for pattern in patterns:
         match = pattern.search(text)
         if match:
-            return _GLOB_REASON.format(word=match.group(0).strip())
+            end = match.end()
+            while end < len(text) and not text[end].isspace():
+                end += 1  # show the whole word, not only the part up to the glob
+            return _GLOB_REASON.format(word=text[match.start() : end].strip())
     return None
 
 
@@ -177,9 +230,11 @@ def _log_reason(_scanned: str, text: str) -> str | None:
     return _LOG_REASON if _LOG_RE.search(text) else None
 
 
-def _time_reason(scanned: str, _text: str) -> str | None:
-    """Trap 5: the `time` keyword inside a command substitution."""
-    return _TIME_REASON if _TIME_SUBST_RE.search(scanned) else None
+def _time_reason(masked: str, _text: str) -> str | None:
+    """Trap 5: the `time` keyword at a command position inside a command substitution."""
+    if any(_TIME_RE.search(body) for body in _substitution_bodies(masked)):
+        return _TIME_REASON
+    return None
 
 
 _CHECKS = (_for_loop_reason, _equals_word_reason, _glob_reason, _log_reason, _time_reason)
@@ -197,14 +252,15 @@ def decide(command: str) -> tuple[str, str] | None:
     -------
     tuple[str, str] | None
         ``("deny", reason)`` for the first zsh trap the command hits, otherwise
-        None. Commands that run a ``bash -c`` / ``sh -c`` string are skipped.
+        None. The string after ``bash -c`` / ``sh -c`` is skipped, because bash runs
+        it; the rest of the command is still checked.
     """
-    if _BASH_STRING_RE.search(command):
-        return None
+    command = _BASH_STRING_RE.sub(lambda m: m.group(0)[: m.start("s") - m.start()] + "''", command)
     scanned = _strip_heredoc_bodies(command)
+    masked = _mask_quotes(scanned)
     text = _unquoted_text(scanned)
     for check in _CHECKS:
-        reason = check(scanned, text)
+        reason = check(masked, text)
         if reason is not None:
             return ("deny", reason)
     return None

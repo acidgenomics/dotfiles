@@ -134,7 +134,7 @@ suppress the protected-path prompt. The safety check runs outside the hook's rea
 config-level escape hatch for file edits. There is no workaround for Bash `mkdir`
 into `.claude/`.
 
-The `guard-claude-allow.sh` hook deployed on this machine (`~/.claude/hooks/`) is
+The `guard-claude-allow.sh` hook deployed on this machine (`~/.agents/hooks/`) is
 **ineffective for protected-path writes**. It correctly emits `allow` JSON (unit
 tests pass), but Claude Code ignores that decision for protected paths. The hook
 can be left in place harmlessly or removed — it provides no benefit for `.claude/`

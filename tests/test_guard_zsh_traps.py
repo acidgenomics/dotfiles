@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-_HOOKS_DIR = Path(__file__).parent.parent / "chezmoi" / "dot_claude" / "hooks"
+_HOOKS_DIR = Path(__file__).parent.parent / "chezmoi" / "dot_agents" / "hooks"
 sys.path.insert(0, str(_HOOKS_DIR))
 # Keep bytecode out of the chezmoi source tree, which chezmoi would otherwise see.
 sys.dont_write_bytecode = True

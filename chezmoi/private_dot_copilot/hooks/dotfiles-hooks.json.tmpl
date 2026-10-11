@@ -6,12 +6,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"{{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh\"",
+            "command": "bash \"{{ .chezmoi.homeDir }}/.agents/hooks/guard-installs.sh\"",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash \"{{ .chezmoi.homeDir }}/.claude/hooks/guard-broad-scan.sh\"",
+            "command": "bash \"{{ .chezmoi.homeDir }}/.agents/hooks/guard-broad-scan.sh\"",
             "timeout": 5
           }
         ]

@@ -22,7 +22,7 @@ so legacy files can still be cleaned up with a prompt.
 The guard is inactive when $TMPDIR is unset or is itself under one of those roots,
 because `mktemp` then produces /tmp paths and a guard would block everything.
 
-Deployed from the public dotfiles tree to `~/.claude/hooks/guard_tmp.py`.
+Deployed from the public dotfiles tree to `~/.agents/hooks/guard_tmp.py`.
 Compatible with Python 3.9, which is what macOS ships as `python3`.
 """
 

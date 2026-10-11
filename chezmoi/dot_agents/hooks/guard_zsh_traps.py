@@ -38,7 +38,7 @@ Also guards against a crash on absent/malformed stdin, like the other
 Bash-matcher hooks: `load_payload` returns None instead of raising, and
 `read_commands` never raises.
 
-Deployed from the public dotfiles tree to `~/.claude/hooks/guard_zsh_traps.py`.
+Deployed from the public dotfiles tree to `~/.agents/hooks/guard_zsh_traps.py`.
 Needs `hook_adapter.py` beside it, and Python 3.10 or newer (the adapter's
 annotations use `X | None`).
 """

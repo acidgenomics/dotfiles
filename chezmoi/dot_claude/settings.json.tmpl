@@ -92,16 +92,16 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-installs.sh" },
-          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.claude/hooks/guard-broad-scan.sh" },
-          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.claude/hooks/guard_rm.py" },
-          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.claude/hooks/guard_zsh_traps.py" }
+          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.agents/hooks/guard-installs.sh" },
+          { "type": "command", "command": "bash {{ .chezmoi.homeDir }}/.agents/hooks/guard-broad-scan.sh" },
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_rm.py" },
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_zsh_traps.py" }
         ]
       },
       {
         "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
-          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.claude/hooks/guard_tmp.py" }
+          { "type": "command", "command": "python3 {{ .chezmoi.homeDir }}/.agents/hooks/guard_tmp.py" }
         ]
       }
     ]
@@ -165,6 +165,10 @@
       "mcp__mcp-atlassian__*",
       "mcp__read-website-fast__*",
       "mcp__tooluniverse__*"
+    ],
+    "ask": [
+      "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)",
+      "Write(/{{ .chezmoi.homeDir }}/.agents/hooks/**)"
     ],
     "defaultMode": "plan",
     "deny": [

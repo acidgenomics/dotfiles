@@ -23,7 +23,7 @@ Decisions:
 Which temp files are fair game is a behavior rule, not something a hook can
 know: delete only what you created in this session.
 
-Deployed from the public dotfiles tree to `~/.claude/hooks/guard_rm.py`.
+Deployed from the public dotfiles tree to `~/.agents/hooks/guard_rm.py`.
 Compatible with Python 3.9, which is what macOS ships as `python3`.
 """
 

@@ -23,9 +23,9 @@ explicitly:
   The tool already ran; a PostToolUse hook cannot undo it, so it only skips
   its own side effect rather than erroring.
 
-Deployed from the public dotfiles tree to `~/.claude/hooks/hook_adapter.py`.
+Deployed from the public dotfiles tree to `~/.agents/hooks/hook_adapter.py`.
 Hooks in the private work tree import it from that deployed path (both trees
-land in the same flat `~/.claude/hooks/` directory), so this module must stay
+land in the same flat `~/.agents/hooks/` directory), so this module must stay
 free of anything tree-specific.
 """
 

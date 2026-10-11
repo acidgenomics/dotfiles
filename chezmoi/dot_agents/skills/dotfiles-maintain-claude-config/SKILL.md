@@ -171,7 +171,7 @@ regardless of what Claude decides.
         "matcher": "Bash",
         "hooks": [{
           "type": "command",
-          "command": "bash ~/.claude/hooks/guard-installs.sh"
+          "command": "bash ~/.agents/hooks/guard-installs.sh"
         }]
       }
     ]
@@ -240,7 +240,7 @@ file while preserving all knowledge in skill files that load on-demand.
 
 ### Completed moves
 
-1. **Hook: never-install enforcement**: `~/.claude/hooks/guard-installs.sh`. Done.
+1. **Hook: never-install enforcement**: `~/.agents/hooks/guard-installs.sh`. Done.
 
 2. **Path-scope `dotfiles-python.md`**: `paths: ["**/*.py", "**/pyproject.toml"]`. Done.
 
@@ -331,6 +331,12 @@ This user's configuration lives in chezmoi at:
 ~/.local/share/koopa/opt/dotfiles/chezmoi/dot_claude/
 ```
 (or equivalently `~/.config/koopa/dotfiles/chezmoi/dot_claude/`).
+
+Hook scripts are the exception: they live in `chezmoi/dot_agents/hooks/` (public
+tree) and the work tree's `chezmoi/dot_agents/hooks/`, both deploying into one flat
+`~/.agents/hooks/` directory (`~/.claude/hooks` is a chezmoi `dot_claude/symlink_hooks` alias
+onto it). `settings.json.tmpl` and the Copilot hook templates
+point at that path.
 
 The deployed targets are `~/.claude/` and `~/.agents/`. **Always edit the chezmoi
 source**, not the deployed copy — it will be overwritten on the next `chezmoi apply`.

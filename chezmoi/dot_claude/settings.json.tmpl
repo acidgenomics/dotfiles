@@ -17,7 +17,7 @@
 {{- else }}
   "theme": "auto",
 {{- end }}
-  "effortLevel": "xhigh",
+  "effortLevel": "medium",
   "enabledPlugins": {
     "astral@astral-sh": true,
     "claude-code-setup@claude-plugins-official": false,
@@ -27,9 +27,9 @@
     "pyright-lsp@claude-plugins-official": false
   },
   "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SHELL": "{{ joinPath $koopaPrefix "bin" "bash" }}",
@@ -87,7 +87,7 @@
       }
     }
   },
-  "model": "opusplan",
+  "model": "sonnet",
   "outputStyle": "STE100",
   "permissions": {
     "allow": [

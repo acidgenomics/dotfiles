@@ -20,6 +20,9 @@
   - https://gist.github.com/simonsmith/6779382
 - `ignored`: Show ignored files.
   Credit: https://stackoverflow.com/a/4855096
+- `intent-to-add-untracked`: Show `git status --untracked-files`, then mark
+  new files as intent-to-add (`git add --intent-to-add .`), so `git diff`
+  includes them. Undo the intent-to-add with `git unstage` (alias for `git reset HEAD --`).
 - `last`: Show the last commit.
 - `ll`: Show custom log of the commit history.
 - `lrb`: List remote branches. Defaults to `origin`.

@@ -38,13 +38,16 @@
 {{- end }}
   "chat.agent.maxRequests": 200,
   "chat.defaultConfiguration": {
-    "permissionLevel": "assisted"
+    "approvals": "allowAll"
   },
   "chat.editing.autoAcceptDelay": 10,
   "chat.editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "chat.editor.fontSize": 16,
   "chat.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "chat.fontSize": 16,
+  "chat.pluginLocations": {
+    "{{ joinPath .chezmoi.homeDir ".local" "share" "koopa" "plugins" "koopa" }}": true
+  },
   "chat.tools.global.autoApprove": false,
   "chat.tools.terminal.autoApprove": {
     "/.*/": { "approve": true, "matchCommandLine": true }

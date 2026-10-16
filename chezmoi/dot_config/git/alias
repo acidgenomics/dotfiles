@@ -32,6 +32,8 @@
         --pretty=custom
     hash = rev-parse HEAD
     ignored = ls-files --directory --exclude-standard --ignored --others
+    intent-to-add-untracked = !git status --untracked-files \
+        && git add --intent-to-add .
     last = log -1 HEAD
     ll = log --pretty=custom
     lrb = "!f() { \

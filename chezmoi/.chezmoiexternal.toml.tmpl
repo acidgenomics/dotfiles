@@ -1,6 +1,6 @@
 # """
 # Include dotfiles from elsewhere.
-# @note Updated 2024-09-24.
+# @note Updated 2026-10-16.
 #
 # @seealso
 # - https://www.chezmoi.io/user-guide/include-files-from-elsewhere/
@@ -9,12 +9,14 @@
 {{- if eq .chezmoi.os "darwin" }}
 [".local/share/zsh/plugins/zsh-autosuggestions"]
     type = "archive"
-    url = "https://github.com/zsh-users/zsh-autosuggestions/archive/refs/tags/v0.7.0.tar.gz"
+    url = "https://github.com/zsh-users/zsh-autosuggestions/archive/refs/tags/v0.7.1.tar.gz"
+    checksum.sha256 = "0df7affff21cd87ed298e6a3970ed08a1dd66a6efa676454ee5b091ad503badf"
     exact = true
     stripComponents = 1
 [".local/share/zsh/plugins/zsh-syntax-highlighting"]
     type = "archive"
     url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/refs/tags/0.8.0.tar.gz"
+    checksum.sha256 = "5981c19ebaab027e356fe1ee5284f7a021b89d4405cc53dc84b476c3aee9cc32"
     exact = true
     stripComponents = 1
 {{- end }}

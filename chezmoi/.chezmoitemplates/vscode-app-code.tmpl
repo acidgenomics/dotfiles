@@ -37,9 +37,6 @@
   "air.executableStrategy": "path",
 {{- end }}
   "chat.agent.maxRequests": 200,
-  "chat.defaultConfiguration": {
-    "approvals": "allowAll"
-  },
   "chat.editing.autoAcceptDelay": 10,
   "chat.editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "chat.editor.fontSize": 16,
@@ -49,14 +46,12 @@
     "{{ joinPath .chezmoi.homeDir ".local" "share" "koopa" "plugins" "koopa" }}": true
   },
   "chat.tools.global.autoApprove": false,
-  "chat.tools.terminal.autoApprove": {
-    "/.*/": { "approve": true, "matchCommandLine": true }
-  },
+  "chat.tools.terminal.autoApprove": {{ includeTemplate "vscode-terminal-auto-approve.tmpl" . | trimAll "\n" }},
   "chat.tools.terminal.enableAutoApprove": true,
   "chat.tools.urls.autoApprove": {
     "https://*/*": {
       "approveRequest": true,
-      "approveResponse": true
+      "approveResponse": false
     }
   },
   "claudeCode.disableLoginPrompt": true,

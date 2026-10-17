@@ -36,7 +36,9 @@ set -g default-shell "{{ lookPath "bash" }}"
 
 # Potentially useful:
 # > set-option -sg buffer-limit 100
-# > set-option -sg focus-events off
+
+# Pass terminal focus events to programs (e.g. vim 'autoread').
+set-option -sg focus-events on
 
 # Set the delay so that it doesn't interfere with programs like vim.
 # Setting this to 0 messes with VS Code integrated terminal.
@@ -55,9 +57,6 @@ set-option -g assume-paste-time 0
 
 # Propagate KOOPA_COLOR_MODE from the attaching client into the session.
 set-option -ga update-environment "KOOPA_COLOR_MODE"
-
-# Force tmux to always use UTF-8.
-set-window-option -gq utf8 on
 
 # Set clock style. Use AM/PM instead of 24 hours.
 set-option -g clock-mode-style 12
@@ -93,7 +92,7 @@ set-option -g default-terminal "tmux-256color"
 
 # Enable 24-bit true color support.
 # Note that this value should match the client terminal outside of tmux.
-set-option -ga terminal-overrides ",xterm-256color:Tc"
+set-option -ga terminal-features ",xterm*:RGB"
 
 # Key bindings
 # ==============================================================================
@@ -131,6 +130,18 @@ bind-key -T copy-mode-vi y send -X copy-pipe-and-cancel 'xclip -selection clipbo
 # Make window and pane indexes start with 1. Zero-indexing is confusing.
 set-option -g base-index 1
 set-window-option -g pane-base-index 1
+
+# Renumber remaining windows when one closes, so indexes stay contiguous.
+set-option -g renumber-windows on
+
+# tmux 3.8 changed the default 'window-status-current-style' from 'default'
+# to 'underscore', which underlines the active window in the status bar. The
+# theme files set only colors, so restore the old default here. This must
+# stay above the theme 'source-file' lines further down. The pane and session
+# status styles got the same new default, so reset them too.
+set-window-option -g window-status-current-style default
+set-window-option -g pane-status-current-style default
+set-option -g session-status-current-style default
 
 # Don't hold the size of the smallest client bounds.
 set-window-option -g aggressive-resize on

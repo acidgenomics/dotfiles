@@ -1,0 +1,10 @@
+{{- /*
+  Global instruction body shared by Codex (AGENTS.md) and Gemini (GEMINI.md):
+  the base CLAUDE.md, then every dotfiles rule in one fixed order. Add a rule
+  here once and both tools pick it up.
+*/ -}}
+{{ include "dot_claude/CLAUDE.md" }}
+{{- range list "thinking" "coding" "security" "python" "shell" "workflow" "dev-workflow" "lessons" "obsidian" }}
+---
+{{ template "agent-rule-body.tmpl" (printf "dotfiles-%s" .) }}
+{{- end }}

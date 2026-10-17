@@ -5,11 +5,6 @@ cainfo = "{{ $dataHome }}/ca-certificates/cacert.pem"
 {{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }}
 cainfo = "/etc/ssl/certs/ca-certificates.crt"
 {{- end }}
-{{- if env "HTTP_PROXY" }}
-proxy = "{{ env "HTTP_PROXY" }}"
-{{- else if env "HTTPS_PROXY" }}
-proxy = "{{ env "HTTPS_PROXY" }}"
-{{- end }}
 
 [net]
 git-fetch-with-cli = true

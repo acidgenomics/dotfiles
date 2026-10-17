@@ -1,8 +1,23 @@
 [global]
 {{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
-{{- if env "HTTP_PROXY" }}
-http-proxy-host = {{ env "HTTP_PROXY" | splitList ":" | rest | first | substr 2 -1 }}
-http-proxy-port = {{ env "HTTP_PROXY" | splitList ":" | last }}
+{{- /*
+  Subversion reads only this file for proxy settings, not the environment.
+  Parse the proxy URL with urlParse, which handles a scheme, a port, a trailing
+  slash and 'user:pass@' credentials. The credentials are never written here.
+  A bare 'host:port' value gets an 'http://' prefix first.
+*/ -}}
+{{- $proxy := env "HTTP_PROXY" | default (env "http_proxy") -}}
+{{- if and $proxy (not (contains "://" $proxy)) -}}
+{{-   $proxy = printf "http://%s" $proxy -}}
+{{- end -}}
+{{- if $proxy -}}
+{{-   $url := urlParse $proxy -}}
+{{-   if $url.hostname }}
+http-proxy-host = {{ $url.hostname }}
+{{-     if contains ":" $url.host }}
+http-proxy-port = {{ $url.host | splitList ":" | last }}
+{{-     end }}
+{{-   end }}
 {{- end }}
 {{- if stat (joinPath $dataHome "ca-certificates" "cacert.pem") }}
 ssl-authority-files = {{ $dataHome }}/ca-certificates/cacert.pem

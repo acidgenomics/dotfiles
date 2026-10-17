@@ -108,6 +108,19 @@ vim.keymap.set('n', '<leader>d', '"_dd')
 -- Insert/Terminal) so it cannot fire mid-paste from a raw/unbracketed
 -- paste stream.
 vim.keymap.set('n', '<cr>', 'o<esc>')
+-- Restore the normal Enter in special buffers, where it jumps or follows
+-- links (quickfix, location list, help, man pages, command-line window).
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'qf', 'help', 'man', 'checkhealth' },
+    callback = function(args)
+        vim.keymap.set('n', '<cr>', '<cr>', { buffer = args.buf })
+    end,
+})
+vim.api.nvim_create_autocmd('CmdwinEnter', {
+    callback = function(args)
+        vim.keymap.set('n', '<cr>', '<cr>', { buffer = args.buf })
+    end,
+})
 
 -- Don't lose selection when shifting sidewards.
 vim.keymap.set('x', '<', '<gv')

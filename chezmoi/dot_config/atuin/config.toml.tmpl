@@ -2,10 +2,12 @@
 {{- $colorMode := env "KOOPA_COLOR_MODE" -}}
 # """
 # Atuin configuration.
-# @note Updated 2026-06-01.
+# @note Updated 2026-10-17.
 # @seealso https://docs.atuin.sh/configuration/config/
 # """
 
+# koopa manages atuin updates, so skip the network version check.
+update_check = false
 search_mode = "fuzzy"
 filter_mode = "global"
 style = "compact"

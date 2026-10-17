@@ -20,15 +20,15 @@
   - https://gist.github.com/simonsmith/6779382
 - `ignored`: Show ignored files.
   Credit: https://stackoverflow.com/a/4855096
-- `intent-to-add-untracked`: Show `git status --untracked-files`, then mark
-  new files as intent-to-add (`git add --intent-to-add .`), so `git diff`
-  includes them. Undo the intent-to-add with `git unstage` (alias for `git reset HEAD --`).
 - `last`: Show the last commit.
 - `ll`: Show custom log of the commit history.
 - `lrb`: List remote branches. Defaults to `origin`.
 - `main`: Check out `main` branch.
 - `retag`: Remove the tag with the specified tag name if exists and tag the
   latest commit with that name.
+- `softadd`: Mark paths as intent-to-add (`git add --intent-to-add`), so
+  `git diff` includes new files. Undo with `git unstage` (alias for
+  `git reset HEAD --`).
 - `tracked`: Show only tracked files.
   Credit: https://stackoverflow.com/a/15606995
 - `u`: Update the content of the last commit by including all staged changes.

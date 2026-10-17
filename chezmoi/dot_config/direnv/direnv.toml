@@ -4,4 +4,4 @@ load_dotenv = true
 strict_env = true
 
 [whitelist]
-prefix = ["~/.local/share/koopa", "~/git", "/opt/koopa"]
+prefix = ["~/.local/share/koopa", "/opt/koopa"]

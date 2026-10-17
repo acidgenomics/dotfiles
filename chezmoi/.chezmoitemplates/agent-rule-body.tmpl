@@ -1,0 +1,18 @@
+{{- /*
+  Body of one ~/.agents/rules/<name>.md rule, for tools with no path-scoped
+  rule mechanism (Codex, Gemini). Strips the paths: front matter so it does
+  not leak into the output. A rule that had paths: keeps its scope as a
+  visible line, because those tools would otherwise treat it as always on.
+  Called as: {{ template "agent-rule-body.tmpl" "<rule-name>" }}
+*/ -}}
+{{- $src := include (printf "dot_agents/rules/%s.md" .) -}}
+{{- $fm := regexFind "(?s)\\A---\\n.*?\\n---\\n" $src -}}
+{{- $globs := list -}}
+{{- range regexFindAll "\"[^\"]+\"" $fm -1 -}}
+{{- $globs = append $globs (printf "`%s`" (trimAll "\"" .)) -}}
+{{- end -}}
+{{- if $globs -}}
+> Applies only when working with files that match: {{ join ", " $globs }}.
+
+{{ end -}}
+{{ regexReplaceAll "(?s)\\A---\\n.*?\\n---\\n" $src "" -}}

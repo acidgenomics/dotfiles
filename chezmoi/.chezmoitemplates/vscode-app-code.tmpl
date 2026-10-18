@@ -32,41 +32,39 @@
     "editor.formatOnSave": false,
     "editor.tabSize": 2
   },
+  "editor.inlineSuggest.enabled": true,
 {{- if lookPath "air" }}
   "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
 {{- end }}
   "chat.agent.maxRequests": 200,
-  "chat.defaultConfiguration": {
-    "permissionLevel": "assisted"
-  },
   "chat.editing.autoAcceptDelay": 10,
   "chat.editor.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "chat.editor.fontSize": 16,
   "chat.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "chat.fontSize": 16,
-  "chat.tools.global.autoApprove": false,
-  "chat.tools.terminal.autoApprove": {
-    "/.*/": { "approve": true, "matchCommandLine": true }
+  "chat.pluginLocations": {
+    "{{ joinPath .chezmoi.homeDir ".local" "share" "koopa" "plugins" "koopa" }}": true
   },
+  "chat.tools.global.autoApprove": false,
+  "chat.tools.terminal.autoApprove": {{ includeTemplate "vscode-terminal-auto-approve.tmpl" . | trimAll "\n" }},
   "chat.tools.terminal.enableAutoApprove": true,
   "chat.tools.urls.autoApprove": {
     "https://*/*": {
       "approveRequest": true,
-      "approveResponse": true
+      "approveResponse": false
     }
   },
   "claudeCode.disableLoginPrompt": true,
   "claudeCode.initialPermissionMode": "plan",
   "claudeCode.lockEditorGroups": false,
   "claudeCode.preferredLocation": "panel",
-  "github.copilot.enable": {
-    "*": false
-  },
-  "github.copilot.nextEditSuggestions.enabled": false,
   "githubPullRequests.defaultMergeMethod": "squash",
   "githubPullRequests.fileListLayout": "tree",
   "githubPullRequests.pullBranch": "never",
+  "path-autocomplete.pathMappings": {
+    ".": "${workspace}"
+  },
   "remote.extensionKind": {
     "GitHub.copilot": [
       "ui"

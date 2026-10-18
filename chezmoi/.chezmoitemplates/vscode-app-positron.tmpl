@@ -8,12 +8,29 @@
   context) — this partial uses .chezmoi.homeDir and .chezmoi.os.
 */}}
 {
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2
+  },
   "[python]": {
-    "editor.formatOnSave": true
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false
   },
   "[r]": {
+{{- if lookPath "air" }}
     "editor.defaultFormatter": "Posit.air-vscode",
+{{- end }}
     "editor.formatOnSave": true
+  },
+  "[toml]": {
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2
   },
   "editor.autoClosingComments": "never",
   "editor.autoClosingDelete": "never",
@@ -35,30 +52,6 @@
 {{- end }}
 {{- if lookPath "quarto" }}
   "quarto.path": "{{ lookPath "quarto" }}",
-{{- end }}
-{{- if eq .chezmoi.os "darwin" }}
-  "terminal.integrated.defaultProfile.osx": "bash",
-{{- end }}
-{{- if eq .chezmoi.os "darwin" }}
-  "terminal.integrated.profiles.osx": {
-    "bash": {
-      "args": [
-        "-il"
-      ],
-      "icon": "terminal-bash",
-      "path": "{{ lookPath "bash" }}"
-    },
-    "zsh": {
-      "args": [
-        "-il"
-      ],
-      "env": {
-        "ZDOTDIR": "${env:HOME}/.config/zsh"
-      },
-      "icon": "terminal-bash",
-      "path": "/bin/zsh"
-    }
-  },
 {{- end }}
   "workbench.editor.empty.hint": "hidden",
   "workbench.keybindings.rstudioKeybindings": true,

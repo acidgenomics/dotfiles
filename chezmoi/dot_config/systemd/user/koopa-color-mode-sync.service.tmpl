@@ -13,7 +13,11 @@ Type=simple
 # The watcher loop:
 #   1. gdbus monitor on the XDG portal SettingChanged signal.
 #   2. On each matching line, call `koopa configure user color-mode`.
-#   3. If the portal is unavailable, fall back to gsettings monitor (GNOME).
+#   3. If the portal monitor exits (portal unavailable), fall through to the
+#      gsettings monitor (GNOME). The two blocks are independent 'if' tests,
+#      because the portal pipeline exits 0 when its monitor dies, so an
+#      'elif' fallback would never run.
+#   4. If both monitors exit, systemd restarts the service (Restart=always).
 ExecStart=/bin/sh -c '\
   koopa="{{ .chezmoi.homeDir }}/.local/share/koopa/bin/koopa"; \
   if command -v gdbus >/dev/null 2>&1; then \
@@ -25,15 +29,16 @@ ExecStart=/bin/sh -c '\
     | while IFS= read -r _line; do \
         "$koopa" configure user color-mode; \
       done; \
-  elif command -v gsettings >/dev/null 2>&1; then \
+  fi; \
+  if command -v gsettings >/dev/null 2>&1; then \
     gsettings monitor org.gnome.desktop.interface color-scheme \
     | while IFS= read -r _line; do \
         "$koopa" configure user color-mode; \
       done; \
   fi \
 '
-Restart=on-failure
-RestartSec=5
+Restart=always
+RestartSec=30
 
 [Install]
 WantedBy=graphical-session.target

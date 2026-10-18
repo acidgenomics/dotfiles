@@ -15,20 +15,7 @@ return {
             },
         },
     },
-    -- Linting (replaces ALE linting for Neovim)
-    {
-        'mfussenegger/nvim-lint',
-        event = { 'BufReadPost', 'BufWritePost' },
-        config = function()
-            local lint = require('lint')
-            lint.linters_by_ft = {
-                python = { 'ruff' },
-            }
-            vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufReadPost' }, {
-                callback = function()
-                    lint.try_lint()
-                end,
-            })
-        end,
-    },
+    -- Linting: Python diagnostics come from the ruff language server
+    -- (see 'vim.lsp.enable' in init.lua.tmpl), so there is no nvim-lint here.
+    -- Running both would report every ruff diagnostic twice.
 }

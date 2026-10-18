@@ -29,18 +29,18 @@
     "editor.formatOnSave": true
   },
   "[toml]": {
+    "editor.formatOnSave": false,
     "editor.tabSize": 2
   },
+  "editor.inlineSuggest.enabled": false,
 {{- if lookPath "air" }}
   "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
 {{- end }}
-  "antigravity.allowAgentAccessNonWorkspaceFiles": true,
+  "antigravity.allowAgentAccessNonWorkspaceFiles": false,
   "antigravity.cascadeAutoExecutionPolicy": "Turbo",
   "chat.tools.global.autoApprove": false,
-  "chat.tools.terminal.autoApprove": {
-    "/^.*$/": true
-  },
+  "chat.tools.terminal.autoApprove": {{ includeTemplate "vscode-terminal-auto-approve.tmpl" . | trimAll "\n" }},
   "chat.tools.terminal.enableAutoApprove": true,
 {{ includeTemplate "dracula-pro-theme.tmpl" (list (joinPath .chezmoi.homeDir ".antigravity" "extensions" "dracula-theme-pro.theme-dracula-pro-*") (joinPath .chezmoi.homeDir ".vscode" "extensions" "dracula-theme-pro.theme-dracula-pro-*") (joinPath .chezmoi.homeDir ".antigravity-server" "extensions" "dracula-theme-pro.theme-dracula-pro-*")) | trimAll "\n" }}
 {{ includeTemplate "vscode-universal-common.tmpl" . | trimAll "\n" }}

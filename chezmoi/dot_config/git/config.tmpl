@@ -2,6 +2,9 @@
     addIgnoredFile = false
     detachedHead = false
 
+[branch]
+    sort = -committerdate
+
 [color]
     ui = true
 [color "branch"]
@@ -85,6 +88,7 @@
 {{- end }}
 
 [diff]
+    algorithm = histogram
     colorMoved = default
 {{- if lookPath "difft" }}
     tool = difftastic
@@ -102,8 +106,8 @@
 {{- end }}
 
 [fetch]
-    fsckobjects = false
-    zeroPaddedFilemode = ignore
+    fsckobjects = true
+    prune = true
 [fetch "fsck"]
     zeroPaddedFilemode = warn
 
@@ -141,7 +145,8 @@
 {{- end }}
 
 [merge]
-    conflictstyle = diff3
+    autoStash = true
+    conflictstyle = zdiff3
 
 [pager]
     difftool = true
@@ -162,22 +167,22 @@
 [rebase]
     autostash = true
 
+[rerere]
+    enabled = true
+
 [receive]
-    fsckobjects = false
+    fsckobjects = true
 [receive "fsck"]
     zeroPaddedFilemode = warn
 
 [safe]
     directory = {{ env "KOOPA_PREFIX" }}
 
-[status]
-    showUntrackedFiles = no
-
 [submodule]
     recurse = true
 
 [transfer]
-    fsckobjects = false
+    fsckobjects = true
 [transfer "fsck"]
     zeroPaddedFilemode = warn
 

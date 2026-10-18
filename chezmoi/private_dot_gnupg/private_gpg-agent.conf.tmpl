@@ -15,19 +15,21 @@
 # > enable-ssh-support
 # """
 
-# Extend re-use window to 1 week.
-# 60 * 60 * 24 * 7 = 604800
+# Extend re-use window to 8 hours.
+# 60 * 60 * 8 = 28800
 # > default-cache-ttl 600
-default-cache-ttl 604800
+default-cache-ttl 28800
 
-# Force re-auth every month.
-# 60 * 60 * 24 * 30 = 2592000
+# Force re-auth every day.
+# 60 * 60 * 24 = 86400
 # > max-cache-ttl 7200
-max-cache-ttl 2592000
+max-cache-ttl 86400
 
 # Configure pinentry.
 {{- if eq .chezmoi.os "darwin" }}
-# > pinentry-program '/usr/local/MacGPG2/libexec/pinentry-mac.app/Contents/MacOS/pinentry-mac'
+{{- if lookPath "pinentry-mac" }}
+pinentry-program {{ lookPath "pinentry-mac" }}
+{{- end }}
 {{- else if eq .chezmoi.os "linux" }}
 # Alternatively, can use 'pinentry-tty'.
 pinentry-program '/usr/bin/pinentry-curses'

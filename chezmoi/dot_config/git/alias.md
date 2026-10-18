@@ -26,6 +26,9 @@
 - `main`: Check out `main` branch.
 - `retag`: Remove the tag with the specified tag name if exists and tag the
   latest commit with that name.
+- `softadd`: Mark paths as intent-to-add (`git add --intent-to-add`), so
+  `git diff` includes new files. Undo with `git unstage` (alias for
+  `git reset HEAD --`).
 - `tracked`: Show only tracked files.
   Credit: https://stackoverflow.com/a/15606995
 - `u`: Update the content of the last commit by including all staged changes.

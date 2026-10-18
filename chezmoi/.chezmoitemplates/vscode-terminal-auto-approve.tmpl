@@ -1,0 +1,18 @@
+{{- /*
+  Body of "chat.tools.terminal.autoApprove", shared by Code and Antigravity.
+  Allows read-only commands and the Python lint/test tools. Denies (false)
+  destructive commands, version-control writes, piped installers, and any
+  command that mentions a .env file. Everything else prompts.
+  A false value (deny) wins over a true value (allow).
+*/ -}}
+{
+  "/\\.env\\b/": false,
+  "/^(rm|sudo|dd|mkfs|chmod|chown)\\b/": false,
+  "/^git (add|checkout|clean|commit|merge|push|rebase|reset|restore)\\b/": false,
+  "/^git (branch\\s+(-\\S*[dDmM]|--delete|--move)|tag\\s+(-d|--delete))\\b/": false,
+  "/^(curl|wget)\\b.*\\|\\s*(ba|z)?sh\\b/": false,
+  "/^(basename|cut|diff|dirname|file|grep|head|jq|ls|man|pwd|rg|sort|stat|tail|tr|uniq|wc|which)\\b/": true,
+  "/^(pytest|pyright|ruff|ty)\\b/": true,
+  "/^git (blame|branch|check-ignore|diff|log|ls-files|remote|rev-parse|show|status)\\b/": true,
+  "/^git (stash list|worktree list)\\b/": true
+}

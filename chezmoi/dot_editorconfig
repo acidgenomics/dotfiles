@@ -1,7 +1,7 @@
 # """
 # EditorConfig
 #
-# @note Updated 2026-08-04.
+# @note Updated 2026-10-16.
 #
 # @seealso
 # - https://editorconfig.org
@@ -37,6 +37,11 @@ indent_size = 4
 indent_style = space
 tab_width = 4
 
+# R Markdown follows the R code style: 4 spaces, no tabs, 80 columns. The
+# Bioconductor guidelines set this for R code only. Applying it to R Markdown
+# and Markdown is a deliberate choice, so these files match the R chunks they
+# contain. Keep Prettier ('.prettierrc.json') and air ('air.toml') in sync.
+# - https://contributions.bioconductor.org/r-code.html
 [*.{Rmd,md}]
 indent_size = 4
 indent_style = space

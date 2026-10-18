@@ -26,7 +26,6 @@
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": "active",
   "editor.guides.indentation": false,
-  "editor.inlineSuggest.enabled": false,
   "editor.occurrencesHighlight": "off",
   "editor.quickSuggestions": {
     "comments": "off",
@@ -93,9 +92,6 @@
   "notebook.formatOnSave.enabled": true,
   "notebook.output.textLineLimit": 100,
   "outline.collapseItems": "alwaysCollapse",
-  "path-autocomplete.pathMappings": {
-    ".": "${workspace}"
-  },
   "python-envs.alwaysUseUv": false,
   "python-envs.terminal.autoActivationType": "off",
   "python-envs.workspaceSearchPaths": [
@@ -116,30 +112,26 @@
   "python.useEnvironmentsExtension": true,
   "r.alwaysUseActiveTerminal": true,
   "r.bracketedPaste": true,
-  "r.lsp.diagnostics": true,
-  "r.lsp.promptToInstall": false,
-  "r.plot.defaults.fullWindowMode": true,
-  "r.plot.useHttpgd": true,
-  "r.rpath.linux": "/usr/bin/R",
-{{- if eq .chezmoi.os "darwin" }}
-  "r.rpath.mac": "/Library/Frameworks/R.framework/Resources/bin/R",
-{{- end }}
-{{- if lookPath "radian" }}
-  "r.rterm.linux": "{{ lookPath "radian" }}",
-{{- if eq .chezmoi.os "darwin" }}
-  "r.rterm.mac": "{{ lookPath "radian" }}",
-{{- end }}
-{{- end }}
-  "r.rterm.option": [
+  "r.consoleArgs": [
     "--no-save",
     "--no-restore",
     "--quiet"
   ],
-  "r.rtermSendDelay": 0,
-  "r.session.data.rowLimit": 100,
-  "r.session.levelOfObjectDetail": "Detailed",
+{{- if lookPath "radian" }}
+  "r.consolePath": "{{ lookPath "radian" }}",
+{{- end }}
+  "r.consoleSendDelay": 0,
+{{- if eq .chezmoi.os "darwin" }}
+  "r.executablePath": "/Library/Frameworks/R.framework/Resources/bin/R",
+{{- else }}
+  "r.executablePath": "/usr/bin/R",
+{{- end }}
+  "r.lsp.diagnostics": true,
+  "r.lsp.promptToInstall": false,
+  "r.plot.backend": "httpgd",
+  "r.plot.defaults.fullWindowMode": true,
   "r.workspaceViewer.removeHiddenItems": true,
-  "r.workspaceViewer.showObjectSize": true,
+  "redhat.telemetry.enabled": false,
   "remote.SSH.connectTimeout": 60,
   "remote.SSH.enableRemoteCommand": true,
   "remote.SSH.localServerDownload": "off",

@@ -32,6 +32,7 @@
     "editor.formatOnSave": false,
     "editor.tabSize": 2
   },
+  "editor.inlineSuggest.enabled": true,
 {{- if lookPath "air" }}
   "air.executablePath": "{{ lookPath "air" }}",
   "air.executableStrategy": "path",
@@ -58,13 +59,12 @@
   "claudeCode.initialPermissionMode": "plan",
   "claudeCode.lockEditorGroups": false,
   "claudeCode.preferredLocation": "panel",
-  "github.copilot.enable": {
-    "*": false
-  },
-  "github.copilot.nextEditSuggestions.enabled": false,
   "githubPullRequests.defaultMergeMethod": "squash",
   "githubPullRequests.fileListLayout": "tree",
   "githubPullRequests.pullBranch": "never",
+  "path-autocomplete.pathMappings": {
+    ".": "${workspace}"
+  },
   "remote.extensionKind": {
     "GitHub.copilot": [
       "ui"

@@ -21,10 +21,8 @@
 .agents/skills/dotfiles-claude-permissions
 .agents/skills/dotfiles-git-history-surgery
 .agents/skills/dotfiles-git-recovery
-.agents/skills/dotfiles-maintain-claude-config
 .agents/skills/dotfiles-python
 .agents/skills/dotfiles-todo-org
-.agents/skills/dotfiles-workflow-guidance
 .claude/hooks
 .claude/rules/coding.md
 .claude/rules/dev-workflow.md

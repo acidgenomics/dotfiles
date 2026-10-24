@@ -21,6 +21,11 @@
 .terminfo/
 Library/
 {{- end }}
+{{- /* The 'positron' command links to the launcher inside the app. Skip it
+       where the app is not installed, so there is no dangling link. */ -}}
+{{- if not (and (eq .chezmoi.os "darwin") (stat "/Applications/Positron.app")) }}
+.local/bin/positron
+{{- end }}
 {{- if lstat (joinPath .chezmoi.homeDir ".config" "koopa" "dotfiles-work") }}
 .claude/settings.json
 .config/pip/pip.conf

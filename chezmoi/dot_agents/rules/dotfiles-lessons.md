@@ -12,4 +12,5 @@
 - **Never reach for a tool outside the current project without asking.** Don't invoke a binary from another project's venv/node_modules or trigger any download (even a small one) to unblock verification. Surface the missing capability and the command that would add it, and let the user decide. The violation is installing without asking, not the size or location.
 - **Path-scoped rule globs must account for chezmoi filename prefixes** (`dot_`, `.tmpl`, extension-less `install`). Test globs against `git ls-files` and mirror the convention into `.editorconfig`. → `koopa-maintain-claude-config` skill.
 - **SKILL.md `description:` uses `>-` and stays at most 1023 chars.** → `koopa-maintain-claude-config` skill.
+- **On macOS, `sed -i` is BSD sed and fails without a backup suffix.** Use `gsed -i`, or the Edit tool for a small change. → `koopa-env` skill.
 - **Git-history surgery:** use the `koopa-git-history-surgery` skill.

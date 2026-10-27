@@ -43,9 +43,14 @@
   "chat.editor.fontSize": 16,
   "chat.fontFamily": "'JetBrainsMonoNL NFM', 'JetBrains Mono', monospace",
   "chat.fontSize": 16,
+{{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") }}
+{{- $koopaPlugin := joinPath (env "KOOPA_PREFIX" | default (joinPath $dataHome "koopa")) "plugins" "koopa" }}
+{{- if stat (joinPath $koopaPlugin "plugin.json") }}
+  {{- /* The VS Code agent host ignores Copilot CLI live directory plugins; register koopa directly. */}}
   "chat.pluginLocations": {
-    "{{ joinPath .chezmoi.homeDir ".local" "share" "koopa" "plugins" "koopa" }}": true
+    "{{ $koopaPlugin }}": true
   },
+{{- end }}
   "chat.tools.global.autoApprove": false,
   "chat.tools.terminal.autoApprove": {{ includeTemplate "vscode-terminal-auto-approve.tmpl" . | trimAll "\n" }},
   "chat.tools.terminal.enableAutoApprove": true,
@@ -56,7 +61,7 @@
     }
   },
   "claudeCode.disableLoginPrompt": true,
-  "claudeCode.initialPermissionMode": "plan",
+  "claudeCode.initialPermissionMode": "auto",
   "claudeCode.lockEditorGroups": false,
   "claudeCode.preferredLocation": "panel",
   "githubPullRequests.allowFetch": false,

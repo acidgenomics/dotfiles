@@ -11,8 +11,10 @@
 
 - Assume all CLI tools are available on PATH; never use `.venv` paths to invoke
   them.
-- Never install software or packages — enforced by the koopa plugin's install guard; surface
-  the command or koopa app name and stop.
+- Installing software or packages triggers the koopa plugin's install/uv guards,
+  which ask for explicit user approval rather than blocking outright. Propose the
+  exact command (or koopa app name) and let the user approve the prompt; never
+  work around the guard by rewording, splitting, or hiding the command.
 - Never override or ignore configuration in `pyproject.toml`.
 
 ## Linting & Type Checking

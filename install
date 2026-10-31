@@ -1162,8 +1162,10 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
     # .theme-light (always alucard) blocks -- Obsidian's own Settings >
     # Appearance toggle switches modes natively, so unlike every other app
     # above this needs no KOOPA_COLOR_MODE branching. Vaults are per-vault,
-    # not a fixed config dir, so this is symlinked into every vault found in
-    # Obsidian's own registry, not a single hardcoded path. appearance.json
+    # not a fixed config dir, so this is copied (never symlinked: a vault in
+    # iCloud syncs to a phone where the link target does not exist) into every
+    # vault found in Obsidian's own registry, not a single hardcoded path.
+    # appearance.json
     # is owned by Obsidian and rewritten wholesale on every settings change,
     # so selecting the theme is a targeted two-key read-modify-write via
     # _select_obsidian_dracula_pro_theme(), skipped entirely while Obsidian
@@ -1184,8 +1186,8 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
         for obsidian_dir in _obsidian_vault_dirs(home):
             theme_dir = os.path.join(obsidian_dir, "themes", "Dracula Pro")
             mkdir(theme_dir)
-            ln(css_path, os.path.join(theme_dir, "theme.css"))
-            ln(manifest_path, os.path.join(theme_dir, "manifest.json"))
+            _copy_obsidian_file(css_path, os.path.join(theme_dir, "theme.css"))
+            _copy_obsidian_file(manifest_path, os.path.join(theme_dir, "manifest.json"))
             if not obsidian_running:
                 _select_obsidian_dracula_pro_theme(obsidian_dir)
     # Zsh: generate palette files sourced at runtime by .zshrc.
@@ -2775,6 +2777,43 @@ def _select_obsidian_dracula_pro_theme(obsidian_dir: str) -> None:
         fh.write("\n")
 
 
+def _copy_obsidian_file(src: str, dest: str) -> None:
+    """Copy a file into a vault, replacing a stale symlink or changed content.
+
+    Never leaves a symlink in the vault: a vault synced through iCloud reaches
+    devices where the link target does not exist.
+    """
+    if os.path.islink(dest):
+        os.unlink(dest)
+    elif os.path.isfile(dest):
+        with open(src, "rb") as a, open(dest, "rb") as b:
+            if a.read() == b.read():
+                return
+    shutil.copyfile(src, dest)
+
+
+def _configure_obsidian_vaults(home: str) -> None:
+    """Copy the shared Obsidian config into every registered vault.
+
+    chezmoi deploys the shared config to ~/.config/koopa/obsidian, because a
+    vault's path differs per machine and may be a symlink, which chezmoi would
+    replace with a directory. Skipped while Obsidian is running, since it
+    rewrites these files from memory. appearance.json is excluded: it has its
+    own targeted merge, see _select_obsidian_dracula_pro_theme().
+    """
+    staging = os.path.join(xdg_config_home(), "koopa", "obsidian")
+    if not os.path.isdir(staging) or _is_obsidian_running():
+        return
+    for obsidian_dir in _obsidian_vault_dirs(home):
+        for root, _, files in os.walk(staging):
+            rel = os.path.relpath(root, staging)
+            dest_dir = obsidian_dir if rel == "." else os.path.join(obsidian_dir, rel)
+            if rel != "." and not os.path.isdir(dest_dir):
+                continue
+            for name in files:
+                _copy_obsidian_file(os.path.join(root, name), os.path.join(dest_dir, name))
+
+
 def _wcag_relative_luminance(hexcolor: str) -> float:
     """True WCAG relative luminance, with sRGB gamma decoding.
 
@@ -3498,6 +3537,7 @@ def main() -> None:
             if not os.path.islink(xcode_free_dest) and not os.path.isfile(xcode_free_dest):
                 ln(xcode_free_src, xcode_free_dest)
     _configure_dracula_pro_post(home, xdg_data)
+    _configure_obsidian_vaults(home)
     _configure_jetbrains(home)
     _configure_claude_code(home)
     if is_macos():

@@ -3,14 +3,12 @@
 {{- $vimPalette := joinPath $dataHome "dracula-pro" "themes" "vim" "autoload" "dracula-pro.vim" -}}
 {{- $koopaMarketplace := joinPath $koopaPrefix ".claude-plugin" "marketplace.json" -}}
 {
-  "alwaysThinkingEnabled": true,
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
   "autoMemoryEnabled": false,
-  "autoUpdatesChannel": "latest",
   "spinnerTipsEnabled": false,
 {{- if stat $vimPalette }}
   "theme": {{ if eq (env "KOOPA_COLOR_MODE") "light" }}"custom:dracula-pro-alucard"{{ else }}"custom:dracula-pro"{{ end }},
@@ -30,14 +28,15 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SHELL": "{{ joinPath $koopaPrefix "bin" "bash" }}",
-    "DISABLE_AUTOUPDATER": "1"
+    "DISABLE_UPDATES": "1"
 {{- if stat (joinPath $dataHome "ca-certificates" "cacert.pem") }},
     "AWS_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
     "CURL_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
-    "DEFAULT_CA_BUNDLE_PATH": "{{ dir $dataHome }}",
+    "DEFAULT_CA_BUNDLE_PATH": "{{ $dataHome }}/ca-certificates",
     "REQUESTS_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
     "SSL_CERT_FILE": "{{ $dataHome }}/ca-certificates/cacert.pem"
 {{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }},
@@ -91,7 +90,6 @@
   "outputStyle": "STE100",
   "permissions": {
     "allow": [
-      "Bash(awk:*)",
       "Bash(basename:*)",
       "Bash(cat:*)",
       "Bash(col:*)",
@@ -109,7 +107,7 @@
       "Bash(man:*)",
       "Bash(otool:*)",
       "Bash(rg:*)",
-      "Bash(sed:*)",
+      "Bash(sed -n:*)",
       "Bash(sort:*)",
       "Bash(stat:*)",
       "Bash(tail:*)",
@@ -119,33 +117,41 @@
       "Bash(wc:*)",
       "Bash(which:*)",
       "Bash(git blame:*)",
-      "Bash(git branch:*)",
+      "Bash(git branch)",
+      "Bash(git branch --show-current)",
+      "Bash(git branch -a:*)",
+      "Bash(git branch --list:*)",
       "Bash(git check-ignore:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
       "Bash(git ls-files:*)",
-      "Bash(git remote:*)",
+      "Bash(git remote -v)",
+      "Bash(git remote get-url:*)",
       "Bash(git rev-parse:*)",
       "Bash(git show:*)",
       "Bash(git stash list:*)",
       "Bash(git status:*)",
       "Bash(git worktree list:*)",
       "Edit(**)",
-      "Edit(//**/*lessons.md)",
       "Grep",
       "ListMcpResourcesTool",
-      "Python(*)",
       "Read(**)",
       "ReadMcpResourceTool",
       "mcp__ide__*",
-      "mcp__mcp-atlassian__*",
-      "mcp__read-website-fast__*",
       "mcp__tooluniverse__*"
     ],
     "ask": [
-      "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)"
+      "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)",
+      "Bash(find * -delete*)",
+      "Bash(find * -exec*)",
+      "Bash(find * -ok*)",
+      "Bash(find * -fls*)",
+      "Bash(find * -fprint*)",
+      "Bash(sed -i*)",
+      "Bash(sort * -o*)"
     ],
     "defaultMode": "auto",
+    "disableBypassPermissionsMode": "disable",
     "deny": [
       "Bash(git add*)",
       "Bash(git commit*)",
@@ -153,6 +159,12 @@
       "Bash(git push*)",
       "Bash(git rebase*)",
       "Bash(git reset*)",
+      "Bash(git -C * add*)",
+      "Bash(git -C * commit*)",
+      "Bash(git -C * merge*)",
+      "Bash(git -C * push*)",
+      "Bash(git -C * rebase*)",
+      "Bash(git -C * reset*)",
       "Bash(cat *.env*)",
       "Edit(**/.env*)",
       "Edit(.env*)",
@@ -160,8 +172,17 @@
       "Read(**/.env*)",
       "Read(.env*)",
       "Read(~/.aws/**)",
+      "Read(~/.config/chezmoi/age-key.txt)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.config/op/**)",
       "Read(~/.gnupg/**)",
-      "Read(~/.ssh/**)"
+      "Read(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.config/chezmoi/age-key.txt)",
+      "Edit(~/.config/gh/**)",
+      "Edit(~/.config/op/**)",
+      "Edit(~/.gnupg/**)",
+      "Edit(~/.ssh/**)"
     ]
   },
   "plansDirectory": "./.claude/plans"

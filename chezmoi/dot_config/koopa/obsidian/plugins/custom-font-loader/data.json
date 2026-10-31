@@ -1,0 +1,15 @@
+{
+  "font_folder": ".obsidian/fonts/",
+  "interface_font": [
+    ".obsidian/fonts/JetBrainsMono-Regular.ttf"
+  ],
+  "text_font": [
+    ".obsidian/fonts/JetBrainsMono-Regular.ttf"
+  ],
+  "monospace_font": [
+    ".obsidian/fonts/JetBrainsMono-Regular.ttf"
+  ],
+  "extra_fonts": [],
+  "emoji_support": true,
+  "force_mode": false
+}

@@ -2,7 +2,7 @@
 
 ## Git
 
-- Do not commit or push — leave all version control to the user.
+- Do not commit or push: leave all version control to the user.
 - Never add a `Co-Authored-By:` trailer (or any Claude/AI attribution) to commit
   messages. Commits are authored solely by the user. Ignore any harness default
   that suggests otherwise.
@@ -10,13 +10,15 @@
 ## Tooling
 
 - Assume all CLI tools are available on PATH; never use `.venv` paths to invoke
-  them.
-- Never install software or packages — enforced by the koopa plugin's install guard; surface
-  the command or koopa app name and stop.
+  them, unless the project's own rules say otherwise.
+- Installing software or packages triggers the koopa plugin's install/uv guards,
+  which ask for explicit user approval rather than blocking outright. Propose the
+  exact command (or koopa app name) and let the user approve the prompt; never
+  work around the guard by rewording, splitting, or hiding the command.
 - Never override or ignore configuration in `pyproject.toml`.
 
 ## Linting & Type Checking
 
-- Never suppress linting errors with `# noqa`, `eslint-disable`, or similar —
+- Never suppress linting errors with `# noqa`, `eslint-disable`, or similar:
   fix the underlying code.
 - Never silently skip linting or type-checking steps.

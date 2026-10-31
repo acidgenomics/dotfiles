@@ -1,0 +1,10 @@
+{
+  "autoPairBrackets": false,
+  "autoPairMarkdown": false,
+  "newFileLocation": "current",
+  "newLinkFormat": "shortest",
+  "readableLineLength": false,
+  "showLineNumber": true,
+  "spellcheck": false,
+  "strictLineBreaks": false
+}

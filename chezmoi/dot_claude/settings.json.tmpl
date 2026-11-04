@@ -2,19 +2,28 @@
 {{- $koopaPrefix := env "KOOPA_PREFIX" | default (joinPath $dataHome "koopa") -}}
 {{- $vimPalette := joinPath $dataHome "dracula-pro" "themes" "vim" "autoload" "dracula-pro.vim" -}}
 {{- $koopaMarketplace := joinPath $koopaPrefix ".claude-plugin" "marketplace.json" -}}
+{{- /* CA bundle: koopa's bundle first, then the Linux system bundle. Computed
+     once here so each env key below can sit in its sorted position. */}}
+{{- $caBundle := "" -}}
+{{- $caDir := "" -}}
+{{- if stat (joinPath $dataHome "ca-certificates" "cacert.pem") -}}
+{{-   $caBundle = joinPath $dataHome "ca-certificates" "cacert.pem" -}}
+{{-   $caDir = joinPath $dataHome "ca-certificates" -}}
+{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") -}}
+{{-   $caBundle = "/etc/ssl/certs/ca-certificates.crt" -}}
+{{-   $caDir = "/etc/ssl/certs" -}}
+{{- end -}}
+{{- /* Keys are sorted alphabetically at every level, and the permission rule
+     lists are sorted in byte order (LC_ALL=C sort, the same order as jq -S).
+     Keep both sorted when you add a key or a rule. */}}
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
   "autoMemoryEnabled": false,
-  "spinnerTipsEnabled": false,
-{{- if stat $vimPalette }}
-  "theme": {{ if eq (env "KOOPA_COLOR_MODE") "light" }}"custom:dracula-pro-alucard"{{ else }}"custom:dracula-pro"{{ end }},
-{{- else }}
-  "theme": "auto",
-{{- end }}
   "effortLevel": "high",
   "enabledPlugins": {
     "astral@astral-sh": true,
@@ -28,61 +37,54 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
+{{- if $caBundle }}
+    "AWS_CA_BUNDLE": "{{ $caBundle }}",
+{{- end }}
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SHELL": "{{ joinPath $koopaPrefix "bin" "bash" }}",
-    "DISABLE_UPDATES": "1"
-{{- if stat (joinPath $dataHome "ca-certificates" "cacert.pem") }},
-    "AWS_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
-    "CURL_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
-    "DEFAULT_CA_BUNDLE_PATH": "{{ $dataHome }}/ca-certificates",
-    "REQUESTS_CA_BUNDLE": "{{ $dataHome }}/ca-certificates/cacert.pem",
-    "SSL_CERT_FILE": "{{ $dataHome }}/ca-certificates/cacert.pem"
-{{- else if and (eq .chezmoi.os "linux") (stat "/etc/ssl/certs/ca-certificates.crt") }},
-    "AWS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
-    "CURL_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
-    "DEFAULT_CA_BUNDLE_PATH": "/etc/ssl/certs",
-    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
-    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+{{- if $caBundle }}
+    "CURL_CA_BUNDLE": "{{ $caBundle }}",
+    "DEFAULT_CA_BUNDLE_PATH": "{{ $caDir }}",
 {{- end }}
-  },
-  "extensions": {
-    "anthropic.claude-code": {
-      "autoUpdate": false
-    }
+    "DISABLE_UPDATES": "1"
+{{- if $caBundle }},
+    "REQUESTS_CA_BUNDLE": "{{ $caBundle }}",
+    "SSL_CERT_FILE": "{{ $caBundle }}"
+{{- end }}
   },
   "extraKnownMarketplaces": {
     "anthropic-agent-skills": {
       "source": {
-        "source": "github",
-        "repo": "anthropics/skills"
+        "repo": "anthropics/skills",
+        "source": "github"
       }
     },
     "astral-sh": {
       "source": {
-        "source": "github",
-        "repo": "astral-sh/claude-code-plugins"
+        "repo": "astral-sh/claude-code-plugins",
+        "source": "github"
       }
     },
     "claude-plugins-official": {
       "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
+        "repo": "anthropics/claude-plugins-official",
+        "source": "github"
       }
     },
 {{- if stat $koopaMarketplace }}
     "koopa": {
       "source": {
-        "source": "directory",
-        "path": "{{ $koopaPrefix }}"
+        "path": "{{ $koopaPrefix }}",
+        "source": "directory"
       }
     },
 {{- end }}
     "life-sciences": {
       "source": {
-        "source": "github",
-        "repo": "anthropics/life-sciences"
+        "repo": "anthropics/life-sciences",
+        "source": "github"
       }
     }
   },
@@ -100,6 +102,25 @@
       "Bash(echo:*)",
       "Bash(file:*)",
       "Bash(find:*)",
+      "Bash(git -C * fetch*)",
+      "Bash(git -C * show*)",
+      "Bash(git blame:*)",
+      "Bash(git branch --list:*)",
+      "Bash(git branch --show-current)",
+      "Bash(git branch -a:*)",
+      "Bash(git branch)",
+      "Bash(git check-ignore:*)",
+      "Bash(git diff:*)",
+      "Bash(git fetch:*)",
+      "Bash(git log:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git remote -v)",
+      "Bash(git remote get-url:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git show:*)",
+      "Bash(git stash list:*)",
+      "Bash(git status:*)",
+      "Bash(git worktree list:*)",
       "Bash(grep:*)",
       "Bash(head:*)",
       "Bash(jq:*)",
@@ -116,22 +137,6 @@
       "Bash(uniq:*)",
       "Bash(wc:*)",
       "Bash(which:*)",
-      "Bash(git blame:*)",
-      "Bash(git branch)",
-      "Bash(git branch --show-current)",
-      "Bash(git branch -a:*)",
-      "Bash(git branch --list:*)",
-      "Bash(git check-ignore:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git ls-files:*)",
-      "Bash(git remote -v)",
-      "Bash(git remote get-url:*)",
-      "Bash(git rev-parse:*)",
-      "Bash(git show:*)",
-      "Bash(git stash list:*)",
-      "Bash(git status:*)",
-      "Bash(git worktree list:*)",
       "Edit(**)",
       "Grep",
       "ListMcpResourcesTool",
@@ -141,33 +146,44 @@
       "mcp__tooluniverse__*"
     ],
     "ask": [
-      "Edit(/{{ .chezmoi.homeDir }}/.agents/hooks/**)",
       "Bash(find * -delete*)",
       "Bash(find * -exec*)",
-      "Bash(find * -ok*)",
       "Bash(find * -fls*)",
       "Bash(find * -fprint*)",
+      "Bash(find * -ok*)",
       "Bash(sed -i*)",
-      "Bash(sort * -o*)"
+      "Bash(sort * -o*)",
+      "Edit(~/.agents/hooks/**)"
     ],
     "defaultMode": "auto",
-    "disableBypassPermissionsMode": "disable",
+    {{/* Edit(~/.claude/settings.json): that file is rendered from this
+         template, so a direct edit is lost on the next chezmoi apply. The
+         rule blocks Edit and Write tool calls only. Claude Code's own writes
+         (/model, "don't ask again" approvals) are not tool calls and still
+         land; this template reverts them on apply. */}}
     "deny": [
-      "Bash(git add*)",
-      "Bash(git commit*)",
-      "Bash(git merge*)",
-      "Bash(git push*)",
-      "Bash(git rebase*)",
-      "Bash(git reset*)",
+      "Bash(cat *.env*)",
       "Bash(git -C * add*)",
       "Bash(git -C * commit*)",
       "Bash(git -C * merge*)",
       "Bash(git -C * push*)",
       "Bash(git -C * rebase*)",
       "Bash(git -C * reset*)",
-      "Bash(cat *.env*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git merge*)",
+      "Bash(git push*)",
+      "Bash(git rebase*)",
+      "Bash(git reset*)",
       "Edit(**/.env*)",
       "Edit(.env*)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(~/.config/chezmoi/age-key.txt)",
+      "Edit(~/.config/gh/**)",
+      "Edit(~/.config/op/**)",
+      "Edit(~/.gnupg/**)",
+      "Edit(~/.ssh/**)",
       "Read(**/*.pem)",
       "Read(**/.env*)",
       "Read(.env*)",
@@ -176,14 +192,15 @@
       "Read(~/.config/gh/**)",
       "Read(~/.config/op/**)",
       "Read(~/.gnupg/**)",
-      "Read(~/.ssh/**)",
-      "Edit(~/.aws/**)",
-      "Edit(~/.config/chezmoi/age-key.txt)",
-      "Edit(~/.config/gh/**)",
-      "Edit(~/.config/op/**)",
-      "Edit(~/.gnupg/**)",
-      "Edit(~/.ssh/**)"
-    ]
+      "Read(~/.ssh/**)"
+    ],
+    "disableBypassPermissionsMode": "disable"
   },
-  "plansDirectory": "./.claude/plans"
+  "plansDirectory": "./.claude/plans",
+  "spinnerTipsEnabled": false,
+{{- if stat $vimPalette }}
+  "theme": {{ if eq (env "KOOPA_COLOR_MODE") "light" }}"custom:dracula-pro-alucard"{{ else }}"custom:dracula-pro"{{ end }}
+{{- else }}
+  "theme": "auto"
+{{- end }}
 }

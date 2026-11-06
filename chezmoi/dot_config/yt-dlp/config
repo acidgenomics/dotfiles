@@ -1,0 +1,3 @@
+# Enable Node.js for YouTube JS challenge solving (only deno is on by default).
+# https://github.com/yt-dlp/yt-dlp/wiki/EJS
+--js-runtimes node

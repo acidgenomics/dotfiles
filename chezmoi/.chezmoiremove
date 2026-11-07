@@ -63,3 +63,7 @@
 .spacemacs.d/init.el
 .tmux.conf
 .tmux/
+Library/LaunchAgents/com.koopa.color-mode-schedule.plist
+Library/LaunchAgents/com.koopa.color-mode-sync.plist
+Library/LaunchAgents/com.koopa.organize-screenshots.plist
+Library/LaunchAgents/com.koopa.today-bucket.plist

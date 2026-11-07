@@ -1,0 +1,46 @@
+{{- if eq .chezmoi.os "darwin" -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.acidgenomics.koopa</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>{{ .chezmoi.homeDir }}/.local/share/koopa/bin/koopa run background-tasks</string>
+  </array>
+  <key>WatchPaths</key>
+  <array>
+    <string>{{ .chezmoi.homeDir }}/Library/Preferences/.GlobalPreferences.plist</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Hour</key><integer>0</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key><integer>17</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+  </array>
+  <key>StartInterval</key>
+  <integer>600</integer>
+  <key>ThrottleInterval</key>
+  <integer>5</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa.log</string>
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/koopa.log</string>
+</dict>
+</plist>
+{{- end }}

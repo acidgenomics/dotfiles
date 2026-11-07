@@ -1140,10 +1140,11 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(tmux_colors, "dracula-pro-alucard.conf"), "w"
             ) as fh:
                 fh.write(alucard_conf)
-    # Claude Code: generate custom theme files selected at runtime by
-    # settings.json.tmpl ("theme": "custom:dracula-pro[-alucard]", branched on
-    # KOOPA_COLOR_MODE). ~/.claude/themes/ is not chezmoi-managed, so this
-    # never shows up as chezmoi drift.
+    # Claude Code: generate custom theme files. settings.json.tmpl selects
+    # "custom:dracula-pro-auto", which holds the palette for the current OS
+    # mode. koopa's color-mode flip rewrites that file in place, and a running
+    # Claude session reloads an in-place change. ~/.claude/themes/ is not
+    # chezmoi-managed, so this never shows up as chezmoi drift.
     claude_prefix = os.path.join(home, ".claude")
     if os.path.isdir(claude_prefix):
         claude_themes = os.path.join(claude_prefix, "themes")
@@ -1158,6 +1159,16 @@ def _configure_dracula_pro_post(home: str, xdg_data: str) -> None:
                 os.path.join(claude_themes, "dracula-pro-alucard.json"), "w"
             ) as fh:
                 fh.write(claude_alucard)
+        if claude_dark and claude_alucard:
+            is_light = os.environ.get("KOOPA_COLOR_MODE", "dark") == "light"
+            claude_auto = _generate_claude_dracula_pro_theme(
+                dp_dir,
+                "alucard" if is_light else variant,
+                name="Dracula Pro Auto",
+            )
+            if claude_auto:
+                with open(os.path.join(claude_themes, "dracula-pro-auto.json"), "w") as fh:
+                    fh.write(claude_auto)
     # Obsidian: generate one theme.css with real .theme-dark (variant) and
     # .theme-light (always alucard) blocks -- Obsidian's own Settings >
     # Appearance toggle switches modes natively, so unlike every other app
@@ -2346,13 +2357,29 @@ _CLAUDE_THEME_CHROME_TOKENS = {
 }
 
 
-def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
+def _generate_claude_dracula_pro_theme(
+    dp_dir: str, variant: str, name: str | None = None
+) -> str | None:
     """Generate a Claude Code custom theme JSON for a Dracula Pro variant.
 
     Written to ~/.claude/themes/<slug>.json and selected at runtime via the
-    "theme": "custom:<slug>" setting (dot_claude/settings.json.tmpl branches on
-    KOOPA_COLOR_MODE to pick dracula-pro vs dracula-pro-alucard). "base" carries
-    any of Claude Code's ~72 tokens this mapping does not override.
+    "theme": "custom:<slug>" setting (dot_claude/settings.json.tmpl selects
+    dracula-pro-auto). "base" carries any of Claude Code's ~72 tokens this
+    mapping does not override.
+
+    Parameters
+    ----------
+    dp_dir : str
+        Dracula Pro vendor directory.
+    variant : str
+        Dracula Pro variant, such as "pro" or "alucard".
+    name : str | None
+        Display name shown in /theme. Defaults to the variant's own name.
+
+    Returns
+    -------
+    str | None
+        Theme JSON text, or None when the vendor palette is unavailable.
     """
     p = _parse_vim_palette(dp_dir, variant)
     if not p:
@@ -2396,7 +2423,7 @@ def _generate_claude_dracula_pro_theme(dp_dir: str, variant: str) -> str | None:
         )
 
     theme = {
-        "name": "Dracula Pro Alucard" if is_light else "Dracula Pro",
+        "name": name or ("Dracula Pro Alucard" if is_light else "Dracula Pro"),
         "base": base,
         "overrides": overrides,
     }
@@ -3360,6 +3387,29 @@ def _sync_launchd_agent(home: str, label: str) -> None:
     subprocess.run([launchctl, "bootstrap", domain, plist], check=True)
 
 
+# Retired per-task LaunchAgents, folded into com.acidgenomics.koopa. Their plist
+# files are listed in .chezmoiremove, so they are gone before this unload runs.
+_RETIRED_LAUNCHD_LABELS = (
+    "com.koopa.color-mode-schedule",
+    "com.koopa.color-mode-sync",
+    "com.koopa.organize-screenshots",
+    "com.koopa.today-bucket",
+)
+
+
+def _bootout_launchd_label(label: str) -> None:
+    """Unload a user LaunchAgent by label, if it is loaded.
+
+    Uses the service-target form, which needs no plist file. A label that is
+    not loaded makes launchctl exit non-zero; that is the expected no-op.
+    """
+    uid = str(os.getuid())
+    subprocess.run(
+        ["/bin/launchctl", "bootout", f"gui/{uid}/{label}"],
+        capture_output=True,
+    )
+
+
 def _has_systemd_user_bus() -> bool:
     """Return True if a systemd --user manager is reachable.
 
@@ -3493,24 +3543,10 @@ def main() -> None:
         ssh_config = os.path.join(ssh_dir, "config")
         if os.path.isfile(ssh_config):
             chmod(ssh_config, "0600")
-    _color_sync_plist = os.path.join(
-        home, "Library", "LaunchAgents", "com.koopa.color-mode-sync.plist"
+    _koopa_agent_plist = os.path.join(
+        home, "Library", "LaunchAgents", "com.acidgenomics.koopa.plist"
     )
-    _color_sync_is_new = is_macos() and not os.path.isfile(_color_sync_plist)
-    _dp_dir = os.path.join(xdg_data, "dracula-pro")
-    _color_sched_has_dp = is_macos() and os.path.isdir(_dp_dir)
-    _color_sched_plist = os.path.join(
-        home, "Library", "LaunchAgents", "com.koopa.color-mode-schedule.plist"
-    )
-    _color_sched_is_new = _color_sched_has_dp and not os.path.isfile(_color_sched_plist)
-    _today_bucket_has_dir = is_macos() and (
-        os.path.isdir(os.path.join(home, "bucket"))
-        or os.path.isdir(os.path.join(home, "Documents", "bucket"))
-    )
-    _today_bucket_plist = os.path.join(
-        home, "Library", "LaunchAgents", "com.koopa.today-bucket.plist"
-    )
-    _today_bucket_is_new = _today_bucket_has_dir and not os.path.isfile(_today_bucket_plist)
+    _koopa_agent_is_new = is_macos() and not os.path.isfile(_koopa_agent_plist)
     # Always derive color mode from the OS before rendering templates.
     # Never trust inherited env — stale KOOPA_COLOR_MODE from a long-running
     # caller would silently render the wrong palette.
@@ -3541,42 +3577,21 @@ def main() -> None:
     _configure_jetbrains(home)
     _configure_claude_code(home)
     if is_macos():
-        _sync_launchd_agent(home, "com.koopa.color-mode-sync")
-        if _color_sync_is_new:
+        for label in _RETIRED_LAUNCHD_LABELS:
+            _bootout_launchd_label(label)
+        _sync_launchd_agent(home, "com.acidgenomics.koopa")
+        if _koopa_agent_is_new:
             print(
-                "Installed launch agent: com.koopa.color-mode-sync\n"
+                "Installed launch agent: com.acidgenomics.koopa\n"
                 "  Location: ~/Library/LaunchAgents/"
-                "com.koopa.color-mode-sync.plist\n"
-                "  Purpose: automatically re-applies dotfiles when macOS\n"
-                "           switches between dark and light mode.\n"
+                "com.acidgenomics.koopa.plist\n"
+                "  Purpose: runs 'koopa run background-tasks', which keeps\n"
+                "           color mode in sync, sets the dark/light schedule\n"
+                "           (needs Dracula Pro), updates ~/today, and files\n"
+                "           screenshots. Log: ~/Library/Logs/koopa.log\n"
                 "  Note: macOS may show a notification that 'sh' is running\n"
                 "        in the background. This is expected and safe."
             )
-        if _color_sched_has_dp:
-            _sync_launchd_agent(home, "com.koopa.color-mode-schedule")
-            if _color_sched_is_new:
-                print(
-                    "Installed launch agent: com.koopa.color-mode-schedule\n"
-                    "  Location: ~/Library/LaunchAgents/"
-                    "com.koopa.color-mode-schedule.plist\n"
-                    "  Purpose: sets macOS appearance on a fixed daily schedule\n"
-                    "           (dark before 9am, light 9am-5pm, dark after 5pm),\n"
-                    "           in the machine's local timezone.\n"
-                    "  Note: macOS may show a notification that 'sh' is running\n"
-                    "        in the background. This is expected and safe."
-                )
-        if _today_bucket_has_dir:
-            _sync_launchd_agent(home, "com.koopa.today-bucket")
-            if _today_bucket_is_new:
-                print(
-                    "Installed launch agent: com.koopa.today-bucket\n"
-                    "  Location: ~/Library/LaunchAgents/"
-                    "com.koopa.today-bucket.plist\n"
-                    "  Purpose: keeps the ~/today dated symlink current at midnight\n"
-                    "           (and on wake from sleep) without needing a new shell.\n"
-                    "  Note: macOS may show a notification that 'sh' is running\n"
-                    "        in the background. This is expected and safe."
-                )
     elif is_linux():
         _sync_systemd_user_agent("koopa-color-mode-sync.service")
     zprofile_src = os.path.join(xdg_config, "zsh", ".zprofile")

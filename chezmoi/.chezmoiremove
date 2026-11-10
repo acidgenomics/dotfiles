@@ -59,6 +59,15 @@
 .claude/skills/workflow-guidance
 .config/bpytop/
 .copilot/hooks/dotfiles-hooks.json
+.copilot/instructions/dotfiles-coding.instructions.md
+.copilot/instructions/dotfiles-dev-workflow.instructions.md
+.copilot/instructions/dotfiles-lessons.instructions.md
+.copilot/instructions/dotfiles-obsidian.instructions.md
+.copilot/instructions/dotfiles-python.instructions.md
+.copilot/instructions/dotfiles-security.instructions.md
+.copilot/instructions/dotfiles-shell.instructions.md
+.copilot/instructions/dotfiles-thinking.instructions.md
+.copilot/instructions/dotfiles-workflow.instructions.md
 .doom.d/
 .emacs-profiles.el
 .gitattributes

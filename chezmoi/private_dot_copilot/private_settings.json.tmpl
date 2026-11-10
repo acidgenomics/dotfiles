@@ -1,0 +1,21 @@
+{{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
+{{- $koopaPrefix := env "KOOPA_PREFIX" | default (joinPath $dataHome "koopa") -}}
+{{- $koopaMarketplace := joinPath $koopaPrefix ".claude-plugin" "marketplace.json" -}}
+{
+{{- if stat $koopaMarketplace }}
+  "enabledPlugins": {
+    "koopa@koopa": true
+  },
+  "extraKnownMarketplaces": {
+    "koopa": {
+      "source": {
+        "path": "{{ $koopaPrefix }}",
+        "source": "directory"
+      }
+    }
+  },
+{{- end }}
+  "model": "auto",
+  "showTipsOnStartup": false,
+  "theme": "default"
+}

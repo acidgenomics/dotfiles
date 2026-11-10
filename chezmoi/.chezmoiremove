@@ -18,6 +18,16 @@
 .agents/hooks/obsidian_vault.py
 .agents/hooks/shell_command_scan.py
 .agents/hooks/uv_command_scan.py
+.agents/rules/dotfiles-coding.md
+.agents/rules/dotfiles-dev-workflow.md
+.agents/rules/dotfiles-lessons.md
+.agents/rules/dotfiles-obsidian.md
+.agents/rules/dotfiles-python.md
+.agents/rules/dotfiles-security.md
+.agents/rules/dotfiles-shell.md
+.agents/rules/dotfiles-thinking.md
+.agents/rules/dotfiles-workflow.md
+.agents/skills/dotfiles-ghostty
 .agents/skills/dotfiles-claude-permissions
 .agents/skills/dotfiles-git-history-surgery
 .agents/skills/dotfiles-git-recovery

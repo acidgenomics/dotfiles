@@ -793,6 +793,7 @@ def _configure_dracula_pro(home: str, xdg_data: str) -> None:
     if not os.path.isdir(dp_dir):
         return
     _warn_on_missing_dracula_pro_sources(dp_dir)
+    _configure_lig_dracula_pro(dp_dir)
     # Vim/Neovim: symlink theme pack so nvim detects it at runtime.
     vim_src = os.path.join(dp_dir, "themes", "vim")
     vim_themes = os.path.join(home, ".vim", "pack", "theme", "start")
@@ -1966,6 +1967,42 @@ fg_color = "{p['comment']}"
 bg_color = "{bg}"
 fg_color = "{p['comment']}"
 """
+
+
+def _generate_lig_dracula_pro_toml(dp_dir: str, variant: str) -> str | None:
+    """Generate Lig colors from the installed Dracula Pro palette."""
+    p = _parse_vim_palette(dp_dir, variant)
+    if not p or not all(k in p for k in ("bg", "fg", "selection", "comment", "purple")):
+        return None
+    return f"""\
+[colors]
+bg = "{p['bg']}"
+fg = "{p['fg']}"
+selected_bg = "{p['selection']}"
+selected_fg = "{p['fg']}"
+description_fg = "{p['comment']}"
+selected_description_fg = "{p['fg']}"
+match_fg = "{p['purple']}"
+border_fg = "{p['comment']}"
+border_bg = "default"
+scrollbar_fg = "{p['selection']}"
+scrollbar_thumb = "{p['comment']}"
+info_fg = "{p['comment']}"
+"""
+
+
+def _configure_lig_dracula_pro(dp_dir: str) -> None:
+    """Write Lig palette fragments before chezmoi renders its config."""
+    colors_dir = os.path.join(xdg_config_home(), "koopa", "lig")
+    for variant, name in (
+        (os.environ.get("KOOPA_DRACULA_PRO_VARIANT", "pro"), "dracula-pro.toml"),
+        ("alucard", "dracula-pro-alucard.toml"),
+    ):
+        colors = _generate_lig_dracula_pro_toml(dp_dir, variant)
+        if colors:
+            mkdir(colors_dir)
+            with open(os.path.join(colors_dir, name), "w") as fh:
+                fh.write(colors)
 
 
 def _generate_atuin_dracula_pro_toml(dp_dir: str, variant: str) -> str | None:

@@ -1,0 +1,17 @@
+{{- $configHome := env "XDG_CONFIG_HOME" | default (joinPath .chezmoi.homeDir ".config") -}}
+{{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
+{{- $light := eq (env "KOOPA_COLOR_MODE") "light" -}}
+{{- $palette := joinPath $configHome "koopa" "lig" "dracula-pro.toml" -}}
+{{- if $light -}}
+{{-   $palette = joinPath $configHome "koopa" "lig" "dracula-pro-alucard.toml" -}}
+{{- end -}}
+[ui]
+{{- if $light }}
+theme = "light"
+{{- else }}
+theme = "dracula"
+{{- end }}
+{{- if and (stat (joinPath $dataHome "dracula-pro")) (stat $palette) }}
+
+{{ include $palette | trimAll "\n" }}
+{{- end }}

@@ -1,0 +1,2 @@
+{{- $dataHome := env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share") -}}
+{{ joinPath (env "KOOPA_PREFIX" | default (joinPath $dataHome "koopa")) "etc" "koopa" "lig" "koopa.json" }}

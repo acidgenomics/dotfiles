@@ -1,5 +1,7 @@
 .install/
 .koopa*
+**/.claude/settings.local.json
+chezmoi/dot_claude/settings.local.json
 chezmoistate*.boltdb
 etc/vscode/*/node_modules/
 etc/vscode/*/out/

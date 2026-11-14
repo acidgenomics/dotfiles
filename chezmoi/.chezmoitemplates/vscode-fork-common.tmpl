@@ -110,28 +110,6 @@
   "python.interpreter.infoVisibility": "always",
   "python.terminal.activateEnvironment": false,
   "python.useEnvironmentsExtension": true,
-  "r.alwaysUseActiveTerminal": true,
-  "r.bracketedPaste": true,
-  "r.consoleArgs": [
-    "--no-save",
-    "--no-restore",
-    "--quiet"
-  ],
-{{- if lookPath "radian" }}
-  "r.consolePath": "{{ lookPath "radian" }}",
-{{- end }}
-  "r.consoleSendDelay": 0,
-{{- if eq .chezmoi.os "darwin" }}
-  "r.executablePath": "/Library/Frameworks/R.framework/Resources/bin/R",
-{{- else }}
-  "r.executablePath": "/usr/bin/R",
-{{- end }}
-  "r.lsp.diagnostics": true,
-  "r.lsp.promptToInstall": false,
-  "r.plot.backend": "httpgd",
-  "r.plot.defaults.fullWindowMode": true,
-  "r.workspaceViewer.removeHiddenItems": true,
-  "redhat.telemetry.enabled": false,
   "remote.SSH.connectTimeout": 60,
   "remote.SSH.enableRemoteCommand": true,
   "remote.SSH.localServerDownload": "off",
@@ -168,7 +146,6 @@
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.initialHint": false,
   "terminal.integrated.localEchoEnabled": "off",
-  "vsicons.dontShowNewVersionMessage": true,
   "window.autoDetectColorScheme": true,
   "window.commandCenter": true,
   "window.zoomLevel": 0,
@@ -187,6 +164,6 @@
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook"
   },
-  "workbench.iconTheme": "vscode-icons",
+  "workbench.iconTheme": "vs-seti",
   "workbench.panel.defaultLocation": "bottom",
   "workbench.tree.renderIndentGuides": "always"

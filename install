@@ -11,8 +11,10 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
+from xml.etree import ElementTree
 
 _PREFIX = Path(__file__).resolve().parent
 _KOOPA_PREFIX = str(_PREFIX.parents[2])
@@ -223,6 +225,69 @@ def _antigravity_ext_dir(home: str) -> str:
     return os.path.join(home, ".antigravity", "extensions")
 
 
+def _jetbrains_plugin_metadata(zip_path: str) -> tuple[bytes, str, str | None]:
+    """Read the vendor plugin JAR and its dark and optional light theme IDs."""
+    with zipfile.ZipFile(zip_path) as bundle:
+        jar_paths = [
+            name for name in bundle.namelist()
+            if re.fullmatch(r"dracula-pro/lib/dracula-pro-[^/]+\.jar", name)
+        ]
+        if len(jar_paths) != 1:
+            raise RuntimeError(f"Expected one Dracula Pro plugin JAR in '{zip_path}'.")
+        jar_data = bundle.read(jar_paths[0])
+    with zipfile.ZipFile(io.BytesIO(jar_data)) as jar:
+        root = ElementTree.fromstring(jar.read("META-INF/plugin.xml"))
+        themes = {
+            entry.get("path"): entry.get("id")
+            for entry in root.iter("themeProvider")
+        }
+    dark_id = themes.get("/themes/DraculaPro.theme.json")
+    light_id = themes.get("/themes/DraculaProAlucard.theme.json")
+    for theme_id in (dark_id, light_id):
+        if theme_id is not None and not re.fullmatch(r"[A-Za-z0-9._-]+", theme_id):
+            raise RuntimeError("Invalid Dracula Pro JetBrains theme ID.")
+    if not dark_id:
+        raise RuntimeError("Dracula Pro JetBrains plugin has no Pro theme ID.")
+    return jar_data, dark_id, light_id
+
+
+def _install_jetbrains_plugin(zip_path: str, plugins_dir: str) -> bool:
+    """Replace the installed plugin when its bundled files differ."""
+    dest = Path(plugins_dir) / "dracula-pro"
+    with zipfile.ZipFile(zip_path) as bundle:
+        files = [entry for entry in bundle.infolist() if not entry.is_dir()]
+        if not files or any(
+            not entry.filename.startswith("dracula-pro/")
+            or ".." in Path(entry.filename).parts
+            for entry in files
+        ):
+            raise RuntimeError("Unexpected Dracula Pro JetBrains plugin archive layout.")
+        expected = {entry.filename.removeprefix("dracula-pro/") for entry in files}
+        existing = {
+            str(path.relative_to(dest)) for path in dest.rglob("*") if path.is_file()
+        } if dest.is_dir() and not dest.is_symlink() else set()
+        if existing == expected and all(
+            (dest / entry.filename.removeprefix("dracula-pro/")).read_bytes() == bundle.read(entry)
+            for entry in files
+        ):
+            return False
+        os.makedirs(plugins_dir, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".koopa-dracula-", dir=plugins_dir) as tmp:
+            bundle.extractall(tmp)
+            staged = Path(tmp) / "dracula-pro"
+            backup = Path(tmp) / "previous"
+            had_previous = os.path.lexists(dest)
+            if had_previous:
+                os.rename(dest, backup)
+            try:
+                os.rename(staged, dest)
+            except OSError:
+                if had_previous:
+                    os.rename(backup, dest)
+                raise
+    return True
+
+
 def _generate_pycharm_alucard_theme(
     dp_dir: str,
 ) -> tuple[str, str] | None:
@@ -235,8 +300,7 @@ def _generate_pycharm_alucard_theme(
     )
     if not os.path.isfile(vsix_path):
         return None
-    with zipfile.ZipFile(vsix_path) as zf:
-        jar_data = zf.read("dracula-pro/lib/dracula-pro-1.4.0.jar")
+    jar_data, _, _ = _jetbrains_plugin_metadata(vsix_path)
     with zipfile.ZipFile(io.BytesIO(jar_data)) as jar:
         dark_xml = jar.read("themes/DraculaPro.xml").decode()
 
@@ -596,24 +660,27 @@ def _configure_jetbrains(home: str) -> None:
     if not ide_dirs:
         return
 
-    # Generate Alucard theme if Dracula Pro is available
+    # Staged official plugin zip (symlinked by _configure_dracula_pro_post)
+    vsix_path = os.path.join(xdg_config_home(), "koopa", "jetbrains-theme", "dracula-pro.zip")
+    has_plugin_zip = has_dracula_pro and os.path.isfile(vsix_path)
+    dark_id: str | None = None
+    light_id: str | None = None
+    if has_plugin_zip:
+        _, dark_id, light_id = _jetbrains_plugin_metadata(vsix_path)
+
+    # Older vendor plugins have no Alucard theme; retain the local fallback.
     alucard_theme_json: str | None = None
     alucard_xml: str | None = None
-    if has_dracula_pro:
+    if has_plugin_zip and not light_id:
         result = _generate_pycharm_alucard_theme(dp_dir)
         if result:
             alucard_theme_json, alucard_xml = result
 
-    # themeIds: dark from the official plugin.xml; Alucard from koopa's local plugin
-    _DP_DARK_THEME_ID = "171dce76-a3c5-4429-91af-41cf86094740"
+    # ID of the local Alucard fallback used by older vendor plugins.
     _DP_ALUCARD_THEME_ID = "a71dce76-a3c5-4429-91af-41cf86094740"
     # Built-in fallback themeIds (no Pro source available)
     _DARCULA_THEME_ID = "Darcula"
     _LIGHT_THEME_ID = "ExperimentalLight"
-
-    # Staged official plugin zip (symlinked by _configure_dracula_pro_post)
-    vsix_path = os.path.join(xdg_config_home(), "koopa", "jetbrains-theme", "dracula-pro.zip")
-    has_plugin_zip = has_dracula_pro and os.path.isfile(vsix_path)
 
     # Current OS appearance — set authoritatively in main() before this runs
     is_light = os.environ.get("KOOPA_COLOR_MODE", "dark") == "light"
@@ -636,17 +703,16 @@ def _configure_jetbrains(home: str) -> None:
                 os.remove(stale)
 
         if has_plugin_zip:
-            # Install official dark plugin if absent
-            dark_plugin_dir = os.path.join(plugins_dir, "dracula-pro")
-            if not os.path.isdir(dark_plugin_dir):
-                os.makedirs(plugins_dir, exist_ok=True)
-                with zipfile.ZipFile(vsix_path) as zf:
-                    zf.extractall(plugins_dir)
-                newly_installed = True
+            newly_installed = _install_jetbrains_plugin(vsix_path, plugins_dir)
 
-        if alucard_theme_json and alucard_xml:
+        alucard_plugin = os.path.join(plugins_dir, "dracula-pro-alucard")
+        if light_id and os.path.islink(alucard_plugin):
+            os.unlink(alucard_plugin)
+        elif light_id and os.path.isdir(alucard_plugin):
+            shutil.rmtree(alucard_plugin)
+        elif alucard_theme_json and alucard_xml:
             # Build the koopa Alucard plugin jar (pure-resource, no .class files)
-            alucard_plugin_dir = os.path.join(plugins_dir, "dracula-pro-alucard", "lib")
+            alucard_plugin_dir = os.path.join(alucard_plugin, "lib")
             os.makedirs(alucard_plugin_dir, exist_ok=True)
             alucard_jar_path = os.path.join(alucard_plugin_dir, "dracula-pro-alucard.jar")
             plugin_xml = (
@@ -672,23 +738,23 @@ def _configure_jetbrains(home: str) -> None:
         # Write laf.xml — always rewrite so koopa can correct stale IDE defaults.
         # laf.xml holds only LafManager theme wiring; koopa owns this file.
         laf_path = os.path.join(options_dir, "laf.xml")
-        if has_plugin_zip and alucard_theme_json:
-            dark_id = _DP_DARK_THEME_ID
-            light_id = _DP_ALUCARD_THEME_ID
+        if has_plugin_zip and dark_id and (light_id or alucard_theme_json):
+            selected_dark_id = dark_id
+            selected_light_id = light_id or _DP_ALUCARD_THEME_ID
             dark_scheme = "Dracula Pro"
             light_scheme = "Dracula Pro Alucard"
         else:
-            dark_id = _DARCULA_THEME_ID
-            light_id = _LIGHT_THEME_ID
+            selected_dark_id = _DARCULA_THEME_ID
+            selected_light_id = _LIGHT_THEME_ID
             dark_scheme = "Darcula"
             light_scheme = "Default"
-        active_id = light_id if is_light else dark_id
+        active_id = selected_light_id if is_light else selected_dark_id
         laf_content = (
             '<application>\n'
             '  <component name="LafManager" autodetect="true">\n'
             f'    <laf themeId="{active_id}" />\n'
-            f'    <preferred-light-laf themeId="{light_id}" />\n'
-            f'    <preferred-dark-laf themeId="{dark_id}" />\n'
+            f'    <preferred-light-laf themeId="{selected_light_id}" />\n'
+            f'    <preferred-dark-laf themeId="{selected_dark_id}" />\n'
             f'    <preferred-light-editor-scheme editorSchemeId="{light_scheme}" />\n'
             f'    <preferred-dark-editor-scheme editorSchemeId="{dark_scheme}" />\n'
             '  </component>\n'
@@ -722,8 +788,8 @@ def _configure_jetbrains(home: str) -> None:
 
         if newly_installed:
             print(
-                f"JetBrains ({os.path.basename(ide_dir)}): installed Dracula Pro plugins.\n"
-                "  Quit PyCharm (if running) and restart it to apply the theme.\n"
+                f"JetBrains ({os.path.basename(ide_dir)}): installed or updated Dracula Pro.\n"
+                "  Quit the IDE (if running) and restart it to apply the theme.\n"
                 "  On first launch you may see a third-party plugin consent prompt — "
                 "click Enable."
             )

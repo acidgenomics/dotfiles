@@ -61,7 +61,7 @@
     }
   },
   "claudeCode.disableLoginPrompt": true,
-  "claudeCode.initialPermissionMode": "auto",
+  "claudeCode.initialPermissionMode": "plan",
   "claudeCode.lockEditorGroups": false,
   "claudeCode.preferredLocation": "panel",
   "githubPullRequests.allowFetch": false,
@@ -71,6 +71,27 @@
   "path-autocomplete.pathMappings": {
     ".": "${workspace}"
   },
+  "r.alwaysUseActiveTerminal": true,
+  "r.bracketedPaste": true,
+  "r.consoleArgs": [
+    "--no-save",
+    "--no-restore",
+    "--quiet"
+  ],
+{{- if lookPath "radian" }}
+  "r.consolePath": "{{ lookPath "radian" }}",
+{{- end }}
+  "r.consoleSendDelay": 0,
+{{- if eq .chezmoi.os "darwin" }}
+  "r.executablePath": "/Library/Frameworks/R.framework/Resources/bin/R",
+{{- else }}
+  "r.executablePath": "/usr/bin/R",
+{{- end }}
+  "r.lsp.diagnostics": true,
+  "r.lsp.promptToInstall": false,
+  "r.plot.backend": "httpgd",
+  "r.plot.defaults.fullWindowMode": true,
+  "r.workspaceViewer.removeHiddenItems": true,
   "remote.extensionKind": {
     "GitHub.copilot": [
       "ui"
